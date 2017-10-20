@@ -1,3 +1,9 @@
+# Build directory
+build/
+
+# Vim
+*.swp
+
 # Prerequisites
 *.d
 
