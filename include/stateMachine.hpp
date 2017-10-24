@@ -7,15 +7,16 @@
 #include <limits>
 #include <stdexcept>
 #include <unordered_map>
+#include <vector>
 
 #include "common.hpp"
-#include "packet.hpp"
 
-template <class Identifier> class StateMachine {
+template <class Identifier, class Packet> class StateMachine {
 public:
 	struct State;
+	class FunIface;
 
-	using stateFun = std::function<uint32_t(State &, Packet &, Packet &)>;
+	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
 	using StateID = uint64_t;
 	using ConnectionID = typename Identifier::ConnectionID;
 	using Hasher = typename Identifier::Hasher;
@@ -26,17 +27,36 @@ public:
 	public:
 		StateID state;
 		void *stateData;
-		StateMachine<Identifier> *machine;
 
-		State(StateID state, void *stateData, StateMachine<Identifier> *machine)
-			: state(state), stateData(stateData), machine(machine){};
-		State(const State &s) : state(s.state), stateData(s.stateData), machine(s.machine){};
+		State(StateID state, void *stateData) : state(state), stateData(stateData){};
+		State(const State &s) : state(s.state), stateData(s.stateData){};
 
 		void transistion(StateID newState) { state = newState; }
+	};
 
-		// After mSec microseconds, transition to newState
-		void registerTimeout(unsigned int mSec, StateID newState) {
-			machine->registerTimeout(mSec, newState);
+	class FunIface {
+	private:
+		StateMachine<Identifier, Packet> *sm;
+
+	public:
+		FunIface(StateMachine<Identifier, Packet> *sm) : sm(sm){};
+
+		void addPktToFree(Packet *p) { sm->pktsToFree.push_back(p); }
+
+		void addPktToSend(Packet *p) { sm->pktsToSend.push_back(p); }
+
+		Packet &getPkt() {
+			if (sm->getPkt) {
+				return sm->getPkt();
+			} else {
+				throw std::runtime_error(
+					"StateMachine::SMFunIface::getPkt no function registered");
+			}
+		}
+
+		void setTimeout() {
+			throw new std::runtime_error(
+				"StateMachine::FunIface::setTimeout not implemented");
 		}
 	};
 
@@ -50,27 +70,22 @@ private:
 	StateID startStateID;
 	StateID endStateID;
 
-public:
-	StateMachine() : startStateID(0), endStateID(StateIDInvalid){};
+	std::function<Packet &()> getPktCB;
 
-	size_t getStateTableSize() { return stateTable.size(); };
+	FunIface funIface;
 
-	void registerFunction(StateID id, stateFun function) { functions.insert({id, function}); }
+	std::vector<Packet *> pktsToFree;
+	std::vector<Packet *> pktsToSend;
 
-	void registerEndStateID(StateID endStateID) { this->endStateID = endStateID; }
-	void registerStartStateID(StateID startStateID) { this->startStateID = startStateID; }
-
-	void removeState(ConnectionID id) { stateTable.erase(id); }
-
-	uint32_t runPkt(Packet pktIn, Packet pktOut) {
+	void runPkt(Packet *pktIn) {
 		ConnectionID identity = identifier.identify(pktIn);
 
-findState:
+	findState:
 		auto stateIt = stateTable.find(identity);
 		if (stateIt == stateTable.end()) {
 			// Add new state
 			D(std::cout << "Adding new state" << std::endl;)
-			State s(startStateID, nullptr, this);
+			State s(startStateID, nullptr);
 			stateTable.insert({identity, s});
 			goto findState;
 		} else {
@@ -85,14 +100,38 @@ findState:
 		}
 
 		D(std::cout << "Running Function" << std::endl;)
-		uint32_t ret = (sfIt->second)(stateIt->second, pktIn, pktOut);
+		(sfIt->second)(stateIt->second, pktIn, funIface);
 
 		if (stateIt->second.state == endStateID) {
 			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
 			removeState(identity);
 		}
+	}
 
-		return ret;
+
+public:
+	StateMachine() : startStateID(0), endStateID(StateIDInvalid), funIface(this){};
+
+	size_t getStateTableSize() { return stateTable.size(); };
+
+	void registerFunction(StateID id, stateFun function) { functions.insert({id, function}); }
+
+	void registerEndStateID(StateID endStateID) { this->endStateID = endStateID; }
+	void registerStartStateID(StateID startStateID) { this->startStateID = startStateID; }
+
+	void registerGetPktCB(std::function<Packet &()> fun) { getPktCB = fun; }
+
+	void removeState(ConnectionID id) { stateTable.erase(id); }
+
+	void runPktBatch(std::vector<Packet *> &pktsIn, std::vector<Packet *> &pktsSend,
+		std::vector<Packet *> &pktsFree) {
+		for(auto pkt : pktsIn){
+			runPkt(pkt);
+			std::swap(pktsSend, pktsToSend);
+			std::swap(pktsFree, pktsToFree);
+			pktsToSend.clear();
+			pktsToFree.clear();
+		}
 	}
 };
 
