@@ -96,54 +96,60 @@ int main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 
-	SM sm;
-	sm.registerStartStateID(1);
-	sm.registerEndStateID(3);
-	sm.registerFunction(1, fun1);
-	sm.registerFunction(2, fun2);
+	try {
 
-	assert(sm.getStateTableSize() == 0);
+		SM sm;
+		sm.registerStartStateID(1);
+		sm.registerEndStateID(3);
+		sm.registerFunction(1, fun1);
+		sm.registerFunction(2, fun2);
 
-	vector<SamplePacket*> pktsIn;
-	vector<SamplePacket*> pktsFree;
-	vector<SamplePacket*> pktsSend;
+		assert(sm.getStateTableSize() == 0);
 
-	pktsIn.push_back(getPkt());
+		vector<SamplePacket *> pktsIn;
+		vector<SamplePacket *> pktsFree;
+		vector<SamplePacket *> pktsSend;
 
-	*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
-	sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-	assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
-	assert(sm.getStateTableSize() == 1);
-	assert(pktsIn.size() == 1);
-	assert(pktsSend.size() == 1);
-	assert(pktsFree.size() == 0);
-	pktsSend.clear();
+		pktsIn.push_back(getPkt());
 
-	*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-	sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-	assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 12);
-	assert(sm.getStateTableSize() == 1);
-	assert(pktsIn.size() == 1);
-	assert(pktsSend.size() == 1);
-	assert(pktsFree.size() == 0);
-	pktsSend.clear();
+		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
+		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
+		assert(sm.getStateTableSize() == 1);
+		assert(pktsIn.size() == 1);
+		assert(pktsSend.size() == 1);
+		assert(pktsFree.size() == 0);
+		pktsSend.clear();
 
-	*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-	sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-	assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 24);
-	assert(sm.getStateTableSize() == 1);
-	assert(pktsIn.size() == 1);
-	assert(pktsSend.size() == 1);
-	assert(pktsFree.size() == 0);
-	pktsSend.clear();
+		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
+		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 12);
+		assert(sm.getStateTableSize() == 1);
+		assert(pktsIn.size() == 1);
+		assert(pktsSend.size() == 1);
+		assert(pktsFree.size() == 0);
+		pktsSend.clear();
 
-	*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 3;
-	sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-	assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 23);
-	assert(sm.getStateTableSize() == 0);
-	assert(pktsIn.size() == 1);
-	assert(pktsSend.size() == 1);
-	assert(pktsFree.size() == 0);
-	pktsSend.clear();
+		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
+		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 24);
+		assert(sm.getStateTableSize() == 1);
+		assert(pktsIn.size() == 1);
+		assert(pktsSend.size() == 1);
+		assert(pktsFree.size() == 0);
+		pktsSend.clear();
 
+		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 3;
+		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 23);
+		assert(sm.getStateTableSize() == 0);
+		assert(pktsIn.size() == 1);
+		assert(pktsSend.size() == 1);
+		assert(pktsFree.size() == 0);
+		pktsSend.clear();
+
+	} catch (exception *e) {
+		cout << endl << "FATAL:" << endl;
+		cout << e->what() << endl;
+	}
 }

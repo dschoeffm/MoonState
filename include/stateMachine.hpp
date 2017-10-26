@@ -45,8 +45,13 @@ public:
 
 		void addPktToSend(Packet *p) { sm->pktsToSend.push_back(p); }
 
-		Packet &getPkt() {
-			if (sm->getPkt) {
+		Packet *getPkt() {
+			if (sm->pktsToFree.size() != 0) {
+				Packet *ret = sm->pktsToFree.back();
+				sm->pktsToFree.pop_back();
+				return ret;
+			} else if (sm->getPkt) {
+				D(sm->getPktCBCounter++;)
 				return sm->getPkt();
 			} else {
 				throw std::runtime_error(
@@ -71,6 +76,7 @@ private:
 	StateID endStateID;
 
 	std::function<Packet &()> getPktCB;
+	D(unsigned int getPktCBCounter = 0;)
 
 	FunIface funIface;
 
@@ -108,7 +114,6 @@ private:
 		}
 	}
 
-
 public:
 	StateMachine() : startStateID(0), endStateID(StateIDInvalid), funIface(this){};
 
@@ -125,13 +130,29 @@ public:
 
 	void runPktBatch(std::vector<Packet *> &pktsIn, std::vector<Packet *> &pktsSend,
 		std::vector<Packet *> &pktsFree) {
-		for(auto pkt : pktsIn){
+		for (auto pkt : pktsIn) {
 			runPkt(pkt);
-			std::swap(pktsSend, pktsToSend);
-			std::swap(pktsFree, pktsToFree);
-			pktsToSend.clear();
-			pktsToFree.clear();
 		}
+#ifdef DEBUG
+		// putting it all in D() and using assert would have been better...
+		// for some reason that didn't work...
+		if ((pktsToFree.size() + pktsToSend.size()) != (getPktCBCounter + pktsIn.size())) {
+			std::cout << "pktsToFree: " << pktsToFree.size() << std::endl;
+			std::cout << "pktsToSend: " << pktsToSend.size() << std::endl;
+			std::cout << "pktsIn: " << pktsIn.size() << std::endl;
+			std::cout << "getPktCBCounter: " << getPktCBCounter << std::endl;
+
+			throw new std::runtime_error(
+				"StateMachine::runPktBatch() some packets were are not in send/free vector");
+		}
+		getPktCBCounter = 0;
+#endif
+		pktsSend.clear();
+		pktsFree.clear();
+		std::swap(pktsSend, pktsToSend);
+		std::swap(pktsFree, pktsToFree);
+		pktsToSend.clear();
+		pktsToFree.clear();
 	}
 };
 
