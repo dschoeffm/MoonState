@@ -1,3 +1,3 @@
-# state-machine
+# MoonState
 
 This should (at some point) be a high-performance DTLS state-machine.
