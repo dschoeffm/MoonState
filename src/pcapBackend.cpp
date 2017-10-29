@@ -34,6 +34,13 @@ void PcapBackend::sendBatch(vector<SamplePacket *> &pkts) {
 	}
 };
 
+void PcapBackend::freeBatch(vector<SamplePacket *> &pkts) {
+	for(auto p : pkts){
+		packetPool.push_back(p);
+	}
+	pkts.clear();
+};
+
 void PcapBackend::recvBatch(vector<SamplePacket *> &pkts) {
 	for (auto p : pkts) {
 		packetPool.push_back(p);

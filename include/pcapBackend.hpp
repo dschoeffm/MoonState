@@ -41,6 +41,7 @@ public:
 	~PcapBackend();
 
 	void sendBatch(std::vector<SamplePacket *> &pkts);
+	void freeBatch(std::vector<SamplePacket *> &pkts);
 	void recvBatch(std::vector<SamplePacket *> &pkts);
 
 	SamplePacket *getPkt();
