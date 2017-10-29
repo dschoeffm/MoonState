@@ -17,7 +17,7 @@ public:
 	class FunIface;
 
 	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
-	using StateID = uint64_t;
+	using StateID = uint16_t;
 	using ConnectionID = typename Identifier::ConnectionID;
 	using Hasher = typename Identifier::Hasher;
 
@@ -25,11 +25,11 @@ public:
 
 	struct State {
 	public:
-		StateID state;
 		void *stateData;
+		StateID state;
 
-		State(StateID state, void *stateData) : state(state), stateData(stateData){};
-		State(const State &s) : state(s.state), stateData(s.stateData){};
+		State(StateID state, void *stateData) : stateData(stateData), state(state) {};
+		State(const State &s) : stateData(s.stateData), state(s.state) {};
 
 		void transistion(StateID newState) { state = newState; }
 	};
@@ -83,20 +83,25 @@ private:
 	std::vector<Packet *> pktsToFree;
 	std::vector<Packet *> pktsToSend;
 
-	void runPkt(Packet *pktIn) {
-		ConnectionID identity = identifier.identify(pktIn);
-
-	findState:
-		auto stateIt = stateTable.find(identity);
+	auto findState(ConnectionID id) {
+	findStateLoop:
+		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
 			// Add new state
 			D(std::cout << "Adding new state" << std::endl;)
 			State s(startStateID, nullptr);
-			stateTable.insert({identity, s});
-			goto findState;
+			stateTable.insert({id, s});
+			goto findStateLoop;
 		} else {
 			D(std::cout << "State found" << std::endl;)
 		}
+		return stateIt;
+	};
+
+	void runPkt(Packet *pktIn) {
+		ConnectionID identity = identifier.identify(pktIn);
+
+		auto stateIt = findState(identity);
 
 		// TODO unregister timeout, if one exists
 
@@ -127,6 +132,24 @@ public:
 	void registerGetPktCB(std::function<Packet &()> fun) { getPktCB = fun; }
 
 	void removeState(ConnectionID id) { stateTable.erase(id); }
+
+	void addState(ConnectionID id, State st) {
+		stateTable.insert({id, st});
+		auto stateIt = findState(id);
+
+		auto sfIt = functions.find(stateIt->second.state);
+		if (sfIt == functions.end()) {
+			throw std::runtime_error("StateMachine::addState() No such function found");
+		}
+
+		D(std::cout << "Running Function" << std::endl;)
+		(sfIt->second)(stateIt->second, nullptr, funIface);
+
+		if (stateIt->second.state == endStateID) {
+			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+			removeState(id);
+		}
+	}
 
 	void runPktBatch(std::vector<Packet *> &pktsIn, std::vector<Packet *> &pktsSend,
 		std::vector<Packet *> &pktsFree) {
