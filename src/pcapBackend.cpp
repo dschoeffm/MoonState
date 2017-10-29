@@ -1,12 +1,28 @@
 #include "pcapBackend.hpp"
+#include "common.hpp"
+
+#include <sys/types.h>
+#include <unistd.h>
+
 using namespace std;
 
-PcapBackend::PcapBackend(
-	string dev, array<uint8_t, 6> srcMac, StateMachine<TupleIdent, SamplePacket> &sm)
-	: dev(dev), sm(sm), srcMac(srcMac) {
+PcapBackend::PcapBackend(string dev, array<uint8_t, 6> srcMac //,
+	// StateMachine<TupleIdent, SamplePacket> &sm
+	)
+	: dev(dev), /* sm(sm), */ srcMac(srcMac) {
+
+	if (geteuid() != 0) {
+		cout << "WARNING: Running pcap wihout root priviledges may be a bad idea" << endl;
+	}
+
 	handle = pcap_open_live(dev.c_str(), bufSize, 1, 1, errbuf);
 	if (handle == NULL) {
 		cout << "PcapBackend: pcap_open_live() failed" << endl;
+		abort();
+	}
+
+	if (pcap_setnonblock(handle, 1, errbuf) < 0) {
+		cout << "PcapBackend: pcap_setnonblock() failed" << endl;
 		abort();
 	}
 };
@@ -35,7 +51,7 @@ void PcapBackend::sendBatch(vector<SamplePacket *> &pkts) {
 };
 
 void PcapBackend::freeBatch(vector<SamplePacket *> &pkts) {
-	for(auto p : pkts){
+	for (auto p : pkts) {
 		packetPool.push_back(p);
 	}
 	pkts.clear();
@@ -50,10 +66,15 @@ void PcapBackend::recvBatch(vector<SamplePacket *> &pkts) {
 	struct pcap_pkthdr header;
 	const u_char *pcapPacket;
 	while ((pcapPacket = pcap_next(handle, &header))) {
+		// If a packet is larger than bufSize, I don't want it anyways...
+		if (header.len > bufSize) {
+			continue;
+		}
 		SamplePacket *pkt = getPkt();
 		memcpy(pkt->getData(), pcapPacket, header.len);
 		pkt->setDataLen(header.len);
 		pkts.push_back(pkt);
+		D(cout << "PcapBackend::recvBatch() got another packet" << endl;)
 	}
 };
 

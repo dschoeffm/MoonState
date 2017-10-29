@@ -27,7 +27,7 @@ private:
 	pcap_t *handle;
 	std::string dev;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	StateMachine<TupleIdent, SamplePacket> &sm;
+	//	StateMachine<TupleIdent, SamplePacket> &sm;
 
 	static constexpr uint32_t bufSize = 2048;
 
@@ -35,8 +35,9 @@ private:
 	std::array<uint8_t, 6> srcMac;
 
 public:
-	PcapBackend(std::string dev, std::array<uint8_t, 6> srcMac,
-		StateMachine<TupleIdent, SamplePacket> &sm);
+	PcapBackend(std::string dev, std::array<uint8_t, 6> srcMac //,
+		// StateMachine<TupleIdent, SamplePacket> &sm
+		);
 
 	~PcapBackend();
 
