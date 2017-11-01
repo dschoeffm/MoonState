@@ -38,12 +38,15 @@ void PcapBackend::sendBatch(vector<SamplePacket *> &pkts) {
 	for (auto p : pkts) {
 		// Set some valid ethernet header
 		struct ether_header *eth = reinterpret_cast<ether_header *>(p->getData());
-		memset(eth->ether_dhost, 6, 0xff);
+		memset(eth->ether_dhost, 0xff, 6);
 		memcpy(eth->ether_shost, srcMac.data(), 6);
 		eth->ether_type = htons(ETHERTYPE_IP);
 
 		// Actually inject packet
-		pcap_inject(handle, p->getData(), p->getDataLen());
+		if(pcap_inject(handle, p->getData(), p->getDataLen()) != (int) p->getDataLen()){
+			cout << "PcapBackend::sendBatch() pcap_inject() failed" << endl;
+			abort();
+		}
 
 		// Give buffer back to the pool
 		packetPool.push_back(p);

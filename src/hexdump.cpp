@@ -17,6 +17,7 @@ void hexdump(const void *data, unsigned int dataLen) {
 	const char *const end = start + dataLen;
 	const char *line = start;
 
+	cout << "Hexdump of: " << data << endl;
 	while (line != end) {
 		cout.width(4);
 		cout.fill('0');
