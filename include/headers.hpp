@@ -15,7 +15,7 @@
 
 namespace Headers {
 
-struct ethernet : public ether_header {
+struct Ethernet : public ether_header {
 	void *getPayload() {
 		return reinterpret_cast<void *>(
 			reinterpret_cast<uint8_t *>(this) + sizeof(struct ether_addr));
@@ -49,12 +49,12 @@ struct ethernet : public ether_header {
 	void setEthertype(uint16_t type) { this->ether_type = htons(type); }
 };
 
-struct ipv4 : public ip {
+struct IPv4 : public ip {
 	void *getPayload() {
 		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + 4 * this->ip_hl);
 	}
 
-	static std::string addrToStr(struct in_addr addr){
+	static std::string addrToStr(struct in_addr addr) {
 		std::stringstream str;
 		str << (addr.s_addr >> 24) << "." << ((addr.s_addr >> 16) & 0xff) << "."
 			<< ((addr.s_addr >> 8) & 0xff) << "." << (addr.s_addr & 0xff);
@@ -64,27 +64,49 @@ struct ipv4 : public ip {
 	std::string getSrcAddr() { return addrToStr(this->ip_src); }
 
 	std::string getDstAddr() { return addrToStr(this->ip_dst); }
+
+	void setLength(uint16_t len) { this->ip_len = htons(len); }
+
+	uint16_t getLength() { return ntohs(this->ip_len); }
+
+	void calcChecksum() {
+		uint32_t result = 0;
+		uint16_t *hdr_cast = reinterpret_cast<uint16_t *>(this);
+
+		this->ip_sum = 0;
+		for (uint8_t i = 0; i < (this->ip_hl * 4); i++) {
+			result += ntohs(hdr_cast[i]);
+			if (result & (1 << 16)) {
+				result &= 0xffff;
+				result++;
+			}
+		}
+
+		this->ip_sum = htons(~result);
+	};
 };
 
-struct ipv6 : public ip6_hdr {
+struct IPv6 : public ip6_hdr {
 	void *getPayload() {
 		// For now, we just assume, that there is no extension header...
-		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + sizeof(struct ip6_hdr));
+		return reinterpret_cast<void *>(
+			reinterpret_cast<uint8_t *>(this) + sizeof(struct ip6_hdr));
 	}
 };
 
-struct udp : public udphdr {
-	void *getPayload(){
-		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + sizeof(struct udphdr));
+struct Udp : public udphdr {
+	void *getPayload() {
+		return reinterpret_cast<void *>(
+			reinterpret_cast<uint8_t *>(this) + sizeof(struct udphdr));
 	}
 };
 
-struct tcp : public tcphdr {
-	void *getPayload(){
-		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + sizeof(struct tcphdr));
+struct Tcp : public tcphdr {
+	void *getPayload() {
+		return reinterpret_cast<void *>(
+			reinterpret_cast<uint8_t *>(this) + sizeof(struct tcphdr));
 	}
 };
-
 };
 
 #endif /* HEADERS_HPP */
