@@ -4,16 +4,16 @@
 #include "common.hpp"
 #include "stateMachine.hpp"
 
-enum class HelloByeServer : StateID {
-	Hello,
-	Bye,
-	Terminate,
+struct HelloByeServer {
+	static constexpr StateID Hello = 0;
+	static constexpr StateID Bye = 1;
+	static constexpr StateID Terminate = 2;
 };
 
-enum class HelloByeClient : StateID {
-	Hello,
-	Bye,
-	Terminate,
+struct HelloByeClient {
+	static constexpr StateID Hello = 0;
+	static constexpr StateID Bye = 1;
+	static constexpr StateID Terminate = 2;
 };
 
 template <class Identifier, class Packet> class HelloByeServerHello;
@@ -23,6 +23,7 @@ template <class Identifier, class Packet> class HelloByeClientBye;
 
 template <class Identifier, class Packet> class HelloByeServerHello {
 	using SM = StateMachine<Identifier, Packet>;
+	friend class HelloByeServerBye<Identifier, Packet>;
 
 private:
 	int clientCookie;
@@ -56,7 +57,7 @@ private:
 	int serverCookie;
 
 public:
-	HelloByeServerBye(const HelloByeServerHello<Identifier, Packet> &in);
+	HelloByeServerBye(const HelloByeServerHello<Identifier, Packet> *in);
 
 	__attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);

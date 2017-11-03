@@ -30,7 +30,7 @@ public:
 		State(StateID state, void *stateData) : stateData(stateData), state(state) {};
 		State(const State &s) : stateData(s.stateData), state(s.state) {};
 
-		void transistion(StateID newState) { state = newState; }
+		void transition(StateID newState) { state = newState; }
 	};
 
 	class FunIface {
