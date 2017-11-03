@@ -17,7 +17,6 @@ public:
 	class FunIface;
 
 	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
-	using StateID = uint16_t;
 	using ConnectionID = typename Identifier::ConnectionID;
 	using Hasher = typename Identifier::Hasher;
 
