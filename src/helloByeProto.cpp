@@ -184,6 +184,65 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 
 /*
  * ===================================
+ * HelloByeClientBye
+ * ===================================
+ *
+ */
+
+template <class Identifier, class Packet>
+HelloByeClientBye<Identifier, Packet>::HelloByeClientBye(
+	const HelloByeClientHello<Identifier, Packet> *in)
+	: clientCookie(in->clientCookie) {}
+
+template <class Identifier, class Packet>
+void HelloByeClientBye<Identifier, Packet>::fun(
+	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+
+	// Get info from packet
+	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
+	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
+	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+
+	char serverStr[] = "SERVER HELLO:";
+	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) == 0) {
+		cout << "HelloByeClientBye::fun() serverStr didn't match" << endl;
+		state.transition(HelloByeClient::Terminate);
+		return;
+	}
+
+	// Get server cookie
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)];
+	this->serverCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
+
+	// Prepare new packet
+	// Set payload string
+	stringstream sstream;
+	sstream << "CLIENT BYE:" << this->serverCookie << endl;
+	string serverByeStr = sstream.str();
+	memcpy(udp->getPayload(), serverByeStr.c_str(), serverByeStr.length());
+
+	// Set the IP header stuff
+	// Leave the payload length alone for now...
+	ipv4->ip_ttl = 64;
+	uint32_t tmp = ipv4->ip_dst.s_addr;
+	ipv4->ip_dst.s_addr = ipv4->ip_src.s_addr;
+	ipv4->ip_src.s_addr = tmp;
+	ipv4->calcChecksum();
+
+	// Set UDP checksum to 0 and hope for the best
+	udp->check = 0;
+	uint16_t tmp16 = udp->dest;
+	udp->dest = udp->source;
+	udp->source = tmp16;
+
+	// We are done after this -> transition to Terminate
+	state.transition(HelloByeClient::RecvBye);
+
+	funIface.addPktToSend(pkt);
+};
+
+/*
+ * ===================================
  * Prepare template instances
  * ===================================
  *

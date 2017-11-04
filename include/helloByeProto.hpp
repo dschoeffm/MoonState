@@ -21,7 +21,8 @@ struct HelloByeServer {
 struct HelloByeClient {
 	static constexpr StateID Hello = 0;
 	static constexpr StateID Bye = 1;
-	static constexpr StateID Terminate = 2;
+	static constexpr StateID RecvBye = 2;
+	static constexpr StateID Terminate = 3;
 };
 
 /*
@@ -171,13 +172,39 @@ private:
 	int serverCookie;
 
 public:
-	HelloByeClientBye(const HelloByeClientHello<Identifier, Packet> &h);
+	HelloByeClientBye(const HelloByeClientHello<Identifier, Packet> *in);
 
 	__attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		HelloByeClientBye *t = reinterpret_cast<HelloByeClientBye *>(state.stateData);
+		t->fun(state, pkt, funIface);
+	}
+};
+
+/*
+ * ===================================
+ * Client RecvBye
+ * ===================================
+ *
+ */
+
+template <class Identifier, class Packet> class HelloByeClientRecvBye {
+	using SM = StateMachine<Identifier, Packet>;
+
+private:
+	int clientCookie;
+	int serverCookie;
+
+public:
+	HelloByeClientRecvBye(const HelloByeClientBye<Identifier, Packet> *in);
+
+	__attribute__((always_inline)) void fun(
+		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
+
+	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+		HelloByeClientRecvBye *t = reinterpret_cast<HelloByeClientRecvBye *>(state.stateData);
 		t->fun(state, pkt, funIface);
 	}
 };
