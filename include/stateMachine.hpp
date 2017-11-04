@@ -49,9 +49,9 @@ public:
 				Packet *ret = sm->pktsToFree.back();
 				sm->pktsToFree.pop_back();
 				return ret;
-			} else if (sm->getPkt) {
+			} else if (sm->getPktCB) {
 				D(sm->getPktCBCounter++;)
-				return sm->getPkt();
+				return sm->getPktCB();
 			} else {
 				throw std::runtime_error(
 					"StateMachine::SMFunIface::getPkt no function registered");
@@ -74,7 +74,7 @@ private:
 	StateID startStateID;
 	StateID endStateID;
 
-	std::function<Packet &()> getPktCB;
+	std::function<Packet *()> getPktCB;
 	D(unsigned int getPktCBCounter = 0;)
 
 	FunIface funIface;
@@ -128,7 +128,7 @@ public:
 	void registerEndStateID(StateID endStateID) { this->endStateID = endStateID; }
 	void registerStartStateID(StateID startStateID) { this->startStateID = startStateID; }
 
-	void registerGetPktCB(std::function<Packet &()> fun) { getPktCB = fun; }
+	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
 
 	void removeState(ConnectionID id) { stateTable.erase(id); }
 
