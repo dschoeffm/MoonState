@@ -58,6 +58,9 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->check = 0;
+	uint16_t tmp16 = udp->dest;
+	udp->dest = udp->source;
+	udp->source = tmp16;
 
 	funIface.addPktToSend(pkt);
 };
@@ -117,6 +120,12 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->check = 0;
+	uint16_t tmp16 = udp->dest;
+	udp->dest = udp->source;
+	udp->source = tmp16;
+
+	// We are done after this -> transition to Terminate
+	state.transition(HelloByeServer::Terminate);
 
 	funIface.addPktToSend(pkt);
 };
@@ -129,7 +138,8 @@ void HelloByeServerBye<Identifier, Packet>::fun(
  */
 
 template <class Identifier, class Packet>
-HelloByeClientHello<Identifier, Packet>::HelloByeClientHello() {
+HelloByeClientHello<Identifier, Packet>::HelloByeClientHello(uint32_t dstIp, uint16_t srcPort)
+	: dstIp(dstIp), srcPort(srcPort) {
 	this->clientCookie = rand();
 };
 
@@ -137,36 +147,49 @@ template <class Identifier, class Packet>
 void HelloByeClientHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
+	// pkt is empty -> get one
+	pkt = funIface.getPkt();
+	memset(pkt->getData(), 0, pkt->getDataLen());
+
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
 	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
 	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
 
+	HelloByeClientConfig *config = HelloByeClientConfig::getInstance();
+
 	// Prepare new packet
 	// Set payload string
 	stringstream sstream;
-	sstream << "SERVER HELLO:" << this->clientCookie << endl;
-	string serverHelloStr = sstream.str();
-	memcpy(udp->getPayload(), serverHelloStr.c_str(), serverHelloStr.length());
+	sstream << "CLIENT HELLO:" << this->clientCookie << endl;
+	string clientHelloStr = sstream.str();
+	memcpy(udp->getPayload(), clientHelloStr.c_str(), clientHelloStr.length());
 
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
 	ipv4->ip_ttl = 64;
-	uint32_t tmp = ipv4->ip_dst.s_addr;
-	ipv4->ip_dst.s_addr = ipv4->ip_src.s_addr;
-	ipv4->ip_src.s_addr = tmp;
+	ipv4->ip_dst.s_addr = dstIp;
+	ipv4->ip_src.s_addr = config->getSrcIP();
 	ipv4->calcChecksum();
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->check = 0;
+	udp->dest = config->getDstPort();
+	udp->source = srcPort;
 
 	state.transition(HelloByeClient::Bye);
 
 	funIface.addPktToSend(pkt);
 };
 
+/*
+ * ===================================
+ * Prepare template instances
+ * ===================================
+ *
+ */
+
 template class HelloByeServerHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 template class HelloByeServerBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 template class HelloByeClientHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 template class HelloByeClientBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
-

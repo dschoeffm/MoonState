@@ -45,18 +45,18 @@ template <class Identifier, class Packet> class HelloByeClientBye;
 
 class HelloByeClientConfig {
 private:
-	uint32_t ip;
-	uint16_t port;
+	uint32_t srcIp;
+	uint16_t dstPort;
 
 	static HelloByeClientConfig *instance;
-	HelloByeClientConfig() : ip(0), port(0) {};
+	HelloByeClientConfig() : srcIp(0), dstPort(0) {};
 
 public:
-	auto getIP() { return ip; }
-	auto getPort() { return port; }
+	auto getSrcIP() { return srcIp; }
+	auto getDstPort() { return dstPort; }
 
-	void setIP(uint32_t newIP) { ip = newIP; }
-	void setPort(uint16_t newPort) { port = newPort; }
+	void setSrcIP(uint32_t newIP) { srcIp = newIP; }
+	void setDstPort(uint16_t newPort) { dstPort = newPort; }
 
 	static void createInstance() {
 		instance = new HelloByeClientConfig;
@@ -141,9 +141,11 @@ template <class Identifier, class Packet> class HelloByeClientHello {
 
 private:
 	int clientCookie;
+	uint32_t dstIp;
+	uint16_t srcPort;
 
 public:
-	HelloByeClientHello();
+	HelloByeClientHello(uint32_t dstIp, uint16_t srcPort);
 
 	__attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
