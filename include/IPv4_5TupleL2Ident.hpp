@@ -24,7 +24,7 @@ public:
 
 		bool operator==(const ConnectionID &c) const {
 			if ((dstIP == c.dstIP) && (srcIP == c.srcIP) && (dstPort == c.dstPort) &&
-				(srcPort == c.srcPort) && (proto = c.proto)) {
+				(srcPort == c.srcPort) && (proto == c.proto)) {
 				return true;
 			} else {
 				return false;
@@ -59,7 +59,7 @@ public:
 
 	static ConnectionID identify(Packet *pkt) {
 		ConnectionID id;
-		struct ip *ip = reinterpret_cast<struct ip *>(pkt->getData() + 14);
+		struct ip *ip = reinterpret_cast<struct ip *>(reinterpret_cast<uint8_t*>(pkt->getData()) + 14);
 		id.dstIP = ip->ip_dst.s_addr;
 		id.srcIP = ip->ip_src.s_addr;
 		id.proto = ip->ip_p;
