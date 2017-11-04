@@ -4,6 +4,14 @@
 #include "common.hpp"
 #include "stateMachine.hpp"
 
+/*
+ * ===================================
+ * States
+ * ===================================
+ *
+ */
+
+
 struct HelloByeServer {
 	static constexpr StateID Hello = 0;
 	static constexpr StateID Bye = 1;
@@ -16,10 +24,54 @@ struct HelloByeClient {
 	static constexpr StateID Terminate = 2;
 };
 
+/*
+ * ===================================
+ * Forward declarations
+ * ===================================
+ *
+ */
+
 template <class Identifier, class Packet> class HelloByeServerHello;
 template <class Identifier, class Packet> class HelloByeServerBye;
 template <class Identifier, class Packet> class HelloByeClientHello;
 template <class Identifier, class Packet> class HelloByeClientBye;
+
+/*
+ * ===================================
+ * Client Config
+ * ===================================
+ *
+ */
+
+class HelloByeClientConfig {
+private:
+	uint32_t ip;
+	uint16_t port;
+
+	static HelloByeClientConfig *instance;
+	HelloByeClientConfig() : ip(0), port(0) {};
+
+public:
+	auto getIP() { return ip; }
+	auto getPort() { return port; }
+
+	void setIP(uint32_t newIP) { ip = newIP; }
+	void setPort(uint16_t newPort) { port = newPort; }
+
+	static HelloByeClientConfig *getInstance() {
+		if (!instance){
+			instance = new HelloByeClientConfig;
+		}
+		return instance;
+	}
+};
+
+/*
+ * ===================================
+ * Server Hello
+ * ===================================
+ *
+ */
 
 template <class Identifier, class Packet> class HelloByeServerHello {
 	using SM = StateMachine<Identifier, Packet>;
@@ -40,14 +92,21 @@ public:
 		t->fun(state, pkt, funIface);
 
 		// Finish transision to other state
-		if(state.state == HelloByeServer::Bye){
-			state.stateData = new HelloByeServerBye<Identifier,Packet>(t);
-			delete(t);
-		} else if(state.state == HelloByeServer::Terminate){
-			delete(t);
+		if (state.state == HelloByeServer::Bye) {
+			state.stateData = new HelloByeServerBye<Identifier, Packet>(t);
+			delete (t);
+		} else if (state.state == HelloByeServer::Terminate) {
+			delete (t);
 		}
 	}
 };
+
+/*
+ * ===================================
+ * Server Bye
+ * ===================================
+ *
+ */
 
 template <class Identifier, class Packet> class HelloByeServerBye {
 	using SM = StateMachine<Identifier, Packet>;
@@ -68,6 +127,13 @@ public:
 	}
 };
 
+/*
+ * ===================================
+ * Client Hello
+ * ===================================
+ *
+ */
+
 template <class Identifier, class Packet> class HelloByeClientHello {
 	using SM = StateMachine<Identifier, Packet>;
 	friend class HelloByeClientBye<Identifier, Packet>;
@@ -86,6 +152,13 @@ public:
 		t->fun(state, pkt, funIface);
 	}
 };
+
+/*
+ * ===================================
+ * Client Bye
+ * ===================================
+ *
+ */
 
 template <class Identifier, class Packet> class HelloByeClientBye {
 	using SM = StateMachine<Identifier, Packet>;
