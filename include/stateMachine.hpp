@@ -73,6 +73,7 @@ private:
 
 	StateID startStateID;
 	StateID endStateID;
+	std::function<void*(ConnectionID)> startStateFun;
 
 	std::function<Packet *()> getPktCB;
 	D(unsigned int getPktCBCounter = 0;)
@@ -88,7 +89,14 @@ private:
 		if (stateIt == stateTable.end()) {
 			// Add new state
 			D(std::cout << "Adding new state" << std::endl;)
-			State s(startStateID, nullptr);
+
+			// Create startState data object
+			void* stateData = nullptr;
+			if(startStateFun){
+				stateData = startStateFun(id);
+			}
+
+			State s(startStateID, stateData);
 			stateTable.insert({id, s});
 			goto findStateLoop;
 		} else {
@@ -126,7 +134,11 @@ public:
 	void registerFunction(StateID id, stateFun function) { functions.insert({id, function}); }
 
 	void registerEndStateID(StateID endStateID) { this->endStateID = endStateID; }
-	void registerStartStateID(StateID startStateID) { this->startStateID = startStateID; }
+	void registerStartStateID(
+		StateID startStateID, std::function<void *(ConnectionID)> startStateFun) {
+		this->startStateID = startStateID;
+		this->startStateFun = startStateFun;
+	}
 
 	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
 

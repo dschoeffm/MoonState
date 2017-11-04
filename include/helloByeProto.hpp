@@ -87,6 +87,11 @@ private:
 public:
 	HelloByeServerHello();
 
+	static void* factory(typename Identifier::ConnectionID id){
+		(void) id;
+		return new HelloByeServerHello();
+	}
+
 	__attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 

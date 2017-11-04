@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 	try {
 
 		SM sm;
-		sm.registerStartStateID(1);
+		sm.registerStartStateID(1, nullptr);
 		sm.registerEndStateID(3);
 		sm.registerFunction(1, fun1);
 		sm.registerFunction(2, fun2);

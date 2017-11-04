@@ -25,6 +25,8 @@ PcapBackend::PcapBackend(string dev, array<uint8_t, 6> srcMac //,
 		cout << "PcapBackend: pcap_setnonblock() failed" << endl;
 		abort();
 	}
+
+	D(cout << "PcapBackend: device opened" << endl;)
 };
 
 PcapBackend::~PcapBackend() {

@@ -45,11 +45,14 @@ int main(int argc, char **argv) {
 
 	StateMachine<Ident, SamplePacket> sm;
 	sm.registerEndStateID(HelloByeServer::Terminate);
+	sm.registerStartStateID(HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::factory);
 
 	sm.registerFunction(HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::run);
 	sm.registerFunction(HelloByeServer::Bye, HelloByeServerBye<Ident, Packet>::run);
 
 	sm.registerGetPktCB(getPkt);
+
+	cout << "main(): Entering loop now" << endl;
 
 	while(1){
 		vector<Packet*> vecIn, vecSend, vecFree;
