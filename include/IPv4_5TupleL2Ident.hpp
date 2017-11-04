@@ -12,6 +12,8 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 
+#include "exceptions.hpp"
+
 template <class Packet> class IPv4_5TupleL2Ident {
 public:
 	struct Hasher;
@@ -73,7 +75,7 @@ public:
 			id.dstPort = tcp->dest;
 			id.srcPort = tcp->source;
 		} else {
-			throw new std::runtime_error("Ip4TupelL2Ident::identify() neither UDP nor TCP");
+			throw new PacketNotIdentified();
 		}
 
 		return id;

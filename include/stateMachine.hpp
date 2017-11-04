@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "common.hpp"
+#include "exceptions.hpp"
 
 template <class Identifier, class Packet> class StateMachine {
 public:
@@ -106,23 +107,27 @@ private:
 	};
 
 	void runPkt(Packet *pktIn) {
-		ConnectionID identity = identifier.identify(pktIn);
+		try {
+			ConnectionID identity = identifier.identify(pktIn);
 
-		auto stateIt = findState(identity);
+			auto stateIt = findState(identity);
 
-		// TODO unregister timeout, if one exists
+			// TODO unregister timeout, if one exists
 
-		auto sfIt = functions.find(stateIt->second.state);
-		if (sfIt == functions.end()) {
-			throw std::runtime_error("StateMachine::runPkt() No such function found");
-		}
+			auto sfIt = functions.find(stateIt->second.state);
+			if (sfIt == functions.end()) {
+				throw std::runtime_error("StateMachine::runPkt() No such function found");
+			}
 
-		D(std::cout << "Running Function" << std::endl;)
-		(sfIt->second)(stateIt->second, pktIn, funIface);
+			D(std::cout << "Running Function" << std::endl;)
+			(sfIt->second)(stateIt->second, pktIn, funIface);
 
-		if (stateIt->second.state == endStateID) {
-			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
-			removeState(identity);
+			if (stateIt->second.state == endStateID) {
+				D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+				removeState(identity);
+			}
+		} catch (PacketNotIdentified *e) {
+			funIface.addPktToFree(pktIn);
 		}
 	}
 
