@@ -58,10 +58,11 @@ public:
 	void setIP(uint32_t newIP) { ip = newIP; }
 	void setPort(uint16_t newPort) { port = newPort; }
 
+	static void createInstance() {
+		instance = new HelloByeClientConfig;
+	}
+
 	static HelloByeClientConfig *getInstance() {
-		if (!instance){
-			instance = new HelloByeClientConfig;
-		}
 		return instance;
 	}
 };
