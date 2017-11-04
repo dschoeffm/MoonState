@@ -218,8 +218,8 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	// Set payload string
 	stringstream sstream;
 	sstream << "CLIENT BYE:" << this->serverCookie << endl;
-	string serverByeStr = sstream.str();
-	memcpy(udp->getPayload(), serverByeStr.c_str(), serverByeStr.length());
+	string clientByeStr = sstream.str();
+	memcpy(udp->getPayload(), clientByeStr.c_str(), clientByeStr.length());
 
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
