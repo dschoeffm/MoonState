@@ -235,10 +235,54 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	udp->dest = udp->source;
 	udp->source = tmp16;
 
-	// We are done after this -> transition to Terminate
+	// We need to wait for the server reply
 	state.transition(HelloByeClient::RecvBye);
 
 	funIface.addPktToSend(pkt);
+};
+
+/*
+ * ===================================
+ * HelloByeClientRecvBye
+ * ===================================
+ *
+ */
+
+template <class Identifier, class Packet>
+HelloByeClientRecvBye<Identifier, Packet>::HelloByeClientRecvBye(
+	const HelloByeClientBye<Identifier, Packet> *in)
+	: clientCookie(in->clientCookie), serverCookie(in->serverCookie) {}
+
+template <class Identifier, class Packet>
+void HelloByeClientRecvBye<Identifier, Packet>::fun(
+	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+
+	// Get info from packet
+	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
+	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
+	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+
+	char serverStr[] = "SERVER BYE:";
+	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) == 0) {
+		cout << "HelloByeClientRecvBye::fun() serverStr didn't match" << endl;
+		state.transition(HelloByeClient::Terminate);
+		return;
+	}
+
+	// Get client cookie
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)];
+	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
+
+	if(recvCookie != this->clientCookie){
+		cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie" << endl;
+		state.transition(HelloByeClient::Terminate);
+		return;
+	}
+
+	// We are done after this -> transition to Terminate
+	state.transition(HelloByeClient::Terminate);
+
+	funIface.addPktToFree(pkt);
 };
 
 /*
@@ -252,3 +296,14 @@ template class HelloByeServerHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacke
 template class HelloByeServerBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 template class HelloByeClientHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 template class HelloByeClientBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+template class HelloByeClientRecvBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+
+/*
+ * ===================================
+ * Define Client config singleton
+ * ===================================
+ *
+ */
+
+HelloByeClientConfig* HelloByeClientConfig::instance = nullptr;
+

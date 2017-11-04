@@ -36,6 +36,7 @@ template <class Identifier, class Packet> class HelloByeServerHello;
 template <class Identifier, class Packet> class HelloByeServerBye;
 template <class Identifier, class Packet> class HelloByeClientHello;
 template <class Identifier, class Packet> class HelloByeClientBye;
+template <class Identifier, class Packet> class HelloByeClientRecvBye;
 
 /*
  * ===================================
@@ -166,6 +167,7 @@ public:
 
 template <class Identifier, class Packet> class HelloByeClientBye {
 	using SM = StateMachine<Identifier, Packet>;
+	friend class HelloByeClientRecvBye<Identifier, Packet>;
 
 private:
 	int clientCookie;
