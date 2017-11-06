@@ -61,7 +61,8 @@ public:
 
 	static ConnectionID identify(Packet *pkt) {
 		ConnectionID id;
-		struct ip *ip = reinterpret_cast<struct ip *>(reinterpret_cast<uint8_t*>(pkt->getData()) + 14);
+		struct ip *ip =
+			reinterpret_cast<struct ip *>(reinterpret_cast<uint8_t *>(pkt->getData()) + 14);
 		id.dstIP = ip->ip_dst.s_addr;
 		id.srcIP = ip->ip_src.s_addr;
 		id.proto = ip->ip_p;
