@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 	cout << "main(): Entering loop now" << endl;
 
 	// TODO write later
-	sm.addState();
+	//sm.addState();
 
 	while(1){
 		vector<Packet*> vecIn, vecSend, vecFree;
