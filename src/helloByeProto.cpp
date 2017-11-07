@@ -31,9 +31,10 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
 
 	char clientStr[] = "CLIENT HELLO:";
-	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) == 0) {
+	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
 		cout << "HelloByeServerHello::fun() clientStr didn't match" << endl;
 		state.transition(HelloByeServer::Terminate);
+		funIface.addPktToFree(pkt);
 		return;
 	}
 
@@ -50,17 +51,20 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
-	ipv4->ip_ttl = 64;
-	uint32_t tmp = ipv4->ip_dst.s_addr;
-	ipv4->ip_dst.s_addr = ipv4->ip_src.s_addr;
-	ipv4->ip_src.s_addr = tmp;
+
+	ipv4->ttl = 64;
+	uint32_t tmp = ipv4->dstIP;
+	ipv4->dstIP = ipv4->srcIP;
+	ipv4->srcIP = tmp;
 	ipv4->calcChecksum();
 
+
 	// Set UDP checksum to 0 and hope for the best
-	udp->check = 0;
-	uint16_t tmp16 = udp->dest;
-	udp->dest = udp->source;
-	udp->source = tmp16;
+
+	udp->checksum = 0;
+	uint16_t tmp16 = udp->dstPort;
+	udp->dstPort = udp->srcPort;
+	udp->srcPort = tmp16;
 
 	funIface.addPktToSend(pkt);
 };
@@ -87,7 +91,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
 
 	char clientStr[] = "CLIENT BYE:";
-	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) == 0) {
+	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
 		cout << "HelloByeServerBye::fun() clientStr didn't match" << endl;
 		state.transition(HelloByeServer::Terminate);
 		return;
@@ -110,6 +114,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	string serverByeStr = sstream.str();
 	memcpy(udp->getPayload(), serverByeStr.c_str(), serverByeStr.length());
 
+	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
 	ipv4->ip_ttl = 64;
@@ -123,7 +128,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	uint16_t tmp16 = udp->dest;
 	udp->dest = udp->source;
 	udp->source = tmp16;
-
+*/
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeServer::Terminate);
 
@@ -165,6 +170,7 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 	string clientHelloStr = sstream.str();
 	memcpy(udp->getPayload(), clientHelloStr.c_str(), clientHelloStr.length());
 
+	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
 	ipv4->ip_ttl = 64;
@@ -176,7 +182,7 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 	udp->check = 0;
 	udp->dest = config->getDstPort();
 	udp->source = srcPort;
-
+*/
 	state.transition(HelloByeClient::Bye);
 
 	funIface.addPktToSend(pkt);
@@ -204,7 +210,7 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
 
 	char serverStr[] = "SERVER HELLO:";
-	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) == 0) {
+	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
 		cout << "HelloByeClientBye::fun() serverStr didn't match" << endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
@@ -221,6 +227,7 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	string clientByeStr = sstream.str();
 	memcpy(udp->getPayload(), clientByeStr.c_str(), clientByeStr.length());
 
+	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
 	ipv4->ip_ttl = 64;
@@ -234,7 +241,7 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	uint16_t tmp16 = udp->dest;
 	udp->dest = udp->source;
 	udp->source = tmp16;
-
+*/
 	// We need to wait for the server reply
 	state.transition(HelloByeClient::RecvBye);
 
@@ -263,7 +270,7 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
 
 	char serverStr[] = "SERVER BYE:";
-	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) == 0) {
+	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
 		cout << "HelloByeClientRecvBye::fun() serverStr didn't match" << endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
