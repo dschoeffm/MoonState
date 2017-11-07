@@ -18,7 +18,7 @@ using namespace std;
 
 template <class Identifier, class Packet>
 HelloByeServerHello<Identifier, Packet>::HelloByeServerHello() {
-	this->serverCookie = rand();
+	this->serverCookie = rand()%10;
 };
 
 template <class Identifier, class Packet>
@@ -145,7 +145,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 template <class Identifier, class Packet>
 HelloByeClientHello<Identifier, Packet>::HelloByeClientHello(uint32_t dstIp, uint16_t srcPort)
 	: dstIp(dstIp), srcPort(srcPort) {
-	this->clientCookie = rand();
+	this->clientCookie = rand()%10;
 };
 
 template <class Identifier, class Packet>
