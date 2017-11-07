@@ -1,52 +1,87 @@
 
-/*
- * This hexdump is based on an implementation aquired from:
- * http://www.i42.co.uk/stuff/hexdump.htm
- *
- */
-
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <iomanip>
+#include <cassert>
 
 #include "common.hpp"
 
 using namespace std;
 
-void hexdump(const void *data, unsigned int dataLen) {
+void hexdump(const void *data, int dataLen) {
 	const char *const start = static_cast<const char *>(data);
-	const char *const end = start + dataLen;
-	const char *line = start;
+
+	int it = 0;
+
+	stringstream all;
 
 	cout << "Hexdump of: " << data << endl;
-	while (line != end) {
-		cout.width(4);
-		cout.fill('0');
-		cout << std::hex << line - start << " : ";
-		unsigned int lineLength = min((unsigned int) 16, static_cast<unsigned int>(end - line));
+	while (dataLen > 0) {
+		unsigned int lineLength = min((int) 16, dataLen);
+		const char *line = start + it;
 
-		for (unsigned int pass = 1; pass <= 2; ++pass) {
-			for (const char *next = line; next != end && next != line + 16; ++next) {
-				char ch = *next;
-				switch (pass) {
-				case 1:
-					cout << (ch < 32 ? '.' : ch);
-					break;
-				case 2:
-					if (next != line)
-						cout << " ";
-					cout.width(2);
-					cout.fill('0');
-					cout << std::hex << std::uppercase
-						 << static_cast<int>(static_cast<unsigned char>(ch));
-					break;
-				}
+		stringstream ascii;
+		stringstream hexDump;
+
+		ascii << setfill('0') << setw(2) << hex << it << " : ";
+
+		for(unsigned int i=0; i < lineLength; i++){
+			char c = static_cast<char>(line[i]);
+			unsigned int varInt = 0;
+			varInt |= static_cast<uint8_t>(c);
+
+			if(isprint(varInt) != 0){
+				ascii << static_cast<char>(line[i]);
+			} else {
+				ascii << '.';
 			}
-			if (pass == 1 && lineLength != 16) {
-				cout << string(16 - lineLength, ' ');
-			}
-			cout << " ";
+
+			hexDump << " " << setfill('0') << setw(2) << hex << uppercase << varInt;
+
 		}
-		cout << endl;
-		line = line + lineLength;
+
+		for(int i=lineLength; i<16; i++){
+			ascii << " ";
+		}
+
+		all << ascii.str();
+		all << hexDump.str();
+		all << endl;
+
+		dataLen -= 16;
+		it+=lineLength;
 	}
+
+	cout << all.str();
+}
+
+void hexdumpHexOnly(const void *data, int dataLen) {
+	const char *const start = static_cast<const char *>(data);
+
+	int it = 0;
+
+	stringstream all;
+
+	cout << "Hexdump of: " << data << endl;
+	while (dataLen > 0) {
+		unsigned int lineLength = min((int) 16, dataLen);
+		const char *line = start + it;
+
+		for(unsigned int i=0; i < lineLength; i++){
+			char c = static_cast<char>(line[i]);
+			unsigned int varInt = 0;
+			varInt |= static_cast<uint8_t>(c);
+
+			all << " " << setfill('0') << setw(2) << hex << uppercase << varInt;
+
+		}
+
+		all << endl;
+
+		dataLen -= 16;
+		it+=lineLength;
+	}
+
+	cout << all.str();
 }
