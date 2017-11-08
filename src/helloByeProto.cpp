@@ -114,21 +114,19 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	string serverByeStr = sstream.str();
 	memcpy(udp->getPayload(), serverByeStr.c_str(), serverByeStr.length());
 
-	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
-	ipv4->ip_ttl = 64;
-	uint32_t tmp = ipv4->ip_dst.s_addr;
-	ipv4->ip_dst.s_addr = ipv4->ip_src.s_addr;
-	ipv4->ip_src.s_addr = tmp;
+	ipv4->ttl = 64;
+	uint32_t tmp = ipv4->dstIP;
+	ipv4->dstIP = ipv4->srcIP;
+	ipv4->srcIP = tmp;
 	ipv4->calcChecksum();
 
 	// Set UDP checksum to 0 and hope for the best
-	udp->check = 0;
-	uint16_t tmp16 = udp->dest;
-	udp->dest = udp->source;
-	udp->source = tmp16;
-*/
+	udp->checksum = 0;
+	uint16_t tmp16 = udp->dstPort;
+	udp->dstPort = udp->srcPort;
+	udp->srcPort = tmp16;
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeServer::Terminate);
 
@@ -170,19 +168,18 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 	string clientHelloStr = sstream.str();
 	memcpy(udp->getPayload(), clientHelloStr.c_str(), clientHelloStr.length());
 
-	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
-	ipv4->ip_ttl = 64;
-	ipv4->ip_dst.s_addr = dstIp;
-	ipv4->ip_src.s_addr = config->getSrcIP();
+	ipv4->ttl = 64;
+	ipv4->dstIP = this->dstIp;
+	ipv4->srcIP = config->getSrcIP();
 	ipv4->calcChecksum();
 
 	// Set UDP checksum to 0 and hope for the best
-	udp->check = 0;
-	udp->dest = config->getDstPort();
-	udp->source = srcPort;
-*/
+	udp->checksum = 0;
+	udp->dstPort = config->getDstPort();
+	udp->srcPort = this->srcPort;
+
 	state.transition(HelloByeClient::Bye);
 
 	funIface.addPktToSend(pkt);
@@ -227,21 +224,20 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	string clientByeStr = sstream.str();
 	memcpy(udp->getPayload(), clientByeStr.c_str(), clientByeStr.length());
 
-	/*
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
-	ipv4->ip_ttl = 64;
-	uint32_t tmp = ipv4->ip_dst.s_addr;
-	ipv4->ip_dst.s_addr = ipv4->ip_src.s_addr;
-	ipv4->ip_src.s_addr = tmp;
+	ipv4->ttl = 64;
+	uint32_t tmp = ipv4->dstIP;
+	ipv4->dstIP = ipv4->srcIP;
+	ipv4->srcIP = tmp;
 	ipv4->calcChecksum();
 
 	// Set UDP checksum to 0 and hope for the best
-	udp->check = 0;
-	uint16_t tmp16 = udp->dest;
-	udp->dest = udp->source;
-	udp->source = tmp16;
-*/
+	udp->checksum = 0;
+	uint16_t tmp16 = udp->dstPort;
+	udp->dstPort = udp->srcPort;
+	udp->srcPort = tmp16;
+
 	// We need to wait for the server reply
 	state.transition(HelloByeClient::RecvBye);
 
