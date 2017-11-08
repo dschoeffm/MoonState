@@ -39,7 +39,7 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)];
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)-1];
 	this->clientCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	// Prepare new packet
@@ -67,6 +67,8 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	udp->srcPort = tmp16;
 
 	funIface.addPktToSend(pkt);
+
+	state.transition(HelloByeServer::Bye);
 };
 
 /*
@@ -98,7 +100,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)];
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)-1];
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	if(recvCookie != this->serverCookie){
@@ -214,7 +216,7 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	}
 
 	// Get server cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)];
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)-1];
 	this->serverCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	// Prepare new packet
@@ -273,7 +275,7 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)];
+	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)-1];
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	if(recvCookie != this->clientCookie){

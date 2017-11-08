@@ -83,22 +83,54 @@ int main(int argc, char **argv) {
 	memcpy(serverPacket2, pcapS2P_p, serverPacket2Hdr.len);
 	SamplePacket sps2(serverPacket2, serverPacket2Hdr.len);
 
+	uint8_t clientCookie=0;
+	uint8_t serverCookie=0;
+
+
 	cout << "main(): Processing packets now" << endl;
 
-	// TODO run all packets
 	{
 		vector<Packet*> vecIn, vecSend, vecFree;
 		vecIn.push_back(&spc1);
 		cout << "Dump of packet input" << endl;
 		hexdump(spc1.getData(), spc1.getDataLen());
+
+		clientCookie = reinterpret_cast<uint8_t*>(spc1.getData())[0x37];
+		cout << "clientCookie: 0x" << hex << static_cast<int>(clientCookie) << endl;
+
 		sm.runPktBatch(vecIn, vecSend, vecFree);
 		assert(vecSend.size() == 1);
 		assert(vecFree.size() == 0);
 		cout << "Dump of packet output" << endl;
 		hexdump(spc1.getData(), spc1.getDataLen());
+
+		serverCookie = reinterpret_cast<uint8_t*>(spc1.getData())[0x37];
+		cout << "serverCookie: 0x" << hex << static_cast<int>(serverCookie) << endl;
+
+	}
+	{
+		reinterpret_cast<uint8_t*>(spc2.getData())[0x35] = serverCookie;
+
+		vector<Packet*> vecIn, vecSend, vecFree;
+		vecIn.push_back(&spc2);
+		cout << "Dump of packet input" << endl;
+		hexdump(spc2.getData(), spc2.getDataLen());
+
+		sm.runPktBatch(vecIn, vecSend, vecFree);
+		assert(vecSend.size() == 1);
+		assert(vecFree.size() == 0);
+
+		assert(reinterpret_cast<uint8_t*>(spc2.getData())[0x35] == clientCookie);
+
+		cout << "Dump of packet output" << endl;
+		hexdump(spc2.getData(), spc2.getDataLen());
 	}
 
 	pcap_close(handler);
+
+	cout << endl << "-----------------------------------------" << endl;
+	cout << "All tests ran through without aborting :)" << endl;
+	cout << "-----------------------------------------" << endl << endl;
 
 	return 0;
 }

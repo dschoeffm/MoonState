@@ -90,6 +90,7 @@ private:
 		if (stateIt == stateTable.end()) {
 			// Add new state
 			D(std::cout << "Adding new state" << std::endl;)
+			D(std::cout << "ConnectionID: " << static_cast<std::string>(id) << std::endl;)
 
 			// Create startState data object
 			void* stateData = nullptr;

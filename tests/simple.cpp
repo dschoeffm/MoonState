@@ -20,6 +20,8 @@ public:
 
 		bool operator<(const ConnectionID &c) const { return val < c.val; }
 
+		operator std::string () const { return "";}
+
 		ConnectionID(const ConnectionID &c) : val(c.val){};
 		ConnectionID() : val(0){};
 	};

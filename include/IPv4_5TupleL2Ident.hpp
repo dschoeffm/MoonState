@@ -5,12 +5,10 @@
 #include <exception>
 #include <functional>
 #include <stdexcept>
+#include <string>
+#include <sstream>
 
-// IPv4/UDP/TCP header
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <netinet/udp.h>
+#include "headers.hpp"
 
 #include "exceptions.hpp"
 
@@ -41,6 +39,15 @@ public:
 			}
 		};
 
+		operator std::string() const {
+			std::stringstream sstream;
+			sstream << "DstIP: " << std::hex << ntohl(dstIP) << ", ";
+			sstream << "SrcIP: " << std::hex << ntohl(srcIP) << ", ";
+			sstream << "DstPort: " << std::dec << ntohs(dstPort) << ", ";
+			sstream << "SrcPort: " << std::dec << ntohs(srcPort);
+			return sstream.str();
+		}
+
 		ConnectionID(const ConnectionID &c)
 			: dstIP(c.dstIP), srcIP(c.srcIP), dstPort(c.dstPort), srcPort(c.srcPort),
 			  proto(c.proto){};
@@ -61,20 +68,20 @@ public:
 
 	static ConnectionID identify(Packet *pkt) {
 		ConnectionID id;
-		struct ip *ip =
-			reinterpret_cast<struct ip *>(reinterpret_cast<uint8_t *>(pkt->getData()) + 14);
-		id.dstIP = ip->ip_dst.s_addr;
-		id.srcIP = ip->ip_src.s_addr;
-		id.proto = ip->ip_p;
+		struct Headers::IPv4 *ip =
+			reinterpret_cast<struct Headers::IPv4 *>(reinterpret_cast<uint8_t *>(pkt->getData()) + 14);
+		id.dstIP = ip->dstIP;
+		id.srcIP = ip->srcIP;
+		id.proto = ip->proto;
 
 		if (id.proto == IPPROTO_UDP) {
-			struct udphdr *udp = reinterpret_cast<struct udphdr *>(ip + ip->ip_hl * 4);
-			id.dstPort = udp->dest;
-			id.srcPort = udp->source;
+			struct Headers::Udp *udp = reinterpret_cast<struct Headers::Udp *>(ip->getPayload());
+			id.dstPort = udp->dstPort;
+			id.srcPort = udp->srcPort;
 		} else if (id.proto == IPPROTO_TCP) {
-			struct tcphdr *tcp = reinterpret_cast<struct tcphdr *>(ip + ip->ip_hl * 4);
-			id.dstPort = tcp->dest;
-			id.srcPort = tcp->source;
+			struct Headers::Tcp *tcp = reinterpret_cast<struct Headers::Tcp *>(ip->getPayload());
+			id.dstPort = tcp->dstPort;
+			id.srcPort = tcp->srcPort;
 		} else {
 			throw new PacketNotIdentified();
 		}
