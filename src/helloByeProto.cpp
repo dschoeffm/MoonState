@@ -34,7 +34,7 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
 		cout << "HelloByeServerHello::fun() clientStr didn't match" << endl;
 		state.transition(HelloByeServer::Terminate);
-		funIface.addPktToFree(pkt);
+		funIface.freePkt();
 		return;
 	}
 
@@ -66,8 +66,6 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	udp->dstPort = udp->srcPort;
 	udp->srcPort = tmp16;
 
-	funIface.addPktToSend(pkt);
-
 	state.transition(HelloByeServer::Bye);
 };
 
@@ -86,6 +84,9 @@ HelloByeServerBye<Identifier, Packet>::HelloByeServerBye(
 template <class Identifier, class Packet>
 void HelloByeServerBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+
+	// Not needed in this function
+	(void) funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -131,8 +132,6 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	udp->srcPort = tmp16;
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeServer::Terminate);
-
-	funIface.addPktToSend(pkt);
 };
 
 /*
@@ -183,8 +182,6 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 	udp->srcPort = this->srcPort;
 
 	state.transition(HelloByeClient::Bye);
-
-	funIface.addPktToSend(pkt);
 };
 
 /*
@@ -202,6 +199,9 @@ HelloByeClientBye<Identifier, Packet>::HelloByeClientBye(
 template <class Identifier, class Packet>
 void HelloByeClientBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+
+	// Not needed in this function
+	(void) funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -242,8 +242,6 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 
 	// We need to wait for the server reply
 	state.transition(HelloByeClient::RecvBye);
-
-	funIface.addPktToSend(pkt);
 };
 
 /*
@@ -261,6 +259,9 @@ HelloByeClientRecvBye<Identifier, Packet>::HelloByeClientRecvBye(
 template <class Identifier, class Packet>
 void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
+
+	// Not needed in this function
+	(void) funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -286,8 +287,6 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeClient::Terminate);
-
-	funIface.addPktToFree(pkt);
 };
 
 /*

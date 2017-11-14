@@ -45,6 +45,7 @@ SamplePacket *getPkt() {
 }
 
 void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
+	(void) fi;
 	cout << endl << "running fun1" << endl;
 
 	if (state.state != 1) {
@@ -55,7 +56,6 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 		cout << "fun1: transision to state 2" << endl;
 		state.transition(2);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 12;
-		fi.addPktToSend(pktIn);
 		return;
 	}
 
@@ -63,17 +63,16 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 		cout << "fun1: transision to state 3" << endl;
 		state.transition(3);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 12;
-		fi.addPktToSend(pktIn);
 		return;
 	}
 
 	cout << "fun1: no transision" << endl;
 
 	*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 10;
-	fi.addPktToSend(pktIn);
 }
 
 void fun2(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
+	(void) fi;
 	cout << endl << "running fun2" << endl;
 
 	if (state.state != 2) {
@@ -84,14 +83,12 @@ void fun2(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 		cout << "fun2: transision to state 3" << endl;
 		state.transition(3);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 23;
-		fi.addPktToSend(pktIn);
 		return;
 	}
 
 	cout << "fun2: no transision" << endl;
 
 	*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 24;
-	fi.addPktToSend(pktIn);
 }
 
 int main(int argc, char **argv) {
@@ -108,47 +105,47 @@ int main(int argc, char **argv) {
 
 		assert(sm.getStateTableSize() == 0);
 
-		vector<SamplePacket *> pktsIn;
-		vector<SamplePacket *> pktsFree;
-		vector<SamplePacket *> pktsSend;
+		BufArray<SamplePacket> pktsIn(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*))), 0);
+		BufArray<SamplePacket> pktsSend(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsFree(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
 
-		pktsIn.push_back(getPkt());
+		pktsIn.addPkt(getPkt());
 
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.size() == 1);
-		assert(pktsSend.size() == 1);
-		assert(pktsFree.size() == 0);
-		pktsSend.clear();
+		assert(pktsIn.getNum() == 1);
+		assert(pktsSend.getNum() == 1);
+		assert(pktsFree.getNum() == 0);
+		pktsSend.setNum(0);
 
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 12);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.size() == 1);
-		assert(pktsSend.size() == 1);
-		assert(pktsFree.size() == 0);
-		pktsSend.clear();
+		assert(pktsIn.getNum() == 1);
+		assert(pktsSend.getNum() == 1);
+		assert(pktsFree.getNum() == 0);
+		pktsSend.setNum(0);
 
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 24);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.size() == 1);
-		assert(pktsSend.size() == 1);
-		assert(pktsFree.size() == 0);
-		pktsSend.clear();
+		assert(pktsIn.getNum() == 1);
+		assert(pktsSend.getNum() == 1);
+		assert(pktsFree.getNum() == 0);
+		pktsSend.setNum(0);
 
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 3;
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 23);
 		assert(sm.getStateTableSize() == 0);
-		assert(pktsIn.size() == 1);
-		assert(pktsSend.size() == 1);
-		assert(pktsFree.size() == 0);
-		pktsSend.clear();
+		assert(pktsIn.getNum() == 1);
+		assert(pktsSend.getNum() == 1);
+		assert(pktsFree.getNum() == 0);
+		pktsSend.setNum(0);
 
 	} catch (exception *e) {
 		cout << endl << "FATAL:" << endl;

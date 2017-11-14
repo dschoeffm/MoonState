@@ -55,11 +55,13 @@ int main(int argc, char **argv) {
 	cout << "main(): Entering loop now" << endl;
 
 	while(1){
-		vector<Packet*> vecIn, vecSend, vecFree;
-		pcap.recvBatch(vecIn);
-		sm.runPktBatch(vecIn, vecSend, vecFree);
-		pcap.sendBatch(vecSend);
-		pcap.freeBatch(vecFree);
+		BufArray<SamplePacket> pktsIn = pcap.recvBatch();
+		BufArray<SamplePacket> pktsSend(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsFree(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+
+		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		pcap.sendBatch(pktsSend);
+		pcap.freeBatch(pktsFree);
 	}
 
 	return 0;

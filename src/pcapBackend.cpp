@@ -9,7 +9,7 @@ using namespace std;
 PcapBackend::PcapBackend(string dev, array<uint8_t, 6> srcMac //,
 	// StateMachine<TupleIdent, SamplePacket> &sm
 	)
-	: dev(dev), /* sm(sm), */ srcMac(srcMac) {
+	: dev(dev), /* sm(sm), */ srcMac(srcMac), bufArray(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * maxBufArraySize)), 0){
 
 	if (geteuid() != 0) {
 		cout << "WARNING: Running pcap wihout root priviledges may be a bad idea" << endl;
@@ -34,10 +34,14 @@ PcapBackend::~PcapBackend() {
 	for (auto i : packetPool) {
 		delete (i);
 	}
+	for (auto i : bufArray) {
+		delete (i);
+	}
+	delete(bufArray.getArray());
 };
 
-void PcapBackend::sendBatch(vector<SamplePacket *> &pkts) {
-	for (auto p : pkts) {
+void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
+	for (SamplePacket* p : pkts) {
 		// Set some valid ethernet header
 		struct ether_header *eth = reinterpret_cast<ether_header *>(p->getData());
 		memset(eth->ether_dhost, 0xff, 6);
@@ -53,24 +57,27 @@ void PcapBackend::sendBatch(vector<SamplePacket *> &pkts) {
 		// Give buffer back to the pool
 		packetPool.push_back(p);
 	}
+	pkts.setNum(0);
 };
 
-void PcapBackend::freeBatch(vector<SamplePacket *> &pkts) {
-	for (auto p : pkts) {
+void PcapBackend::freeBatch(BufArray<SamplePacket> &pkts) {
+	for (SamplePacket* p : pkts) {
 		packetPool.push_back(p);
 	}
-	pkts.clear();
+	pkts.setNum(0);
 };
 
-void PcapBackend::recvBatch(vector<SamplePacket *> &pkts) {
-	for (auto p : pkts) {
-		packetPool.push_back(p);
-	}
-	pkts.clear();
+BufArray<SamplePacket> PcapBackend::recvBatch() {
 
 	struct pcap_pkthdr header;
 	const u_char *pcapPacket;
-	while ((pcapPacket = pcap_next(handle, &header))) {
+
+	SamplePacket** array = reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * 64));
+	BufArray<SamplePacket> pkts(array, 0);
+
+	unsigned int count = 0;
+
+	while ((pcapPacket = pcap_next(handle, &header)) && count < 64) {
 		// If a packet is larger than bufSize, I don't want it anyways...
 		if (header.len > bufSize) {
 			continue;
@@ -78,9 +85,12 @@ void PcapBackend::recvBatch(vector<SamplePacket *> &pkts) {
 		SamplePacket *pkt = getPkt();
 		memcpy(pkt->getData(), pcapPacket, header.len);
 		pkt->setDataLen(header.len);
-		pkts.push_back(pkt);
+		pkts.addPkt(pkt);
+		count++;
 		D(cout << "PcapBackend::recvBatch() got another packet" << endl;)
 	}
+
+	return pkts;
 };
 
 SamplePacket *PcapBackend::getPkt() {

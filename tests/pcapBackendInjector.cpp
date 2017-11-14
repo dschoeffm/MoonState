@@ -42,8 +42,8 @@ int main(int argc, char** argv){
 	PcapBackend pcap(string(argv[1]), {{0x4,0x5,0x6,0x7,0x8,0x9}});
 
 	SamplePacket* sp = new SamplePacket(malloc(bufSize), bufSize);
-	vector<SamplePacket*> vec;
-	vec.push_back(sp);
+	BufArray<SamplePacket> bufArray(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*))), 0);
+	bufArray.addPkt(sp);
 
 
 	memset(sp->getData(), 0, bufSize);
@@ -74,11 +74,11 @@ int main(int argc, char** argv){
 	icmp->icmp_hun.ih_idseq.icd_seq = 0;
 
 	cout << "Assembled packet:" << endl;
-	hexdump(vec.front()->getData(), vec.front()->getDataLen());
+	hexdump(bufArray.getArray()[0]->getData(), bufArray.getArray()[0]->getDataLen());
 
 	cout << "main() sending packets" << endl;
 
-	pcap.sendBatch(vec);
+	pcap.sendBatch(bufArray);
 
 	cout << "reached end of main()" << endl << endl;
 

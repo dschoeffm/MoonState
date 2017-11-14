@@ -11,6 +11,7 @@
 
 #include "common.hpp"
 #include "exceptions.hpp"
+#include "bufArray.hpp"
 
 template <class Identifier, class Packet> class StateMachine {
 public:
@@ -37,14 +38,25 @@ public:
 	class FunIface {
 	private:
 		StateMachine<Identifier, Packet> *sm;
+		Packet* pkt;
+		BufArray<Packet>& pktsSend;
+		BufArray<Packet>& pktsFree;
+		bool sendPkt;
 
 	public:
-		FunIface(StateMachine<Identifier, Packet> *sm) : sm(sm){};
+		FunIface(StateMachine<Identifier, Packet> *sm, Packet* pkt, BufArray<Packet>& pktsSend, BufArray<Packet>& pktsFree) : sm(sm), pkt(pkt), pktsSend(pktsSend), pktsFree(pktsFree), sendPkt(true){};
 
-		void addPktToFree(Packet *p) { sm->pktsToFree.push_back(p); }
+		~FunIface(){
+			if(sendPkt){
+				pktsSend.addPkt(pkt);
+			} else {
+				pktsFree.addPkt(pkt);
+			}
+		}
 
-		void addPktToSend(Packet *p) { sm->pktsToSend.push_back(p); }
+		void freePkt() { sendPkt = false; }
 
+#if 0
 		Packet *getPkt() {
 			if (sm->pktsToFree.size() != 0) {
 				Packet *ret = sm->pktsToFree.back();
@@ -57,6 +69,12 @@ public:
 				throw std::runtime_error(
 					"StateMachine::SMFunIface::getPkt no function registered");
 			}
+		}
+#endif
+
+		Packet *getPkt() {
+			throw new std::runtime_error(
+				"StateMachine::FunIface::getPkt() not implemented");
 		}
 
 		void setTimeout() {
@@ -78,11 +96,6 @@ private:
 
 	std::function<Packet *()> getPktCB;
 	D(unsigned int getPktCBCounter = 0;)
-
-	FunIface funIface;
-
-	std::vector<Packet *> pktsToFree;
-	std::vector<Packet *> pktsToSend;
 
 	auto findState(ConnectionID id) {
 	findStateLoop:
@@ -107,7 +120,7 @@ private:
 		return stateIt;
 	};
 
-	void runPkt(Packet *pktIn) {
+	void runPkt(Packet *pktIn, BufArray<Packet>& pktsSend, BufArray<Packet>& pktsFree) {
 		try {
 			ConnectionID identity = identifier.identify(pktIn);
 
@@ -120,6 +133,8 @@ private:
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
 
+			FunIface funIface(this, pktIn, pktsSend, pktsFree);
+
 			D(std::cout << "Running Function" << std::endl;)
 			(sfIt->second)(stateIt->second, pktIn, funIface);
 
@@ -128,12 +143,12 @@ private:
 				removeState(identity);
 			}
 		} catch (PacketNotIdentified *e) {
-			funIface.addPktToFree(pktIn);
+			pktsFree.addPkt(pktIn);
 		}
 	}
 
 public:
-	StateMachine() : startStateID(0), endStateID(StateIDInvalid), funIface(this){};
+	StateMachine() : startStateID(0), endStateID(StateIDInvalid) {};
 
 	size_t getStateTableSize() { return stateTable.size(); };
 
@@ -150,7 +165,7 @@ public:
 
 	void removeState(ConnectionID id) { stateTable.erase(id); }
 
-	void addState(ConnectionID id, State st) {
+	void addState(ConnectionID id, State st, Packet* pkt) {
 		stateTable.insert({id, st});
 		auto stateIt = findState(id);
 
@@ -159,8 +174,10 @@ public:
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 
+		FunIface funIface(this, pkt, nullptr, nullptr);
+
 		D(std::cout << "Running Function" << std::endl;)
-		(sfIt->second)(stateIt->second, nullptr, funIface);
+		(sfIt->second)(stateIt->second, pkt, funIface);
 
 		if (stateIt->second.state == endStateID) {
 			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
@@ -168,31 +185,11 @@ public:
 		}
 	}
 
-	void runPktBatch(std::vector<Packet *> &pktsIn, std::vector<Packet *> &pktsSend,
-		std::vector<Packet *> &pktsFree) {
+	void runPktBatch(BufArray<Packet> &pktsIn, BufArray<Packet> &pktsSend,
+		BufArray<Packet> &pktsFree) {
 		for (auto pkt : pktsIn) {
-			runPkt(pkt);
+			runPkt(pkt, pktsSend, pktsFree);
 		}
-#ifdef DEBUG
-		// putting it all in D() and using assert would have been better...
-		// for some reason that didn't work...
-		if ((pktsToFree.size() + pktsToSend.size()) != (getPktCBCounter + pktsIn.size())) {
-			std::cout << "pktsToFree: " << pktsToFree.size() << std::endl;
-			std::cout << "pktsToSend: " << pktsToSend.size() << std::endl;
-			std::cout << "pktsIn: " << pktsIn.size() << std::endl;
-			std::cout << "getPktCBCounter: " << getPktCBCounter << std::endl;
-
-			throw new std::runtime_error(
-				"StateMachine::runPktBatch() some packets were are not in send/free vector");
-		}
-		getPktCBCounter = 0;
-#endif
-		pktsSend.clear();
-		pktsFree.clear();
-		std::swap(pktsSend, pktsToSend);
-		std::swap(pktsFree, pktsToFree);
-		pktsToSend.clear();
-		pktsToFree.clear();
 	}
 };
 

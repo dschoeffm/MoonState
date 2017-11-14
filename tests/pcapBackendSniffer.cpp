@@ -33,8 +33,7 @@ int main(int argc, char** argv){
 	PcapBackend pcap(string(argv[1]), {{0,0,0,0,0,0}});
 
 	while(!interrupted){
-		vector<SamplePacket*> pkts;
-		pcap.recvBatch(pkts);
+		BufArray<SamplePacket> pkts = pcap.recvBatch();
 		for(auto p : pkts){
 			cout << endl << "Packet Hexdump:" << endl;
 			hexdump(p->getData(), p->getDataLen());

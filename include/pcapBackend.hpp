@@ -12,13 +12,13 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <net/ethernet.h>
 
 #include "IPv4_5TupleL2Ident.hpp"
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
+#include "bufArray.hpp"
 
 class PcapBackend {
 private:
@@ -30,20 +30,24 @@ private:
 	//	StateMachine<TupleIdent, SamplePacket> &sm;
 
 	static constexpr uint32_t bufSize = 2048;
+	static constexpr unsigned int maxBufArraySize = 64;
 
 	std::vector<SamplePacket *> packetPool;
 	std::array<uint8_t, 6> srcMac;
+	BufArray<SamplePacket> bufArray;
 
 public:
+	// WARNING: THIS CLASS IS NOT THREAD SAFE
 	PcapBackend(std::string dev, std::array<uint8_t, 6> srcMac //,
 		// StateMachine<TupleIdent, SamplePacket> &sm
 		);
 
 	~PcapBackend();
 
-	void sendBatch(std::vector<SamplePacket *> &pkts);
-	void freeBatch(std::vector<SamplePacket *> &pkts);
-	void recvBatch(std::vector<SamplePacket *> &pkts);
+	void sendBatch(BufArray<SamplePacket> &pkts);
+	void freeBatch(BufArray<SamplePacket> &pkts);
+
+	BufArray<SamplePacket> recvBatch();
 
 	SamplePacket *getPkt();
 };
