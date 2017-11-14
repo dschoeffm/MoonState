@@ -10,7 +10,6 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-#include <cstdlib>
 
 #define BUFLEN 100
 
@@ -20,7 +19,7 @@ void client(int fd, struct sockaddr_in server) {
 	char buf[BUFLEN];
 	socklen_t addrlen = sizeof(struct sockaddr_in);
 
-	int cookieClient = rand()%10;
+	int cookieClient = rand() % 10;
 
 	// Send first message
 	memset(buf, 0, BUFLEN);
@@ -69,7 +68,7 @@ void client(int fd, struct sockaddr_in server) {
 		abort();
 	}
 
-	if(cookieClient != atoi(buf + 11)){
+	if (cookieClient != atoi(buf + 11)) {
 		cout << "client: server sent me the wrong cookie... I want chocolate..." << endl;
 		abort();
 	}
@@ -95,7 +94,7 @@ void server(int fd, struct sockaddr_in server) {
 
 	cout << "Waiting for client" << endl;
 
-	int cookieServer = rand()%10;
+	int cookieServer = rand() % 10;
 
 	// Receive client hello
 	if (recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&client, &clen) < 0) {
@@ -134,7 +133,7 @@ void server(int fd, struct sockaddr_in server) {
 		abort();
 	}
 
-	if(cookieServer != atoi(buf + 11)){
+	if (cookieServer != atoi(buf + 11)) {
 		cout << "server: client sent me the wrong cookie... I want vanilla..." << endl;
 		abort();
 	}
@@ -167,7 +166,7 @@ int main(int argc, char **argv) {
 	bool c;
 	uint16_t port;
 
-	srand (time(NULL));
+	srand(time(NULL));
 
 	memset((char *)&sa, 0, sizeof(struct sockaddr_in));
 	sa.sin_family = AF_INET;

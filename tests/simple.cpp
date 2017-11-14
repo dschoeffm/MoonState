@@ -20,7 +20,7 @@ public:
 
 		bool operator<(const ConnectionID &c) const { return val < c.val; }
 
-		operator std::string () const { return "";}
+		operator std::string() const { return ""; }
 
 		ConnectionID(const ConnectionID &c) : val(c.val){};
 		ConnectionID() : val(0){};
@@ -45,7 +45,7 @@ SamplePacket *getPkt() {
 }
 
 void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
-	(void) fi;
+	(void)fi;
 	cout << endl << "running fun1" << endl;
 
 	if (state.state != 1) {
@@ -72,7 +72,7 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 }
 
 void fun2(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
-	(void) fi;
+	(void)fi;
 	cout << endl << "running fun2" << endl;
 
 	if (state.state != 2) {
@@ -105,9 +105,12 @@ int main(int argc, char **argv) {
 
 		assert(sm.getStateTableSize() == 0);
 
-		BufArray<SamplePacket> pktsIn(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*))), 0);
-		BufArray<SamplePacket> pktsSend(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsIn(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
+		BufArray<SamplePacket> pktsSend(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsFree(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
 
 		pktsIn.addPkt(getPkt());
 

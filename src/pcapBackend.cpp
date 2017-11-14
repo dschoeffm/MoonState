@@ -6,10 +6,13 @@
 
 using namespace std;
 
-PcapBackend::PcapBackend(string dev, array<uint8_t, 6> srcMac //,
-	// StateMachine<TupleIdent, SamplePacket> &sm
+PcapBackend::PcapBackend(
+	string dev, array<uint8_t, 6> srcMac //,
+										 // StateMachine<TupleIdent, SamplePacket> &sm
 	)
-	: dev(dev), /* sm(sm), */ srcMac(srcMac), bufArray(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * maxBufArraySize)), 0){
+	: dev(dev), /* sm(sm), */ srcMac(srcMac),
+	  bufArray(
+		  reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * maxBufArraySize)), 0) {
 
 	if (geteuid() != 0) {
 		cout << "WARNING: Running pcap wihout root priviledges may be a bad idea" << endl;
@@ -37,11 +40,11 @@ PcapBackend::~PcapBackend() {
 	for (auto i : bufArray) {
 		delete (i);
 	}
-	delete(bufArray.getArray());
+	delete (bufArray.getArray());
 };
 
 void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
-	for (SamplePacket* p : pkts) {
+	for (SamplePacket *p : pkts) {
 		// Set some valid ethernet header
 		struct ether_header *eth = reinterpret_cast<ether_header *>(p->getData());
 		memset(eth->ether_dhost, 0xff, 6);
@@ -49,7 +52,7 @@ void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
 		eth->ether_type = htons(ETHERTYPE_IP);
 
 		// Actually inject packet
-		if(pcap_inject(handle, p->getData(), p->getDataLen()) != (int) p->getDataLen()){
+		if (pcap_inject(handle, p->getData(), p->getDataLen()) != (int)p->getDataLen()) {
 			cout << "PcapBackend::sendBatch() pcap_inject() failed" << endl;
 			abort();
 		}
@@ -61,7 +64,7 @@ void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
 };
 
 void PcapBackend::freeBatch(BufArray<SamplePacket> &pkts) {
-	for (SamplePacket* p : pkts) {
+	for (SamplePacket *p : pkts) {
 		packetPool.push_back(p);
 	}
 	pkts.setNum(0);
@@ -72,7 +75,7 @@ BufArray<SamplePacket> PcapBackend::recvBatch() {
 	struct pcap_pkthdr header;
 	const u_char *pcapPacket;
 
-	SamplePacket** array = reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * 64));
+	SamplePacket **array = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * 64));
 	BufArray<SamplePacket> pkts(array, 0);
 
 	unsigned int count = 0;

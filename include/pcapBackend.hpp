@@ -16,9 +16,9 @@
 #include <net/ethernet.h>
 
 #include "IPv4_5TupleL2Ident.hpp"
+#include "bufArray.hpp"
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
-#include "bufArray.hpp"
 
 class PcapBackend {
 private:
@@ -38,9 +38,10 @@ private:
 
 public:
 	// WARNING: THIS CLASS IS NOT THREAD SAFE
-	PcapBackend(std::string dev, std::array<uint8_t, 6> srcMac //,
-		// StateMachine<TupleIdent, SamplePacket> &sm
-		);
+	PcapBackend(std::string dev,
+		std::array<uint8_t, 6> srcMac //,
+									  // StateMachine<TupleIdent, SamplePacket> &sm
+	);
 
 	~PcapBackend();
 

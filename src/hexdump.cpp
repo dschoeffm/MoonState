@@ -1,9 +1,9 @@
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <iomanip>
 #include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #include "common.hpp"
 
@@ -18,7 +18,7 @@ void hexdump(const void *data, int dataLen) {
 
 	cout << "Hexdump of: " << data << endl;
 	while (dataLen > 0) {
-		unsigned int lineLength = min((int) 16, dataLen);
+		unsigned int lineLength = min((int)16, dataLen);
 		const char *line = start + it;
 
 		stringstream ascii;
@@ -26,22 +26,21 @@ void hexdump(const void *data, int dataLen) {
 
 		ascii << setfill('0') << setw(2) << hex << it << " : ";
 
-		for(unsigned int i=0; i < lineLength; i++){
+		for (unsigned int i = 0; i < lineLength; i++) {
 			char c = static_cast<char>(line[i]);
 			unsigned int varInt = 0;
 			varInt |= static_cast<uint8_t>(c);
 
-			if(isprint(varInt) != 0){
+			if (isprint(varInt) != 0) {
 				ascii << static_cast<char>(line[i]);
 			} else {
 				ascii << '.';
 			}
 
 			hexDump << " " << setfill('0') << setw(2) << hex << uppercase << varInt;
-
 		}
 
-		for(int i=lineLength; i<16; i++){
+		for (int i = lineLength; i < 16; i++) {
 			ascii << " ";
 		}
 
@@ -50,7 +49,7 @@ void hexdump(const void *data, int dataLen) {
 		all << endl;
 
 		dataLen -= 16;
-		it+=lineLength;
+		it += lineLength;
 	}
 
 	cout << all.str();
@@ -65,22 +64,21 @@ void hexdumpHexOnly(const void *data, int dataLen) {
 
 	cout << "Hexdump of: " << data << endl;
 	while (dataLen > 0) {
-		unsigned int lineLength = min((int) 16, dataLen);
+		unsigned int lineLength = min((int)16, dataLen);
 		const char *line = start + it;
 
-		for(unsigned int i=0; i < lineLength; i++){
+		for (unsigned int i = 0; i < lineLength; i++) {
 			char c = static_cast<char>(line[i]);
 			unsigned int varInt = 0;
 			varInt |= static_cast<uint8_t>(c);
 
 			all << " " << setfill('0') << setw(2) << hex << uppercase << varInt;
-
 		}
 
 		all << endl;
 
 		dataLen -= 16;
-		it+=lineLength;
+		it += lineLength;
 	}
 
 	cout << all.str();

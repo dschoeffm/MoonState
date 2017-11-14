@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 
 #include "headers.hpp"
 
@@ -68,18 +68,20 @@ public:
 
 	static ConnectionID identify(Packet *pkt) {
 		ConnectionID id;
-		struct Headers::IPv4 *ip =
-			reinterpret_cast<struct Headers::IPv4 *>(reinterpret_cast<uint8_t *>(pkt->getData()) + 14);
+		struct Headers::IPv4 *ip = reinterpret_cast<struct Headers::IPv4 *>(
+			reinterpret_cast<uint8_t *>(pkt->getData()) + 14);
 		id.dstIP = ip->dstIP;
 		id.srcIP = ip->srcIP;
 		id.proto = ip->proto;
 
 		if (id.proto == IPPROTO_UDP) {
-			struct Headers::Udp *udp = reinterpret_cast<struct Headers::Udp *>(ip->getPayload());
+			struct Headers::Udp *udp =
+				reinterpret_cast<struct Headers::Udp *>(ip->getPayload());
 			id.dstPort = udp->dstPort;
 			id.srcPort = udp->srcPort;
 		} else if (id.proto == IPPROTO_TCP) {
-			struct Headers::Tcp *tcp = reinterpret_cast<struct Headers::Tcp *>(ip->getPayload());
+			struct Headers::Tcp *tcp =
+				reinterpret_cast<struct Headers::Tcp *>(ip->getPayload());
 			id.dstPort = tcp->dstPort;
 			id.srcPort = tcp->srcPort;
 		} else {

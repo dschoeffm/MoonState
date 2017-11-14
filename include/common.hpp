@@ -8,4 +8,4 @@
 
 using StateID = uint16_t;
 
-void hexdump(const void* data, int dataLen);
+void hexdump(const void *data, int dataLen);

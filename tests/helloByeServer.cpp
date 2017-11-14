@@ -45,7 +45,8 @@ int main(int argc, char **argv) {
 
 	StateMachine<Ident, SamplePacket> sm;
 	sm.registerEndStateID(HelloByeServer::Terminate);
-	sm.registerStartStateID(HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::factory);
+	sm.registerStartStateID(
+		HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::factory);
 
 	sm.registerFunction(HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::run);
 	sm.registerFunction(HelloByeServer::Bye, HelloByeServerBye<Ident, Packet>::run);
@@ -54,10 +55,12 @@ int main(int argc, char **argv) {
 
 	cout << "main(): Entering loop now" << endl;
 
-	while(1){
+	while (1) {
 		BufArray<SamplePacket> pktsIn = pcap.recvBatch();
-		BufArray<SamplePacket> pktsSend(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsSend(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsFree(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
 
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		pcap.sendBatch(pktsSend);

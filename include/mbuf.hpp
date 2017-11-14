@@ -13,7 +13,6 @@ struct mbuf : public rte_mbuf {
 	uint16_t getBufLen() { return this->buf_len; }
 };
 
-
 #endif /* WITH_DPDK */
 
 #endif /* MBUF_HPP */

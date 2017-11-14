@@ -1,9 +1,9 @@
 #include <cstdlib>
 #include <sstream>
 
+#include "IPv4_5TupleL2Ident.hpp"
 #include "headers.hpp"
 #include "helloByeProto.hpp"
-#include "IPv4_5TupleL2Ident.hpp"
 #include "samplePacket.hpp"
 
 using namespace Headers;
@@ -18,7 +18,7 @@ using namespace std;
 
 template <class Identifier, class Packet>
 HelloByeServerHello<Identifier, Packet>::HelloByeServerHello() {
-	this->serverCookie = rand()%10;
+	this->serverCookie = rand() % 10;
 };
 
 template <class Identifier, class Packet>
@@ -39,7 +39,8 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)-1];
+	uint8_t cookieChar =
+		reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr) - 1];
 	this->clientCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	// Prepare new packet
@@ -57,7 +58,6 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 	ipv4->dstIP = ipv4->srcIP;
 	ipv4->srcIP = tmp;
 	ipv4->calcChecksum();
-
 
 	// Set UDP checksum to 0 and hope for the best
 
@@ -86,7 +86,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
-	(void) funIface;
+	(void)funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -101,10 +101,11 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr)-1];
+	uint8_t cookieChar =
+		reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(clientStr) - 1];
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
-	if(recvCookie != this->serverCookie){
+	if (recvCookie != this->serverCookie) {
 		cout << "HelloByeServerBye::fun() Client sent over wrong cookie" << endl;
 		state.transition(HelloByeServer::Terminate);
 		return;
@@ -144,7 +145,7 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 template <class Identifier, class Packet>
 HelloByeClientHello<Identifier, Packet>::HelloByeClientHello(uint32_t dstIp, uint16_t srcPort)
 	: dstIp(dstIp), srcPort(srcPort) {
-	this->clientCookie = rand()%10;
+	this->clientCookie = rand() % 10;
 };
 
 template <class Identifier, class Packet>
@@ -201,7 +202,7 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
-	(void) funIface;
+	(void)funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -216,7 +217,8 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 	}
 
 	// Get server cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)-1];
+	uint8_t cookieChar =
+		reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr) - 1];
 	this->serverCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	// Prepare new packet
@@ -261,7 +263,7 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
-	(void) funIface;
+	(void)funIface;
 
 	// Get info from packet
 	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
@@ -276,10 +278,11 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	}
 
 	// Get client cookie
-	uint8_t cookieChar = reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr)-1];
+	uint8_t cookieChar =
+		reinterpret_cast<uint8_t *>(udp->getPayload())[sizeof(serverStr) - 1];
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
-	if(recvCookie != this->clientCookie){
+	if (recvCookie != this->clientCookie) {
 		cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie" << endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
@@ -309,5 +312,4 @@ template class HelloByeClientRecvBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePac
  *
  */
 
-HelloByeClientConfig* HelloByeClientConfig::instance = nullptr;
-
+HelloByeClientConfig *HelloByeClientConfig::instance = nullptr;

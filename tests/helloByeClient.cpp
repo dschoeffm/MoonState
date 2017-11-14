@@ -9,10 +9,10 @@
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
 
-#include <netinet/ether.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/ether.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 using namespace std;
 
@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
 
 	StateMachine<Ident, SamplePacket> sm;
 	sm.registerEndStateID(HelloByeClient::Terminate);
-	//sm.registerStartStateID(HelloByeClient::Hello, HelloByeClientHello<Ident, Packet>::factory);
+	// sm.registerStartStateID(HelloByeClient::Hello, HelloByeClientHello<Ident,
+	// Packet>::factory);
 
 	sm.registerFunction(HelloByeClient::Hello, HelloByeClientHello<Ident, Packet>::run);
 	sm.registerFunction(HelloByeClient::Bye, HelloByeClientBye<Ident, Packet>::run);
@@ -66,13 +67,15 @@ int main(int argc, char **argv) {
 	cout << "main(): Entering loop now" << endl;
 
 	// TODO write later
-	//sm.addState();
+	// sm.addState();
 
-	while(1){
-		//vector<Packet*> vecIn, vecSend, vecFree;
+	while (1) {
+		// vector<Packet*> vecIn, vecSend, vecFree;
 		BufArray<SamplePacket> pktsIn = pcap.recvBatch();
-		BufArray<SamplePacket> pktsSend(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(reinterpret_cast<SamplePacket**>(malloc(sizeof(void*) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsSend(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> pktsFree(
+			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
 
 		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
 		pcap.sendBatch(pktsSend);

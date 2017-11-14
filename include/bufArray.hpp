@@ -19,12 +19,8 @@ template <typename Packet> struct BufArray : public std::pair<Packet **, unsigne
 		this->second += 1;
 	}
 
-	Packet* operator[](unsigned int idx){
-		return this->getArray()[idx];
-	}
+	Packet *operator[](unsigned int idx) { return this->getArray()[idx]; }
 
-	//	typedef Packet *iterator;
-	//	typedef const Packet *const_iterator;
 	Packet **begin() { return &this->getArray()[0]; }
 	Packet **end() { return &this->getArray()[this->getNum()]; }
 };

@@ -11,7 +11,6 @@
  *
  */
 
-
 struct HelloByeServer {
 	static constexpr StateID Hello = 0;
 	static constexpr StateID Bye = 1;
@@ -51,7 +50,7 @@ private:
 	uint16_t dstPort;
 
 	static HelloByeClientConfig *instance;
-	HelloByeClientConfig() : srcIp(0), dstPort(0) {};
+	HelloByeClientConfig() : srcIp(0), dstPort(0){};
 
 public:
 	auto getSrcIP() { return srcIp; }
@@ -60,13 +59,9 @@ public:
 	void setSrcIP(uint32_t newIP) { srcIp = newIP; }
 	void setDstPort(uint16_t newPort) { dstPort = newPort; }
 
-	static void createInstance() {
-		instance = new HelloByeClientConfig;
-	}
+	static void createInstance() { instance = new HelloByeClientConfig; }
 
-	static HelloByeClientConfig *getInstance() {
-		return instance;
-	}
+	static HelloByeClientConfig *getInstance() { return instance; }
 };
 
 /*
@@ -87,8 +82,8 @@ private:
 public:
 	HelloByeServerHello();
 
-	static void* factory(typename Identifier::ConnectionID id){
-		(void) id;
+	static void *factory(typename Identifier::ConnectionID id) {
+		(void)id;
 		return new HelloByeServerHello();
 	}
 
