@@ -74,7 +74,7 @@ int main(int argc, char** argv){
 	icmp->icmp_hun.ih_idseq.icd_seq = 0;
 
 	cout << "Assembled packet:" << endl;
-	hexdump(bufArray.getArray()[0]->getData(), bufArray.getArray()[0]->getDataLen());
+	hexdump(bufArray[0]->getData(), bufArray[0]->getDataLen());
 
 	cout << "main() sending packets" << endl;
 
