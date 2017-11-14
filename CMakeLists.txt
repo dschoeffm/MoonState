@@ -5,6 +5,14 @@ if(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "Release")
 endif(NOT CMAKE_BUILD_TYPE)
 
+if(NOT DPDK_INCLUDE_DIR)
+	SET(DPDK_INCLUDE_DIR "/usr/include/dpdk/")
+endif(NOT DPDK_INCLUDE_DIR)
+
+if(NOT NO_DPDK)
+	add_definitions(-DWITH_DPDK)
+endif(NOT NO_DPDK)
+
 SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -O3 -fno-omit-frame-pointer")
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DDEBUG -g3 -O0 -fno-optimize-sibling-calls -fno-inline")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
@@ -12,6 +20,12 @@ SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+if(NOT NO_DPDK)
+INCLUDE_DIRECTORIES(
+	${DPDK_INCLUDE_DIR}
+)
+endif(NOT NO_DPDK)
 
 #FILE(GLOB SOURCES src/*.cpp)
 
