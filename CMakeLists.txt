@@ -13,7 +13,7 @@ if(NOT NO_DPDK)
 	add_definitions(-DWITH_DPDK)
 endif(NOT NO_DPDK)
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -O3 -fno-omit-frame-pointer")
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -O3 -fno-omit-frame-pointer -Wno-undefined-inline")
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DDEBUG -g3 -O0 -fno-optimize-sibling-calls -fno-inline")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 

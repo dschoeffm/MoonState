@@ -87,7 +87,7 @@ public:
 		return new HelloByeServerHello();
 	}
 
-	__attribute__((always_inline)) void fun(
+	inline __attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
@@ -121,7 +121,7 @@ private:
 public:
 	HelloByeServerBye(const HelloByeServerHello<Identifier, Packet> *in);
 
-	__attribute__((always_inline)) void fun(
+	inline __attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
@@ -149,7 +149,7 @@ private:
 public:
 	HelloByeClientHello(uint32_t dstIp, uint16_t srcPort);
 
-	__attribute__((always_inline)) void fun(
+	inline __attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
@@ -176,7 +176,7 @@ private:
 public:
 	HelloByeClientBye(const HelloByeClientHello<Identifier, Packet> *in);
 
-	__attribute__((always_inline)) void fun(
+	inline __attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
@@ -202,7 +202,7 @@ private:
 public:
 	HelloByeClientRecvBye(const HelloByeClientBye<Identifier, Packet> *in);
 
-	__attribute__((always_inline)) void fun(
+	inline __attribute__((always_inline)) void fun(
 		typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface);
 
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
