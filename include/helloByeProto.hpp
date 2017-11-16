@@ -211,4 +211,6 @@ public:
 	}
 };
 
+#include "../src/helloByeProto.cpp"
+
 #endif /* HELLOBYEPROTO_HPP */

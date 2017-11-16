@@ -1,9 +1,13 @@
+#ifndef HELLOBYEPROTO_CPP
+#define HELLOBYEPROTO_CPP
+
 #include <cstdlib>
 #include <sstream>
 
 #include "IPv4_5TupleL2Ident.hpp"
 #include "headers.hpp"
 #include "helloByeProto.hpp"
+#include "mbuf.hpp"
 #include "samplePacket.hpp"
 
 using namespace Headers;
@@ -292,24 +296,27 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	state.transition(HelloByeClient::Terminate);
 };
 
-/*
- * ===================================
- * Prepare template instances
- * ===================================
- *
- */
+	/*
+	 * ===================================
+	 * Prepare template instances
+	 * ===================================
+	 *
+	 */
 
-template class HelloByeServerHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
-template class HelloByeServerBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
-template class HelloByeClientHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
-template class HelloByeClientBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
-template class HelloByeClientRecvBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+	/*
+	 * This file is now included in the header
+	 *
+	template class HelloByeServerHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+	template class HelloByeServerBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+	template class HelloByeClientHello<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+	template class HelloByeClientBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
+	template class HelloByeClientRecvBye<IPv4_5TupleL2Ident<SamplePacket>, SamplePacket>;
 
-/*
- * ===================================
- * Define Client config singleton
- * ===================================
- *
- */
+	template class HelloByeServerHello<IPv4_5TupleL2Ident<mbuf>, mbuf>;
+	template class HelloByeServerBye<IPv4_5TupleL2Ident<mbuf>, mbuf>;
+	template class HelloByeClientHello<IPv4_5TupleL2Ident<mbuf>, mbuf>;
+	template class HelloByeClientBye<IPv4_5TupleL2Ident<mbuf>, mbuf>;
+	template class HelloByeClientRecvBye<IPv4_5TupleL2Ident<mbuf>, mbuf>;
+	*/
 
-HelloByeClientConfig *HelloByeClientConfig::instance = nullptr;
+#endif /* HELLOBYEPROTO_CPP */
