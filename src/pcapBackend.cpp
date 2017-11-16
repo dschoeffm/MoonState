@@ -1,3 +1,5 @@
+#ifdef WITH_PCAP
+
 #include "pcapBackend.hpp"
 #include "common.hpp"
 
@@ -107,3 +109,5 @@ SamplePacket *PcapBackend::getPkt() {
 		return sp;
 	}
 };
+
+#endif /* WITH_PCAP */

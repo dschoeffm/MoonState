@@ -1,3 +1,5 @@
+#ifdef WITH_PCAP
+
 #ifndef PCAPBACKEND_HPP
 #define PCAPBACKEND_HPP
 
@@ -54,3 +56,5 @@ public:
 };
 
 #endif /* PCAPBACKEND_HPP */
+
+#endif /* WITH_PCAP */

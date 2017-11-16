@@ -1,3 +1,5 @@
+#ifdef WITH_PCAP
+
 #include <array>
 #include <iostream>
 #include <string>
@@ -69,3 +71,17 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+
+#else
+
+#include <iostream>
+
+int main(int argc, char **argv) {
+	(void)argc;
+	(void)argv;
+
+	std::cout << "Built without pcap..." << std::endl;
+	return 0;
+}
+
+#endif
