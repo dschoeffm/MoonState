@@ -122,6 +122,8 @@ private:
 	};
 
 	void runPkt(Packet *pktIn, BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
+		D(std::cout << "StateMachine::runPkt() called" << std::endl;)
+
 		try {
 			ConnectionID identity = identifier.identify(pktIn);
 
@@ -131,6 +133,8 @@ private:
 
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
+				D(std::cout << "StateMachine::runPkt() Didn't find a function for this state"
+							<< std::endl;)
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
 
@@ -144,6 +148,8 @@ private:
 				removeState(identity);
 			}
 		} catch (PacketNotIdentified *e) {
+			D(std::cout << "StateMachine::runPkt() Packet could not be identified"
+						<< std::endl;)
 			pktsFree.addPkt(pktIn);
 		}
 	}
