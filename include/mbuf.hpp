@@ -5,7 +5,7 @@
 #include <rte_mbuf.h>
 
 struct mbuf : public rte_mbuf {
-	void *getData() { return this->buf_addr; }
+	void *getData() { return rte_pktmbuf_mtod(this, void *); }
 	uint16_t getDataLen() { return this->data_len; };
 	void setDataLen(uint16_t l) { this->data_len = l; };
 	uint16_t getBufLen() { return this->buf_len; }
