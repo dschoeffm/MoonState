@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
+#include "common.hpp"
 #include "headers.hpp"
 
 #include "exceptions.hpp"
@@ -85,6 +87,12 @@ public:
 			id.dstPort = tcp->dstPort;
 			id.srcPort = tcp->srcPort;
 		} else {
+#ifdef DEBUG
+			std::cout << "IPv4_5TupleL2Ident::indentify() failed" << std::endl;
+			std::cout << "IPv4_5TupleL2Ident::indentify() id.proto="
+					  << static_cast<unsigned int>(id.proto) << std::endl;
+#endif
+			hexdump(pkt->getData(), pkt->getDataLen());
 			throw new PacketNotIdentified();
 		}
 
