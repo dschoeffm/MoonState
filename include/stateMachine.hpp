@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -12,6 +13,7 @@
 #include "bufArray.hpp"
 #include "common.hpp"
 #include "exceptions.hpp"
+#include "spinlock.hpp"
 
 template <class Identifier, class Packet> class StateMachine {
 public:
@@ -87,6 +89,9 @@ public:
 private:
 	std::unordered_map<ConnectionID, State, Hasher> stateTable;
 
+	static SpinLockCLSize newStatesLock;
+	static std::unordered_map<ConnectionID, State, Hasher> newStates;
+
 	std::unordered_map<StateID, stateFun> functions;
 
 	Identifier identifier;
@@ -96,25 +101,42 @@ private:
 	std::function<void *(ConnectionID)> startStateFun;
 
 	std::function<Packet *()> getPktCB;
-	D(unsigned int getPktCBCounter = 0;)
+	bool listenToConnections;
 
 	auto findState(ConnectionID id) {
 	findStateLoop:
 		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
-			// Add new state
-			D(std::cout << "Adding new state" << std::endl;)
-			D(std::cout << "ConnectionID: " << static_cast<std::string>(id) << std::endl;)
 
-			// Create startState data object
-			void *stateData = nullptr;
-			if (startStateFun) {
-				stateData = startStateFun(id);
+			// Check, if this is a connection opened by another core
+			{
+				std::lock_guard<SpinLockCLSize> guard(newStatesLock);
+				auto maybeStateIt = newStates.find(id);
+				if (maybeStateIt != newStates.end()) {
+					// Found a suitable state, insert it into own stateTable
+					stateTable.insert(*maybeStateIt);
+					newStates.erase(maybeStateIt);
+					goto findStateLoop;
+				}
 			}
 
-			State s(startStateID, stateData);
-			stateTable.insert({id, s});
-			goto findStateLoop;
+			// Maybe accept the new connection
+			if (listenToConnections) {
+				// Add new state
+				D(std::cout << "Adding new state" << std::endl;)
+				D(std::cout << "ConnectionID: " << static_cast<std::string>(id) << std::endl;)
+
+				// Create startState data object
+				void *stateData = nullptr;
+				if (startStateFun) {
+					stateData = startStateFun(id);
+				}
+
+				State s(startStateID, stateData);
+				stateTable.insert({id, s});
+				goto findStateLoop;
+			}
+
 		} else {
 			D(std::cout << "State found" << std::endl;)
 		}
@@ -128,6 +150,12 @@ private:
 			ConnectionID identity = identifier.identify(pktIn);
 
 			auto stateIt = findState(identity);
+
+			if (stateIt == stateTable.end()) {
+				// We don't want this packet
+				D(std::cout << "StateMachine::runPkt() discarding packet" << std::endl;)
+				return;
+			}
 
 			// TODO unregister timeout, if one exists
 
@@ -155,7 +183,8 @@ private:
 	}
 
 public:
-	StateMachine() : startStateID(0), endStateID(StateIDInvalid){};
+	StateMachine()
+		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false){};
 
 	size_t getStateTableSize() { return stateTable.size(); };
 
@@ -166,6 +195,7 @@ public:
 		StateID startStateID, std::function<void *(ConnectionID)> startStateFun) {
 		this->startStateID = startStateID;
 		this->startStateFun = startStateFun;
+		listenToConnections = true;
 	}
 
 	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
@@ -173,10 +203,9 @@ public:
 	void removeState(ConnectionID id) { stateTable.erase(id); }
 
 	void addState(ConnectionID id, State st, Packet *pkt) {
-		stateTable.insert({id, st});
-		auto stateIt = findState(id);
+		auto state = {id, st};
 
-		auto sfIt = functions.find(stateIt->second.state);
+		auto sfIt = functions.find(state.state);
 		if (sfIt == functions.end()) {
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
@@ -184,11 +213,16 @@ public:
 		FunIface funIface(this, pkt, nullptr, nullptr);
 
 		D(std::cout << "Running Function" << std::endl;)
-		(sfIt->second)(stateIt->second, pkt, funIface);
+		(sfIt->second)(state, pkt, funIface);
 
-		if (stateIt->second.state == endStateID) {
+		if (state.state == endStateID) {
 			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
-			removeState(id);
+			return;
+		}
+
+		{
+			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
+			newStates.insert(state);
 		}
 	}
 
@@ -199,5 +233,13 @@ public:
 		}
 	}
 };
+
+template <class Identifier, class Packet>
+std::unordered_map<typename Identifier::ConnectionID,
+	typename StateMachine<Identifier, Packet>::State, typename Identifier::Hasher>
+	StateMachine<Identifier, Packet>::newStates;
+
+template <class Identifier, class Packet>
+SpinLockCLSize StateMachine<Identifier, Packet>::newStatesLock;
 
 #endif /* STATE_MACHINE_HPP */
