@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <rte_mbuf.h>
 
+/*! Wrapper aroung DPDK rte_mbuf
+ */
 struct mbuf : public rte_mbuf {
 	void *getData() { return rte_pktmbuf_mtod(this, void *); }
 	uint16_t getDataLen() { return this->data_len; };

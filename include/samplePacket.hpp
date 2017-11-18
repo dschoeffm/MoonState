@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <cstdlib>
 
+/*! Example for a packet class
+ * This class is meant to show, which functions are expected to be exposed by
+ * any packet class
+ */
 class SamplePacket {
 private:
 	void *data;

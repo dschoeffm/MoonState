@@ -18,6 +18,8 @@ struct Ethernet {
 	std::array<uint8_t, 6> srcMac;  //!< Source MAC
 	uint16_t ethertype;				//!< Ethertype
 
+	/*! Get the SDU
+	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
 			reinterpret_cast<uint8_t *>(this) + sizeof(struct Ethernet));
@@ -76,6 +78,8 @@ struct IPv4 {
 	uint32_t srcIP;	//!< source IPv4 address
 	uint32_t dstIP;	//!< destination IPv4 address
 
+	/*! Get the SDU
+	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + 4 * ihl());
 	}
@@ -95,6 +99,8 @@ struct IPv4 {
 
 	uint16_t getLength() { return ntohs(this->total_length); }
 
+	/*! Fill out the header checksum for this packet
+	 */
 	void calcChecksum() {
 		uint32_t result = 0;
 		uint16_t *hdr_cast = reinterpret_cast<uint16_t *>(this);
@@ -125,6 +131,8 @@ struct Tcp {
 	uint16_t checksum;	 //!< Checksum
 	uint16_t urgend_ptr;   //!< Urgent pointer
 
+	/*! Get the SDU
+	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
 			reinterpret_cast<uint8_t *>(this) + sizeof(struct Tcp));
@@ -140,6 +148,8 @@ struct Udp {
 	uint16_t len;	  //!< Length
 	uint16_t checksum; //!< Checksum
 
+	/*! Get the SDU
+	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
 			reinterpret_cast<uint8_t *>(this) + sizeof(struct Udp));

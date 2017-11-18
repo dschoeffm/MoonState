@@ -15,17 +15,31 @@
 #include "exceptions.hpp"
 #include "spinlock.hpp"
 
+/*! State machine framework
+ * This class is a comprehensive framework, on top of which a developer can
+ * build high-performance state machines.
+ *
+ * It can be specialized to work with different underlying packet packet sources
+ * and packet identifiers.
+ */
 template <class Identifier, class Packet> class StateMachine {
 public:
 	struct State;
 	class FunIface;
 
+	// This is the signature any state function needs to expose
 	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
+
+	// These two members are expected by any Identifier
 	using ConnectionID = typename Identifier::ConnectionID;
 	using Hasher = typename Identifier::Hasher;
 
 	static constexpr auto StateIDInvalid = std::numeric_limits<StateID>::max();
 
+	/*! Represents one connection
+	 * This struct holds the information about the current state, and a void*
+	 * which points to any kind of data the user chooses
+	 */
 	struct State {
 	public:
 		void *stateData;
@@ -34,9 +48,14 @@ public:
 		State(StateID state, void *stateData) : stateData(stateData), state(state){};
 		State(const State &s) : stateData(s.stateData), state(s.state){};
 
+		/*! Transition to another state
+		 * \param newState The state to transition to
+		 */
 		void transition(StateID newState) { state = newState; }
 	};
 
+	/*! Main interface for the needs of a state function
+	 */
 	class FunIface {
 	private:
 		StateMachine<Identifier, Packet> *sm;
@@ -58,6 +77,8 @@ public:
 			}
 		}
 
+		/*! Free the packets after the batch is processed, do not send it
+		 */
 		void freePkt() { sendPkt = false; }
 
 #if 0
@@ -76,10 +97,15 @@ public:
 		}
 #endif
 
+		/*! Get an additional packet buffer
+		 */
 		Packet *getPkt() {
 			throw new std::runtime_error("StateMachine::FunIface::getPkt() not implemented");
 		}
 
+		/*! Set a timeout, after which a transition will happen
+		 * \todo implement this function
+		 */
 		void setTimeout() {
 			throw new std::runtime_error(
 				"StateMachine::FunIface::setTimeout not implemented");
@@ -87,21 +113,39 @@ public:
 	};
 
 private:
+	// This is the heart of the state tracking
+	// stateTable holds the link between connections and states
 	std::unordered_map<ConnectionID, State, Hasher> stateTable;
 
-	static SpinLockCLSize newStatesLock;
-	static std::unordered_map<ConnectionID, State, Hasher> newStates;
-
+	// This table specifies which function should be called for a packet
+	// belonging to a connection in a specific state
 	std::unordered_map<StateID, stateFun> functions;
 
+	// TODO: Since the identifier should not track anything, maybe we don't
+	// even need a member -> all static functions
 	Identifier identifier;
 
+	// The state a newly received connection starts in
+	// This is only useful, if listenToConnections is true
 	StateID startStateID;
-	StateID endStateID;
+
+	// This function gets called on newly received connections
+	// This is only useful, if listenToConnections is true
 	std::function<void *(ConnectionID)> startStateFun;
 
+	// If a connection reaches this state, it gets destryed
+	StateID endStateID;
+
+	// Callback to aquire new packets
 	std::function<Packet *()> getPktCB;
+
+	// Basically: Server mode or client mode
 	bool listenToConnections;
+
+	// These two members allow to open a connection on one core,
+	// and receive subsequent packets on another
+	static SpinLockCLSize newStatesLock;
+	static std::unordered_map<ConnectionID, State, Hasher> newStates;
 
 	auto findState(ConnectionID id) {
 	findStateLoop:
@@ -186,11 +230,39 @@ public:
 	StateMachine()
 		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false){};
 
+	/*! Get the number of tracked connections
+	 * This is probably only for statistics
+	 *
+	 * \return Number of connections
+	 */
 	size_t getStateTableSize() { return stateTable.size(); };
 
+	/*! Register a function for a given state
+	 *
+	 * This function should be called once for each state you wish to use
+	 *
+	 * \param id ID of the state for which to set a function
+	 * \param function This function will be called, when a connection is in
+	 * 		state id, and gets a packet
+	 */
 	void registerFunction(StateID id, stateFun function) { functions.insert({id, function}); }
 
+	/*! This registers an end state
+	 * If a connections reaches this id, it will be destroyed
+	 *
+	 * \param endStateID the state in question
+	 */
 	void registerEndStateID(StateID endStateID) { this->endStateID = endStateID; }
+
+	/*! This method describes, how to proceed with incoming connections
+	 *
+	 * If you call this function, you allow for incoming connections.
+	 * They will start using the parameters.
+	 *
+	 * \param startStateID All new connections will start in this state
+	 * \param startStateFun This function is called to populate the void* for the state
+	 * 		(may be nullptr)
+	 */
 	void registerStartStateID(
 		StateID startStateID, std::function<void *(ConnectionID)> startStateFun) {
 		this->startStateID = startStateID;
@@ -198,10 +270,28 @@ public:
 		listenToConnections = true;
 	}
 
+	/*! Register a callback in order to get new buffer
+	 *
+	 * \param fun Function to call, if new buffers are needed
+	 */
 	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
 
+	/*! Remove a connection
+	 *
+	 * Using this function you can delete a connection.
+	 *
+	 * \param id The connection id of the connection to remove
+	 */
 	void removeState(ConnectionID id) { stateTable.erase(id); }
 
+	/*! Open an outgoing connection
+	 *
+	 * This is the function you want to call, if you want to connect to a server.
+	 *
+	 * \param id The connection id this connection will use
+	 * \param st The state data
+	 * \param pkt Packet buffer to use for the first packet
+	 */
 	void addState(ConnectionID id, State st, Packet *pkt) {
 		auto state = {id, st};
 
@@ -210,6 +300,8 @@ public:
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 
+		// TODO the nullptrs will cause a segfault
+		// TODO fix this in the future
 		FunIface funIface(this, pkt, nullptr, nullptr);
 
 		D(std::cout << "Running Function" << std::endl;)
@@ -226,6 +318,17 @@ public:
 		}
 	}
 
+	/*! Run a batch of packets
+	 *
+	 * This method is the function you want to call, in order to pump new packets
+	 * into the state machine
+	 *
+	 * \param pktsIn Incoming packets
+	 * \param pktsSend Packets to be sent, after the method returns
+	 * 		(caller has to make sure, there is enough room)
+	 * \param pktsFree Packets to be freed, after the method returns
+	 * 		(caller has to make sure, there is enough room)
+	 */
 	void runPktBatch(
 		BufArray<Packet> &pktsIn, BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
 		for (auto pkt : pktsIn) {
@@ -234,6 +337,9 @@ public:
 	}
 };
 
+// Define static members of the state machine
+
+// Don't try to understand the template stuff, it works...
 template <class Identifier, class Packet>
 std::unordered_map<typename Identifier::ConnectionID,
 	typename StateMachine<Identifier, Packet>::State, typename Identifier::Hasher>

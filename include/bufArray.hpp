@@ -5,6 +5,9 @@
 #include <iterator>
 #include <utility>
 
+/*! Wrapper around MoonGen bufarrays
+ * BufArrays bundle an array of pointers to packets together with their count
+ */
 template <typename Packet> struct BufArray : public std::pair<Packet **, unsigned int> {
 
 	BufArray(Packet **pkts, unsigned int numPkts)
