@@ -11,6 +11,10 @@ if(NOT DPDK_INCLUDE_DIR)
 	SET(DPDK_INCLUDE_DIR "/usr/include/dpdk/")
 endif(NOT DPDK_INCLUDE_DIR)
 
+if(LIBMOON_BUILD_LIBRARY)
+	SET(DPDK_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libmoon/deps/dpdk/x86_64-native-linuxapp-gcc/include")
+endif(LIBMOON_BUILD_LIBRARY)
+
 SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -O3 -fno-omit-frame-pointer")
 
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DDEBUG -g3 -O0 -fno-optimize-sibling-calls -fno-inline")
@@ -42,5 +46,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-ENABLE_TESTING()
-ADD_SUBDIRECTORY(tests)
+# For some reason, the tests don't compile for MoonGen...
+if(NOT LIBMOON_BUILD_LIBRARY)
+	ENABLE_TESTING()
+	ADD_SUBDIRECTORY(tests)
+endif(NOT LIBMOON_BUILD_LIBRARY)
