@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "stateMachine.hpp"
 
+namespace HelloBye {
+
 /*
  * ===================================
  * States
@@ -210,6 +212,8 @@ public:
 		t->fun(state, pkt, funIface);
 	}
 };
+
+}; // namespace HelloBye
 
 #include "../src/helloByeProto.cpp"
 

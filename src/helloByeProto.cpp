@@ -10,8 +10,8 @@
 #include "mbuf.hpp"
 #include "samplePacket.hpp"
 
-using namespace Headers;
-using namespace std;
+// using namespace Headers;
+// using namespace std;
 
 /*
  * ===================================
@@ -21,22 +21,22 @@ using namespace std;
  */
 
 template <class Identifier, class Packet>
-HelloByeServerHello<Identifier, Packet>::HelloByeServerHello() {
+HelloBye::HelloByeServerHello<Identifier, Packet>::HelloByeServerHello() {
 	this->serverCookie = rand() % 10;
 };
 
 template <class Identifier, class Packet>
-void HelloByeServerHello<Identifier, Packet>::fun(
+void HelloBye::HelloByeServerHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Get info from packet
-	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
-	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
-	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	char clientStr[] = "CLIENT HELLO:";
 	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
-		cout << "HelloByeServerHello::fun() clientStr didn't match" << endl;
+		std::cout << "HelloByeServerHello::fun() clientStr didn't match" << std::endl;
 		state.transition(HelloByeServer::Terminate);
 		funIface.freePkt();
 		return;
@@ -49,9 +49,9 @@ void HelloByeServerHello<Identifier, Packet>::fun(
 
 	// Prepare new packet
 	// Set payload string
-	stringstream sstream;
-	sstream << "SERVER HELLO:" << this->serverCookie << endl;
-	string serverHelloStr = sstream.str();
+	std::stringstream sstream;
+	sstream << "SERVER HELLO:" << this->serverCookie << std::endl;
+	std::string serverHelloStr = sstream.str();
 	memcpy(udp->getPayload(), serverHelloStr.c_str(), serverHelloStr.length());
 
 	// Set the IP header stuff
@@ -81,25 +81,25 @@ void HelloByeServerHello<Identifier, Packet>::fun(
  */
 
 template <class Identifier, class Packet>
-HelloByeServerBye<Identifier, Packet>::HelloByeServerBye(
+HelloBye::HelloByeServerBye<Identifier, Packet>::HelloByeServerBye(
 	const HelloByeServerHello<Identifier, Packet> *in)
 	: clientCookie(in->clientCookie), serverCookie(in->serverCookie) {}
 
 template <class Identifier, class Packet>
-void HelloByeServerBye<Identifier, Packet>::fun(
+void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
 	(void)funIface;
 
 	// Get info from packet
-	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
-	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
-	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	char clientStr[] = "CLIENT BYE:";
 	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
-		cout << "HelloByeServerBye::fun() clientStr didn't match" << endl;
+		std::cout << "HelloByeServerBye::fun() clientStr didn't match" << std::endl;
 		state.transition(HelloByeServer::Terminate);
 		return;
 	}
@@ -110,16 +110,16 @@ void HelloByeServerBye<Identifier, Packet>::fun(
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	if (recvCookie != this->serverCookie) {
-		cout << "HelloByeServerBye::fun() Client sent over wrong cookie" << endl;
+		std::cout << "HelloByeServerBye::fun() Client sent over wrong cookie" << std::endl;
 		state.transition(HelloByeServer::Terminate);
 		return;
 	}
 
 	// Prepare new packet
 	// Set payload string
-	stringstream sstream;
-	sstream << "SERVER BYE:" << this->clientCookie << endl;
-	string serverByeStr = sstream.str();
+	std::stringstream sstream;
+	sstream << "SERVER BYE:" << this->clientCookie << std::endl;
+	std::string serverByeStr = sstream.str();
 	memcpy(udp->getPayload(), serverByeStr.c_str(), serverByeStr.length());
 
 	// Set the IP header stuff
@@ -147,13 +147,14 @@ void HelloByeServerBye<Identifier, Packet>::fun(
  */
 
 template <class Identifier, class Packet>
-HelloByeClientHello<Identifier, Packet>::HelloByeClientHello(uint32_t dstIp, uint16_t srcPort)
+HelloBye::HelloByeClientHello<Identifier, Packet>::HelloByeClientHello(
+	uint32_t dstIp, uint16_t srcPort)
 	: dstIp(dstIp), srcPort(srcPort) {
 	this->clientCookie = rand() % 10;
 };
 
 template <class Identifier, class Packet>
-void HelloByeClientHello<Identifier, Packet>::fun(
+void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// pkt is empty -> get one
@@ -161,17 +162,17 @@ void HelloByeClientHello<Identifier, Packet>::fun(
 	memset(pkt->getData(), 0, pkt->getDataLen());
 
 	// Get info from packet
-	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
-	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
-	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	HelloByeClientConfig *config = HelloByeClientConfig::getInstance();
 
 	// Prepare new packet
 	// Set payload string
-	stringstream sstream;
-	sstream << "CLIENT HELLO:" << this->clientCookie << endl;
-	string clientHelloStr = sstream.str();
+	std::stringstream sstream;
+	sstream << "CLIENT HELLO:" << this->clientCookie << std::endl;
+	std::string clientHelloStr = sstream.str();
 	memcpy(udp->getPayload(), clientHelloStr.c_str(), clientHelloStr.length());
 
 	// Set the IP header stuff
@@ -197,25 +198,25 @@ void HelloByeClientHello<Identifier, Packet>::fun(
  */
 
 template <class Identifier, class Packet>
-HelloByeClientBye<Identifier, Packet>::HelloByeClientBye(
+HelloBye::HelloByeClientBye<Identifier, Packet>::HelloByeClientBye(
 	const HelloByeClientHello<Identifier, Packet> *in)
 	: clientCookie(in->clientCookie) {}
 
 template <class Identifier, class Packet>
-void HelloByeClientBye<Identifier, Packet>::fun(
+void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
 	(void)funIface;
 
 	// Get info from packet
-	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
-	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
-	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	char serverStr[] = "SERVER HELLO:";
 	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
-		cout << "HelloByeClientBye::fun() serverStr didn't match" << endl;
+		std::cout << "HelloByeClientBye::fun() serverStr didn't match" << std::endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
 	}
@@ -227,9 +228,9 @@ void HelloByeClientBye<Identifier, Packet>::fun(
 
 	// Prepare new packet
 	// Set payload string
-	stringstream sstream;
-	sstream << "CLIENT BYE:" << this->serverCookie << endl;
-	string clientByeStr = sstream.str();
+	std::stringstream sstream;
+	sstream << "CLIENT BYE:" << this->serverCookie << std::endl;
+	std::string clientByeStr = sstream.str();
 	memcpy(udp->getPayload(), clientByeStr.c_str(), clientByeStr.length());
 
 	// Set the IP header stuff
@@ -258,25 +259,25 @@ void HelloByeClientBye<Identifier, Packet>::fun(
  */
 
 template <class Identifier, class Packet>
-HelloByeClientRecvBye<Identifier, Packet>::HelloByeClientRecvBye(
+HelloBye::HelloByeClientRecvBye<Identifier, Packet>::HelloByeClientRecvBye(
 	const HelloByeClientBye<Identifier, Packet> *in)
 	: clientCookie(in->clientCookie), serverCookie(in->serverCookie) {}
 
 template <class Identifier, class Packet>
-void HelloByeClientRecvBye<Identifier, Packet>::fun(
+void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
 	// Not needed in this function
 	(void)funIface;
 
 	// Get info from packet
-	Ethernet *ether = reinterpret_cast<Ethernet *>(pkt->getData());
-	IPv4 *ipv4 = reinterpret_cast<IPv4 *>(ether->getPayload());
-	Udp *udp = reinterpret_cast<Udp *>(ipv4->getPayload());
+	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	char serverStr[] = "SERVER BYE:";
 	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
-		cout << "HelloByeClientRecvBye::fun() serverStr didn't match" << endl;
+		std::cout << "HelloByeClientRecvBye::fun() serverStr didn't match" << std::endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
 	}
@@ -287,7 +288,8 @@ void HelloByeClientRecvBye<Identifier, Packet>::fun(
 	int recvCookie = static_cast<int>(cookieChar) - 48; // ASCII Conversion
 
 	if (recvCookie != this->clientCookie) {
-		cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie" << endl;
+		std::cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie"
+				  << std::endl;
 		state.transition(HelloByeClient::Terminate);
 		return;
 	}

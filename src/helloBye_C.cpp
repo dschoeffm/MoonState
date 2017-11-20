@@ -11,14 +11,14 @@ void *HelloByeServer_init() {
 
 	auto *obj = new StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>();
 
-	obj->registerEndStateID(HelloByeServer::Terminate);
-	obj->registerStartStateID(
-		HelloByeServer::Hello, HelloByeServerHello<IPv4_5TupleL2Ident<mbuf>, mbuf>::factory);
+	obj->registerEndStateID(HelloBye::HelloByeServer::Terminate);
+	obj->registerStartStateID(HelloBye::HelloByeServer::Hello,
+		HelloBye::HelloByeServerHello<IPv4_5TupleL2Ident<mbuf>, mbuf>::factory);
 
-	obj->registerFunction(
-		HelloByeServer::Hello, HelloByeServerHello<IPv4_5TupleL2Ident<mbuf>, mbuf>::run);
-	obj->registerFunction(
-		HelloByeServer::Bye, HelloByeServerBye<IPv4_5TupleL2Ident<mbuf>, mbuf>::run);
+	obj->registerFunction(HelloBye::HelloByeServer::Hello,
+		HelloBye::HelloByeServerHello<IPv4_5TupleL2Ident<mbuf>, mbuf>::run);
+	obj->registerFunction(HelloBye::HelloByeServer::Bye,
+		HelloBye::HelloByeServerBye<IPv4_5TupleL2Ident<mbuf>, mbuf>::run);
 
 	return obj;
 };

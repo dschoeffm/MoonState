@@ -7,4 +7,4 @@
  *
  */
 
-HelloByeClientConfig *HelloByeClientConfig::instance = nullptr;
+HelloBye::HelloByeClientConfig *HelloBye::HelloByeClientConfig::instance = nullptr;
