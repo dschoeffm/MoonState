@@ -1,11 +1,14 @@
 #ifndef STATE_MACHINE_HPP
 #define STATE_MACHINE_HPP
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <mutex>
+#include <queue>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -24,17 +27,27 @@
  */
 template <class Identifier, class Packet> class StateMachine {
 public:
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Public declarations
+	 * XXX -------------------------------------------- XXX
+	 */
+
 	struct State;
 	class FunIface;
 
 	// This is the signature any state function needs to expose
 	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
 
+	// This is the signature any timeout function needs to expose
+	using timeoutFun = std::function<void(State &, FunIface &)>;
+
 	// These two members are expected by any Identifier
 	using ConnectionID = typename Identifier::ConnectionID;
 	using Hasher = typename Identifier::Hasher;
 
 	static constexpr auto StateIDInvalid = std::numeric_limits<StateID>::max();
+	static constexpr auto timeoutIDInvalid = std::numeric_limits<uint32_t>::max();
 
 	/*! Represents one connection
 	 * This struct holds the information about the current state, and a void*
@@ -44,8 +57,10 @@ public:
 	public:
 		void *stateData;
 		StateID state;
+		uint32_t timeoutID;
 
-		State(StateID state, void *stateData) : stateData(stateData), state(state){};
+		State(StateID state, void *stateData)
+			: stateData(stateData), state(state), timeoutID(timeoutIDInvalid){};
 		State(const State &s) : stateData(s.stateData), state(s.state){};
 
 		/*! Transition to another state
@@ -53,6 +68,12 @@ public:
 		 */
 		void transition(StateID newState) { state = newState; }
 	};
+
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Interface exposed to state functions
+	 * XXX -------------------------------------------- XXX
+	 */
 
 	/*! Main interface for the needs of a state function
 	 */
@@ -62,12 +83,16 @@ public:
 		Packet *pkt;
 		BufArray<Packet> &pktsSend;
 		BufArray<Packet> &pktsFree;
+		ConnectionID &cID;
+		State &state;
 		bool sendPkt;
 
 	public:
 		FunIface(StateMachine<Identifier, Packet> *sm, Packet *pkt,
-			BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree)
-			: sm(sm), pkt(pkt), pktsSend(pktsSend), pktsFree(pktsFree), sendPkt(true){};
+			BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree, ConnectionID &cID,
+			State &state)
+			: sm(sm), pkt(pkt), pktsSend(pktsSend), pktsFree(pktsFree), cID(cID),
+			  state(state), sendPkt(true){};
 
 		~FunIface() {
 			if (sendPkt) {
@@ -98,21 +123,43 @@ public:
 #endif
 
 		/*! Get an additional packet buffer
+		 * \return The new packet buffer
 		 */
 		Packet *getPkt() {
 			throw new std::runtime_error("StateMachine::FunIface::getPkt() not implemented");
 		}
 
 		/*! Set a timeout, after which a transition will happen
-		 * \todo implement this function
+		 * \param timeout Time in milliseconds, until timeout will occur
+		 * \param fun Function to execute, if timeout occurs
 		 */
-		void setTimeout() {
-			throw new std::runtime_error(
-				"StateMachine::FunIface::setTimeout not implemented");
+		void setTimeout(std::chrono::milliseconds timeout, timeoutFun fun) {
+			std::chrono::time_point<std::chrono::steady_clock> now =
+				std::chrono::steady_clock::now();
+			std::chrono::time_point<std::chrono::steady_clock> then = now + timeout;
+
+			struct Timeout t;
+			t.time = then;
+			t.timeoutID = sm->curTimeoutID++;
+
+			auto td = std::make_unique<struct TimeoutData>();
+			td->fun = fun;
+			td->id = cID;
+
+			state.timeoutID = t.timeoutID;
+
+			sm->timeoutsQ.push(t);
+			sm->timeoutFunctions.insert({t.timeoutID, td});
 		}
 	};
 
 private:
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Private attributes
+	 * XXX -------------------------------------------- XXX
+	 */
+
 	// This is the heart of the state tracking
 	// stateTable holds the link between connections and states
 	std::unordered_map<ConnectionID, State, Hasher> stateTable;
@@ -142,10 +189,69 @@ private:
 	// Basically: Server mode or client mode
 	bool listenToConnections;
 
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Timeout handling
+	 * XXX -------------------------------------------- XXX
+	 */
+
+	// This represents the timeout tracking
+	struct Timeout {
+		// This is the, when the timeout ticks out
+		std::chrono::time_point<std::chrono::steady_clock> time;
+
+		// This uniquely identifies a single timeout
+		uint32_t timeoutID;
+
+		// Make sure, that the nearest timeout is the first one in timeoutsQ (see below)
+		class Compare {
+		public:
+			bool operator()(struct Timeout a, struct Timeout b) { return a.time < b.time; };
+		};
+	};
+
+	// This increments for every timeout -> provides a unique ID
+	uint32_t curTimeoutID;
+
+	// This contains all the timeouts
+	std::priority_queue<struct Timeout, std::vector<struct Timeout>,
+		typename Timeout::Compare>
+		timeoutsQ;
+
+	// This is used only to check if a timeout is valid, and given that, to
+	// execute it
+	struct TimeoutData {
+		// This is used to identify, which connection the timeout belongs to
+		// indexes the stateTable
+		ConnectionID id;
+
+		// This function is executed, if the timeout ticks out
+		timeoutFun fun;
+	};
+
+	// If a timeoutID maps to a TimeoutData, this timeout is valid
+	// if it maps to ::end(), then it is ignored.
+	// The unique_ptr should make sure, that the map is not blown up by large ConnectionIDs
+	// XXX The indirection assumes, that timeouts don't happen frequently, otherwise
+	// it may be better to store them directly in the map? (not sure)
+	std::unordered_map<uint32_t, std::unique_ptr<struct TimeoutData>> timeoutFunctions;
+
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Connection sharing
+	 * XXX -------------------------------------------- XXX
+	 */
+
 	// These two members allow to open a connection on one core,
 	// and receive subsequent packets on another
 	static SpinLockCLSize newStatesLock;
 	static std::unordered_map<ConnectionID, State, Hasher> newStates;
+
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Private helper methods
+	 * XXX -------------------------------------------- XXX
+	 */
 
 	auto findState(ConnectionID id) {
 	findStateLoop:
@@ -201,7 +307,10 @@ private:
 				return;
 			}
 
-			// TODO unregister timeout, if one exists
+			if (stateIt->second.timeoutID != timeoutIDInvalid) {
+				this->timeoutFunctions.erase(stateIt->second.timeoutID);
+				stateIt->second.timeoutID = timeoutIDInvalid;
+			}
 
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
@@ -210,7 +319,7 @@ private:
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
 
-			FunIface funIface(this, pktIn, pktsSend, pktsFree);
+			FunIface funIface(this, pktIn, pktsSend, pktsFree, identity, stateIt->second);
 
 			D(std::cout << "Running Function" << std::endl;)
 			(sfIt->second)(stateIt->second, pktIn, funIface);
@@ -227,8 +336,15 @@ private:
 	}
 
 public:
+	/*
+	 * XXX -------------------------------------------- XXX
+	 *       Public interface
+	 * XXX -------------------------------------------- XXX
+	 */
+
 	StateMachine()
-		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false){};
+		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false),
+		  curTimeoutID(0){};
 
 	/*! Get the number of tracked connections
 	 * This is probably only for statistics
@@ -334,6 +450,8 @@ public:
 		for (auto pkt : pktsIn) {
 			runPkt(pkt, pktsSend, pktsFree);
 		}
+
+		// TODO run through all the timeouts
 	}
 };
 
