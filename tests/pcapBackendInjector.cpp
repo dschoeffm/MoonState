@@ -91,6 +91,10 @@ int main(int argc, char **argv) {
 #include <iostream>
 
 int main(int argc, char **argv) {
+
+	(void)argc;
+	(void)argv;
+
 	std::cout << "Built without pcap..." << std::endl;
 	return 0;
 }
