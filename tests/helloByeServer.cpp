@@ -46,12 +46,14 @@ int main(int argc, char **argv) {
 	PcapBackend pcap(string(argv[1]), addr);
 
 	StateMachine<Ident, SamplePacket> sm;
-	sm.registerEndStateID(HelloByeServer::Terminate);
-	sm.registerStartStateID(
-		HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::factory);
+	sm.registerEndStateID(HelloBye::HelloByeServer::Terminate);
+	sm.registerStartStateID(HelloBye::HelloByeServer::Hello,
+		HelloBye::HelloByeServerHello<Ident, Packet>::factory);
 
-	sm.registerFunction(HelloByeServer::Hello, HelloByeServerHello<Ident, Packet>::run);
-	sm.registerFunction(HelloByeServer::Bye, HelloByeServerBye<Ident, Packet>::run);
+	sm.registerFunction(
+		HelloBye::HelloByeServer::Hello, HelloBye::HelloByeServerHello<Ident, Packet>::run);
+	sm.registerFunction(
+		HelloBye::HelloByeServer::Bye, HelloBye::HelloByeServerBye<Ident, Packet>::run);
 
 	sm.registerGetPktCB(getPkt);
 

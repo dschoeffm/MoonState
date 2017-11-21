@@ -52,17 +52,20 @@ int main(int argc, char **argv) {
 	struct in_addr ipAddr;
 	inet_aton(argv[3], &ipAddr);
 
-	uint16_t port = atoi(argv[4]);
-
 	// TODO build client config singleton
 
+	// Uncomment this, as soon as the client config is used
+	// uint16_t port = atoi(argv[4]);
+
 	StateMachine<Ident, SamplePacket> sm;
-	sm.registerEndStateID(HelloByeClient::Terminate);
+	sm.registerEndStateID(HelloBye::HelloByeClient::Terminate);
 	// sm.registerStartStateID(HelloByeClient::Hello, HelloByeClientHello<Ident,
 	// Packet>::factory);
 
-	sm.registerFunction(HelloByeClient::Hello, HelloByeClientHello<Ident, Packet>::run);
-	sm.registerFunction(HelloByeClient::Bye, HelloByeClientBye<Ident, Packet>::run);
+	sm.registerFunction(
+		HelloBye::HelloByeClient::Hello, HelloBye::HelloByeClientHello<Ident, Packet>::run);
+	sm.registerFunction(
+		HelloBye::HelloByeClient::Bye, HelloBye::HelloByeClientBye<Ident, Packet>::run);
 
 	sm.registerGetPktCB(getPkt);
 
