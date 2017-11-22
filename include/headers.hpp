@@ -11,14 +11,14 @@
 
 namespace Headers {
 
-/*! Representation of the etherner header.
- */
+/*! Representation of the etherner header. */
 struct Ethernet {
 	std::array<uint8_t, 6> destMac; //!< Destination MAC
 	std::array<uint8_t, 6> srcMac;  //!< Source MAC
 	uint16_t ethertype;				//!< Ethertype
 
 	/*! Get the SDU
+	 * \return Pointer to the payload
 	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
@@ -38,7 +38,15 @@ struct Ethernet {
 
 	std::string getDstAddr() { return addrToStr(this->destMac); }
 
+	/*! Get the ethertype
+	 * \return Ethertype in host byte order
+	 */
 	uint16_t getEthertype() { return ntohs(this->ethertype); }
+
+	/*! Set the ethertype
+	 * \param type Ethertype in host byte order
+	 */
+	void setEthertype(uint16_t type) { this->ethertype = htons(type); }
 
 	void setSrcAddr(const std::array<uint8_t, 6> addr) {
 		memcpy(this->srcMac.data(), addr.data(), 6);
@@ -48,11 +56,9 @@ struct Ethernet {
 		memcpy(this->destMac.data(), addr.data(), 6);
 	}
 
-	void setEthertype(uint16_t type) { this->ethertype = htons(type); }
 } __attribute__((packed));
 
-/*! Representation of the IPv4 header.
- */
+/*! Representation of the IPv4 header. */
 struct IPv4 {
 	uint8_t version_ihl; //!< Version and IHL
 
@@ -101,10 +107,13 @@ struct IPv4 {
 	static constexpr uint8_t PROTO_TCP = 6;
 	static constexpr uint8_t PROTO_UDP = 17;
 
+	/*! Set the protocol to ICMP */
 	void setProtoICMP() { proto = PROTO_ICMP; }
 
+	/*! Set the protocol to TCP */
 	void setProtoTCP() { proto = PROTO_TCP; }
 
+	/*! Set the protocol to UDP */
 	void setProtoUDP() { proto = PROTO_UDP; }
 
 	uint16_t checksum; //!< header checksum
@@ -132,6 +141,7 @@ struct IPv4 {
 	uint32_t getDstIP() const { return ntohl(dstIP); }
 
 	/*! Get the SDU
+	 * \return Pointer to the payload
 	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(reinterpret_cast<uint8_t *>(this) + 4 * ihl());
@@ -152,8 +162,7 @@ struct IPv4 {
 
 	uint16_t getLength() { return ntohs(this->total_length); }
 
-	/*! Fill out the header checksum for this packet
-	 */
+	/*! Fill out the header checksum for this packet */
 	void calcChecksum() {
 		uint32_t result = 0;
 		uint16_t *hdr_cast = reinterpret_cast<uint16_t *>(this);
@@ -172,8 +181,7 @@ struct IPv4 {
 
 } __attribute__((packed));
 
-/*! Representation of the TCP header.
- */
+/*! Representation of the TCP header. */
 struct Tcp {
 	uint16_t srcPort;	  //!< Source port
 	uint16_t dstPort;	  //!< Destination port
@@ -185,6 +193,7 @@ struct Tcp {
 	uint16_t urgend_ptr;   //!< Urgent pointer
 
 	/*! Get the SDU
+	 * \return Pointer to the payload
 	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
@@ -193,8 +202,7 @@ struct Tcp {
 
 } __attribute__((packed));
 
-/*! Representation of the UDP header.
- */
+/*! Representation of the UDP header. */
 struct Udp {
 	uint16_t srcPort;  //!< Source port
 	uint16_t dstPort;  //!< Destination port
@@ -232,6 +240,7 @@ struct Udp {
 	void setPayloadLength(uint16_t length) { len = htons(length + sizeof(struct Udp)); }
 
 	/*! Get the SDU
+	 * \return Pointer to the payload
 	 */
 	void *getPayload() {
 		return reinterpret_cast<void *>(
@@ -240,8 +249,7 @@ struct Udp {
 
 } __attribute__((packed));
 
-/*! Representation of the ICMP header
- */
+/*! Representation of the ICMP header */
 struct Icmp {
 	uint8_t type;	  //!< Type
 	uint8_t code;	  //!< Code
