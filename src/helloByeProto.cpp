@@ -61,7 +61,7 @@ void HelloBye::HelloByeServerHello<Identifier, Packet>::fun(
 	uint32_t tmp = ipv4->dstIP;
 	ipv4->dstIP = ipv4->srcIP;
 	ipv4->srcIP = tmp;
-	ipv4->calcChecksum();
+	ipv4->checksum = 0;
 
 	// Set UDP checksum to 0 and hope for the best
 
@@ -128,7 +128,7 @@ void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	uint32_t tmp = ipv4->dstIP;
 	ipv4->dstIP = ipv4->srcIP;
 	ipv4->srcIP = tmp;
-	ipv4->calcChecksum();
+	ipv4->checksum = 0;
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
@@ -180,7 +180,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	ipv4->ttl = 64;
 	ipv4->dstIP = this->dstIp;
 	ipv4->srcIP = config->getSrcIP();
-	ipv4->calcChecksum();
+	ipv4->checksum = 0;
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
@@ -239,7 +239,7 @@ void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	uint32_t tmp = ipv4->dstIP;
 	ipv4->dstIP = ipv4->srcIP;
 	ipv4->srcIP = tmp;
-	ipv4->calcChecksum();
+	ipv4->checksum = 0;
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
