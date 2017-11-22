@@ -1,6 +1,7 @@
 #ifndef STATE_MACHINE_HPP
 #define STATE_MACHINE_HPP
 
+#include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -451,7 +452,42 @@ public:
 			runPkt(pkt, pktsSend, pktsFree);
 		}
 
-		// TODO run through all the timeouts
+		// This loop handles the timeouts
+		// It breaks, if there are no usable timeouts anymore
+		// It will (usually) not run until timeoutsQ is empty
+		while (!timeoutsQ.empty()) {
+			// Get the next timeout
+			auto timeoutElem = timeoutsQ.top();
+
+			// If the current timeout is in the future -> break
+			if (timeoutElem.time > std::chrono::steady_clock::now()) {
+				break;
+			}
+
+			// Extract some info from the timeout
+			uint32_t timeoutID = timeoutElem.timeoutID;
+			auto timeoutDataIt = timeoutFunctions.find(timeoutID);
+
+			// Check if the timeout is valid
+			if (timeoutDataIt == timeoutFunctions.end()) {
+				timeoutsQ.pop();
+				continue;
+			}
+
+			// Prepare function call
+			std::unique_ptr<struct TimeoutData> timeoutData =
+				std::move(timeoutDataIt->second);
+			auto stateIt = findState(timeoutData->id);
+			assert(stateIt != stateTable.end());
+			FunIface funIface(
+				this, nullptr, pktsSend, pktsFree, timeoutData->id, stateIt->second);
+
+			// Clear the timeoutID from the state
+			stateIt->second.timeoutID = timeoutIDInvalid;
+
+			// Call function
+			timeoutData->fun(stateIt->second, funIface);
+		}
 	}
 };
 
