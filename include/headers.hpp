@@ -75,8 +75,19 @@ struct IPv4 {
 		version_ihl |= len;
 	}
 
-	uint8_t tos;				  //!< Type of Service
-	uint16_t total_length;		  //!< L3-PDU length
+	uint8_t tos;		   //!< Type of Service
+	uint16_t total_length; //!< L3-PDU length
+
+	/*! Set the length of the L3-SDU
+	 * \param Length of the L3-SDU (IP payload length)
+	 */
+	void setPayloadLength(uint16_t len) { total_length = htons(ihl() * 4 + len); }
+
+	/*! Get the length of the L3-SDU
+	 * \return The length of the payload (host byte order)
+	 */
+	uint16_t getPayloadLength() const { return ntohl(total_length) - ihl() * 4; }
+
 	uint16_t id;				  //!< Identification
 	uint16_t flags_fragmentation; //!< flags and fragmentation offset
 
@@ -99,6 +110,26 @@ struct IPv4 {
 	uint16_t checksum; //!< header checksum
 	uint32_t srcIP;	//!< source IPv4 address
 	uint32_t dstIP;	//!< destination IPv4 address
+
+	/*! Set the source ip
+	 * \param ip Source IP in host byte order
+	 */
+	void setSrcIP(uint32_t ip) { srcIP = htonl(ip); }
+
+	/*! Set the destination ip
+	 * \param ip Destination IP in host byte order
+	 */
+	void setDstIP(uint32_t ip) { dstIP = htonl(ip); }
+
+	/*! Get the source IP
+	 * \return Source IP in host byte order
+	 */
+	uint32_t getSrcIP() const { return ntohl(srcIP); }
+
+	/*! Get the destination IP
+	 * \return Destination IP in host byte order
+	 */
+	uint32_t getDstIP() const { return ntohl(dstIP); }
 
 	/*! Get the SDU
 	 */
@@ -169,6 +200,36 @@ struct Udp {
 	uint16_t dstPort;  //!< Destination port
 	uint16_t len;	  //!< Length
 	uint16_t checksum; //!< Checksum
+
+	/*! Set the source port
+	 * \param Source port in host byte order
+	 */
+	void setSrcPort(uint16_t p) { srcPort = htons(p); }
+
+	/*! Set the destination port
+	 * \param Destinatino port in host byte order
+	 */
+	void setDstPort(uint16_t p) { dstPort = htons(p); }
+
+	/*! Get the source port
+	 * \return Source port in host byte order
+	 */
+	uint16_t getSrcPort() const { return ntohs(srcPort); }
+
+	/*! Get the destination port
+	 * \return Destination port in host byte order
+	 */
+	uint16_t getDstPort() const { return ntohs(dstPort); }
+
+	/*! Get the length of the L4-SDU (UDP payload)
+	 * \return Length of the payload (host byte order)
+	 */
+	uint16_t getPayloadLength() const { return ntohs(len) - sizeof(struct Udp); }
+
+	/*! Set the length of the L4-SDU (UDP payload)
+	 * \param Length of the payload (host byte order)
+	 */
+	void setPayloadLength(uint16_t length) { len = htons(length + sizeof(struct Udp)); }
 
 	/*! Get the SDU
 	 */
