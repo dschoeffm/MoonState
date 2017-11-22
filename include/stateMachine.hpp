@@ -305,6 +305,8 @@ private:
 			if (stateIt == stateTable.end()) {
 				// We don't want this packet
 				D(std::cout << "StateMachine::runPkt() discarding packet" << std::endl;)
+				D(std::cout << "ident of packet: " << static_cast<std::string>(identity)
+							<< std::endl;)
 				return;
 			}
 
@@ -407,31 +409,36 @@ public:
 	 *
 	 * \param id The connection id this connection will use
 	 * \param st The state data
-	 * \param pkt Packet buffer to use for the first packet
+	 * \param pktsIn Packet buffer for the state to work with (only one packet)
+	 * \param pktsSend Packets to send out (same as runPktBatch())
+	 * \param pktsFree Packets to free (same as runPktBatch())
 	 */
-	void addState(ConnectionID id, State st, Packet *pkt) {
-		auto state = {id, st};
+	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn,
+		BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
 
-		auto sfIt = functions.find(state.state);
+		auto sfIt = functions.find(st.state);
 		if (sfIt == functions.end()) {
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 
-		// TODO the nullptrs will cause a segfault
-		// TODO fix this in the future
-		FunIface funIface(this, pkt, nullptr, nullptr);
+		FunIface funIface(this, pktsIn[0], pktsSend, pktsFree, id, st);
 
-		D(std::cout << "Running Function" << std::endl;)
-		(sfIt->second)(state, pkt, funIface);
+		D(std::cout << "StateMachine::addState() Running Function" << std::endl;)
+		(sfIt->second)(st, pktsIn[0], funIface);
 
-		if (state.state == endStateID) {
-			D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+		if (st.state == endStateID) {
+			D(std::cout << "StateMachine::addState() Reached endStateID - deleting connection"
+						<< std::endl;)
 			return;
 		}
 
 		{
+			D(std::cout << "StateMachine::addState() adding connection to newStates"
+						<< std::endl;)
+			D(std::cout << "StateMachine::addState() identity: "
+						<< static_cast<std::string>(id) << std::endl;)
 			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
-			newStates.insert(state);
+			newStates.insert({id, st});
 		}
 	}
 
