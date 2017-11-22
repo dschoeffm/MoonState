@@ -3,7 +3,7 @@ PROJECT(MoonState CXX)
 
 # Default build type is Release
 if(NOT CMAKE_BUILD_TYPE)
-	SET(CMAKE_BUILD_TYPE "Release")
+	SET(CMAKE_BUILD_TYPE "Debug")
 endif(NOT CMAKE_BUILD_TYPE)
 
 # Default DPDK header include path is in the system headers
