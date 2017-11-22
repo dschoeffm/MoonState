@@ -59,6 +59,22 @@ struct IPv4 {
 	uint8_t version() const { return (version_ihl & 0xf0) >> 4; }
 	uint8_t ihl() const { return version_ihl & 0x0f; }
 
+	/*! Set the version field to 4
+	 */
+	void setVersion() {
+		version_ihl &= 0x0f;
+		version_ihl |= 0x40;
+	}
+
+	/*! Sets the IP header length
+	 * \param len length as it will appear in the header
+	 */
+	void setIHL(uint8_t len) {
+		version_ihl &= 0xf0;
+		len &= 0x0f;
+		version_ihl |= len;
+	}
+
 	uint8_t tos;				  //!< Type of Service
 	uint16_t total_length;		  //!< L3-PDU length
 	uint16_t id;				  //!< Identification
@@ -73,6 +89,12 @@ struct IPv4 {
 	static constexpr uint8_t PROTO_ICMP = 1;
 	static constexpr uint8_t PROTO_TCP = 6;
 	static constexpr uint8_t PROTO_UDP = 17;
+
+	void setProtoICMP() { proto = PROTO_ICMP; }
+
+	void setProtoTCP() { proto = PROTO_TCP; }
+
+	void setProtoUDP() { proto = PROTO_UDP; }
 
 	uint16_t checksum; //!< header checksum
 	uint32_t srcIP;	//!< source IPv4 address
