@@ -157,16 +157,26 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
-	// pkt is empty -> get one
-	pkt = funIface.getPkt();
+	(void)funIface;
+
 	memset(pkt->getData(), 0, pkt->getDataLen());
 
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
-	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	HelloByeClientConfig *config = HelloByeClientConfig::getInstance();
+
+	// Set the IP header stuff
+	// Leave the payload length alone for now...
+	ipv4->setVersion();
+	ipv4->setIHL(5);
+	ipv4->ttl = 64;
+	ipv4->dstIP = this->dstIp;
+	ipv4->srcIP = config->getSrcIP();
+	ipv4->checksum = 0;
+
+	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
 
 	// Prepare new packet
 	// Set payload string
@@ -175,12 +185,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	std::string clientHelloStr = sstream.str();
 	memcpy(udp->getPayload(), clientHelloStr.c_str(), clientHelloStr.length());
 
-	// Set the IP header stuff
-	// Leave the payload length alone for now...
-	ipv4->ttl = 64;
-	ipv4->dstIP = this->dstIp;
-	ipv4->srcIP = config->getSrcIP();
-	ipv4->checksum = 0;
+	ether->ethertype = htons(0x0800);
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
@@ -231,6 +236,9 @@ void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	std::stringstream sstream;
 	sstream << "CLIENT BYE:" << this->serverCookie << std::endl;
 	std::string clientByeStr = sstream.str();
+
+	// Zero out old data - just assume 20 bytes...
+	memset(udp->getPayload(), 0, 20);
 	memcpy(udp->getPayload(), clientByeStr.c_str(), clientByeStr.length());
 
 	// Set the IP header stuff
@@ -267,9 +275,6 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
-	// Not needed in this function
-	(void)funIface;
-
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
@@ -293,6 +298,8 @@ void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 		state.transition(HelloByeClient::Terminate);
 		return;
 	}
+
+	funIface.freePkt();
 
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeClient::Terminate);
