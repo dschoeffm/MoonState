@@ -183,5 +183,9 @@ int main(int argc, char **argv) {
 		// Just catch whatever fails there may be
 		cout << endl << "FATAL:" << endl;
 		cout << e->what() << endl;
+
+		return 1;
 	}
+
+	return 0;
 }
