@@ -20,13 +20,55 @@
 #include "spinlock.hpp"
 
 /*! State machine framework
+ *
  * This class is a comprehensive framework, on top of which a developer can
  * build high-performance state machines.
  *
  * It can be specialized to work with different underlying packet packet sources
  * and packet identifiers.
+ *
+ * The Identifier needs to have the following form:
+ * \code{.cpp}
+ * class Identifier {
+ * 		// This class needs to be unique for each packet
+ *		class ConnectionID {
+ *			bool operator==(const ConnectionID &c) const;
+ *			bool operator<(const ConnectionID &c) const;
+ *			operator std::string() const;
+ *			ConnectionID(const ConnectionID &c);
+ *			ConnectionID();
+ *		};
+ *
+ *		struct Hasher {
+ *			// This should be uniformly distributed
+ *			// Collisions can happen, but are not great
+ *			size_t operator()(const ConnectionID &c) const;
+ *		};
+ *
+ *		static ConnectionID identify(Packet *pkt);
+ * };
+ * \endcode
+ *
+ * The Packet needs to have the following form:
+ * \code{.cpp}
+ * struct Packet {
+ *		void *getData();
+ *		uint16_t getDataLen();
+ *		void setDataLen(uint16_t l);
+ *		uint16_t getBufLen();
+ * };
+ * \endcode
+ *
+ * \tparam Identifier This class is used to uniquely identify incoming packets (see above)
+ * \tparam Packet This class wraps around any kind of packet buffer (see above)
  */
+
 template <class Identifier, class Packet> class StateMachine {
+private:
+	using ConnectionID = typename Identifier::ConnectionID;
+	using Hasher = typename Identifier::Hasher;
+	static constexpr auto timeoutIDInvalid = std::numeric_limits<uint32_t>::max();
+
 public:
 	/*
 	 * XXX -------------------------------------------- XXX
@@ -37,20 +79,17 @@ public:
 	struct State;
 	class FunIface;
 
-	// This is the signature any state function needs to expose
+	/*! This is the signature any state function needs to expose */
 	using stateFun = std::function<void(State &, Packet *, FunIface &)>;
 
-	// This is the signature any timeout function needs to expose
+	/*! This is the signature any timeout function needs to expose */
 	using timeoutFun = std::function<void(State &, FunIface &)>;
 
-	// These two members are expected by any Identifier
-	using ConnectionID = typename Identifier::ConnectionID;
-	using Hasher = typename Identifier::Hasher;
-
+	/*! Represents an invalid StateID */
 	static constexpr auto StateIDInvalid = std::numeric_limits<StateID>::max();
-	static constexpr auto timeoutIDInvalid = std::numeric_limits<uint32_t>::max();
 
 	/*! Represents one connection
+	 *
 	 * This struct holds the information about the current state, and a void*
 	 * which points to any kind of data the user chooses
 	 */
@@ -80,6 +119,8 @@ public:
 	 */
 	class FunIface {
 	private:
+		friend class StateMachine<Identifier, Packet>;
+
 		StateMachine<Identifier, Packet> *sm;
 		Packet *pkt;
 		BufArray<Packet> &pktsSend;
@@ -88,13 +129,14 @@ public:
 		State &state;
 		bool sendPkt;
 
-	public:
+		// Private -> nobody can misuse any FunIface objects
 		FunIface(StateMachine<Identifier, Packet> *sm, Packet *pkt,
 			BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree, ConnectionID &cID,
 			State &state)
 			: sm(sm), pkt(pkt), pktsSend(pktsSend), pktsFree(pktsFree), cID(cID),
 			  state(state), sendPkt(true){};
 
+	public:
 		~FunIface() {
 			if (sendPkt) {
 				pktsSend.addPkt(pkt);
@@ -103,8 +145,7 @@ public:
 			}
 		}
 
-		/*! Free the packets after the batch is processed, do not send it
-		 */
+		/*! Free the packets after the batch is processed, do not send it */
 		void freePkt() { sendPkt = false; }
 
 #if 0
