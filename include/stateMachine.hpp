@@ -184,14 +184,21 @@ public:
 			t.time = then;
 			t.timeoutID = sm->curTimeoutID++;
 
-			auto td = std::make_unique<struct TimeoutData>();
-			td->fun = fun;
-			td->id = cID;
-
 			state.timeoutID = t.timeoutID;
 
 			sm->timeoutsQ.push(t);
-			sm->timeoutFunctions.insert({t.timeoutID, td});
+
+			// This is an alternative to emplace
+			// emplace should be better
+			/*
+			auto td = std::make_unique<struct TimeoutData>(cID, fun);
+			sm->timeoutFunctions.insert(
+				std::pair<uint32_t, std::unique_ptr<struct TimeoutData>>(
+					t.timeoutID, std::move(td)));
+			*/
+
+			sm->timeoutFunctions.emplace(
+				t.timeoutID, std::make_unique<struct TimeoutData>(cID, fun));
 		}
 	};
 
@@ -269,6 +276,9 @@ private:
 
 		// This function is executed, if the timeout ticks out
 		timeoutFun fun;
+
+		// Trivial constructor
+		TimeoutData(ConnectionID id, timeoutFun fun) : id(id), fun(fun){};
 	};
 
 	// If a timeoutID maps to a TimeoutData, this timeout is valid
@@ -535,6 +545,16 @@ public:
 
 			// Call function
 			timeoutData->fun(stateIt->second, funIface);
+
+			// Check if we reached the end state
+			if (stateIt->second.state == endStateID) {
+				D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+				removeState(timeoutData->id);
+			}
+
+			// Clean up
+			timeoutsQ.pop();
+			timeoutFunctions.erase(timeoutDataIt);
 		}
 	}
 };
