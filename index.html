@@ -87,8 +87,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">MoonState </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This should (at some point) be a high-performance DTLS state-machine. </p>
-</div></div><!-- contents -->
+<div class="textblock"><p>This should (at some point) be a high-performance DTLS state-machine.</p>
+<h2>Build Instructions</h2>
+<p>MoonState uses CMake as a build system.</p>
+<p>The most simple build command is the following: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;mkdir build</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;cd build</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;cmake ..</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;make -j</div></div><!-- fragment --><p>You may want to give cmake more options: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;DPDK_INCLUDE_DIR=&lt;path-to-DPDK-headers&gt;</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;WITH_PCAP=x // If this is defined, pcap is needed</div></div><!-- fragment --> </div></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->
 <!-- start footer part -->
 </div>
