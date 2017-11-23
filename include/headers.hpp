@@ -85,7 +85,7 @@ struct IPv4 {
 	uint16_t total_length; //!< L3-PDU length
 
 	/*! Set the length of the L3-SDU
-	 * \param Length of the L3-SDU (IP payload length)
+	 * \param len of the L3-SDU (IP payload length)
 	 */
 	void setPayloadLength(uint16_t len) { total_length = htons(ihl() * 4 + len); }
 
@@ -210,12 +210,12 @@ struct Udp {
 	uint16_t checksum; //!< Checksum
 
 	/*! Set the source port
-	 * \param Source port in host byte order
+	 * \param p Source port in host byte order
 	 */
 	void setSrcPort(uint16_t p) { srcPort = htons(p); }
 
 	/*! Set the destination port
-	 * \param Destinatino port in host byte order
+	 * \param p Destination port in host byte order
 	 */
 	void setDstPort(uint16_t p) { dstPort = htons(p); }
 
@@ -235,7 +235,7 @@ struct Udp {
 	uint16_t getPayloadLength() const { return ntohs(len) - sizeof(struct Udp); }
 
 	/*! Set the length of the L4-SDU (UDP payload)
-	 * \param Length of the payload (host byte order)
+	 * \param length of the payload (host byte order)
 	 */
 	void setPayloadLength(uint16_t length) { len = htons(length + sizeof(struct Udp)); }
 
