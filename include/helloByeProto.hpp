@@ -1,6 +1,8 @@
 #ifndef HELLOBYEPROTO_HPP
 #define HELLOBYEPROTO_HPP
 
+#include <mutex>
+
 #include "common.hpp"
 #include "stateMachine.hpp"
 
@@ -52,6 +54,7 @@ private:
 	uint16_t dstPort;
 
 	static HelloByeClientConfig *instance;
+	static std::mutex mtx;
 	HelloByeClientConfig() : srcIp(0), dstPort(0){};
 
 public:
@@ -61,7 +64,12 @@ public:
 	void setSrcIP(uint32_t newIP) { srcIp = newIP; }
 	void setDstPort(uint16_t newPort) { dstPort = newPort; }
 
-	static void createInstance() { instance = new HelloByeClientConfig; }
+	static void createInstance() {
+		std::lock_guard<std::mutex> lock(mtx);
+		if (instance == nullptr) {
+			instance = new HelloByeClientConfig;
+		}
+	}
 
 	static HelloByeClientConfig *getInstance() { return instance; }
 };

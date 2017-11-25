@@ -451,7 +451,7 @@ public:
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 
-		FunIface funIface(this, pktsIn[0], id, st);
+		FunIface funIface(this, 0, pktsIn, id, st);
 
 		D(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		(sfIt->second)(st, pktsIn[0], funIface);
