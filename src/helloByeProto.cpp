@@ -173,7 +173,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	ipv4->setVersion();
 	ipv4->setIHL(5);
 	ipv4->ttl = 64;
-	ipv4->setPayloadLength(20);
+	ipv4->setLength(100 - 14);
 	ipv4->setDstIP(this->dstIp);
 	ipv4->setSrcIP(config->getSrcIP());
 	ipv4->setProtoUDP();
@@ -194,7 +194,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	udp->checksum = 0;
 	udp->setDstPort(config->getDstPort());
 	udp->setSrcPort(this->srcPort);
-	udp->setPayloadLength(ipv4->getPayloadLength());
+	udp->setPayloadLength(50);
 
 	state.transition(HelloByeClient::Bye);
 };

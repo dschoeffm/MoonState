@@ -95,10 +95,10 @@ void *HelloByeClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int i
 	HelloBye::HelloByeClientConfig *config = HelloBye::HelloByeClientConfig::getInstance();
 
 	IPv4_5TupleL2Ident<mbuf>::ConnectionID cID;
-	cID.dstIP = config->getSrcIP();
-	cID.srcIP = dstIP;
-	cID.dstPort = srcPort;
-	cID.srcPort = config->getDstPort();
+	cID.dstIP = htonl(config->getSrcIP());
+	cID.srcIP = htonl(dstIP);
+	cID.dstPort = htons(srcPort);
+	cID.srcPort = htons(config->getDstPort());
 	cID.proto = Headers::IPv4::PROTO_UDP;
 
 	auto *hello =
