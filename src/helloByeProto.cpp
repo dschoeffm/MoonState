@@ -135,6 +135,7 @@ void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	uint16_t tmp16 = udp->dstPort;
 	udp->dstPort = udp->srcPort;
 	udp->srcPort = tmp16;
+
 	// We are done after this -> transition to Terminate
 	state.transition(HelloByeServer::Terminate);
 };
@@ -172,6 +173,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	ipv4->setVersion();
 	ipv4->setIHL(5);
 	ipv4->ttl = 64;
+	ipv4->setPayloadLength(20);
 	ipv4->setDstIP(this->dstIp);
 	ipv4->setSrcIP(config->getSrcIP());
 	ipv4->setProtoUDP();
@@ -190,8 +192,9 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
-	udp->dstPort = config->getDstPort();
-	udp->srcPort = this->srcPort;
+	udp->setDstPort(config->getDstPort());
+	udp->setSrcPort(this->srcPort);
+	udp->setPayloadLength(ipv4->getPayloadLength());
 
 	state.transition(HelloByeClient::Bye);
 };
