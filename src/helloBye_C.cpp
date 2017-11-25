@@ -32,7 +32,8 @@ void *HelloByeServer_init() {
 void *HelloByeServer_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount) {
 
-	BufArray<mbuf> *inPktsBA = new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount);
+	BufArray<mbuf> *inPktsBA =
+		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
 
 	auto *sm = reinterpret_cast<StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *>(obj);
 	sm->runPktBatch(*inPktsBA);
@@ -60,7 +61,7 @@ void HelloByeServer_free(void *obj) {
  * Client
  */
 
-void *HelloByeClient_init(uint32_t srcIP, uint16_t dstPort) {
+void *HelloByeClient_init() {
 	auto *obj = new StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>();
 
 	obj->registerEndStateID(HelloBye::HelloByeClient::Terminate);
@@ -72,12 +73,15 @@ void *HelloByeClient_init(uint32_t srcIP, uint16_t dstPort) {
 	obj->registerFunction(HelloBye::HelloByeClient::RecvBye,
 		HelloBye::HelloByeClientRecvBye<IPv4_5TupleL2Ident<mbuf>, mbuf>::run);
 
+	return obj;
+};
+
+void HelloByeClient_config(uint32_t srcIP, uint16_t dstPort) {
+
 	HelloBye::HelloByeClientConfig::createInstance();
 	HelloBye::HelloByeClientConfig *config = HelloBye::HelloByeClientConfig::getInstance();
 	config->setSrcIP(srcIP);
 	config->setDstPort(dstPort);
-
-	return obj;
 };
 
 void *HelloByeClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
@@ -85,7 +89,8 @@ void *HelloByeClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int i
 
 	auto *sm = reinterpret_cast<StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *>(obj);
 
-	BufArray<mbuf> *inPktsBA = new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount);
+	BufArray<mbuf> *inPktsBA =
+		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
 
 	HelloBye::HelloByeClientConfig *config = HelloBye::HelloByeClientConfig::getInstance();
 
@@ -122,7 +127,8 @@ void HelloByeClient_getPkts(
 
 void *HelloByeClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount) {
-	BufArray<mbuf> *inPktsBA = new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount);
+	BufArray<mbuf> *inPktsBA =
+		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
 
 	auto *sm = reinterpret_cast<StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *>(obj);
 	sm->runPktBatch(*inPktsBA);

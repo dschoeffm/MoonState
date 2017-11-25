@@ -51,13 +51,18 @@ void HelloByeServer_free(void *obj);
  * XXX -------------------------------------------- XXX
  */
 
-/*! Init a HelloBye server
+/*! Init a HelloBye client
+ *
+ * \return void* to the object (opaque)
+ */
+void *HelloByeClient_init();
+
+/*! Configure the client
  *
  * \param srcIP Source IP, will be the same for all connections, host byte order
  * \param dstPort Destination port, will be the same for all connections, host byte order
- * \return void* to the object (opaque)
  */
-void *HelloByeClient_init(uint32_t srcIP, uint16_t dstPort);
+void HelloByeClient_config(uint32_t srcIP, uint16_t dstPort);
 
 /*! Open a connection to a server
  *
