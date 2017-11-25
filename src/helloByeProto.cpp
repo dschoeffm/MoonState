@@ -172,8 +172,9 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	ipv4->setVersion();
 	ipv4->setIHL(5);
 	ipv4->ttl = 64;
-	ipv4->dstIP = this->dstIp;
-	ipv4->srcIP = config->getSrcIP();
+	ipv4->setDstIP(this->dstIp);
+	ipv4->setSrcIP(config->getSrcIP());
+	ipv4->setProtoUDP();
 	ipv4->checksum = 0;
 
 	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
