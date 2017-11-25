@@ -12,6 +12,8 @@ using namespace std;
 class Identifier;
 using SM = StateMachine<Identifier, SamplePacket>;
 
+bool timeoutFunctionUsed = false;
+
 // This is a very elemental Identifier class
 class Identifier {
 public:
@@ -51,6 +53,7 @@ void timeout13(SM::State &state, SM::FunIface &fi) {
 	(void)fi;
 	cout << "timeout13() transitioning to state 3" << endl;
 	state.transition(3);
+	timeoutFunctionUsed = true;
 }
 
 // This is the function for state 1
@@ -133,43 +136,38 @@ int main(int argc, char **argv) {
 		// Setup sanity check
 		assert(sm.getStateTableSize() == 0);
 
-		// Prepare one input, and two output BufArrays
-		BufArray<SamplePacket> pktsIn(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-		BufArray<SamplePacket> pktsSend(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		// Prepare the packet array
+		SamplePacket *sp = getPkt();
+		SamplePacket **spArray = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+		spArray[0] = sp;
 
-		// Add one black packet into the input BufArray
-		pktsIn.addPkt(getPkt());
+		// Prepare one BufArray
+		BufArray<SamplePacket> pktsIn(spArray, 1);
 
 		// Set data in input packet to 0
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
 
 		// Run the packet through the state machine
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		sm.runPktBatch(pktsIn);
 
 		// Check if the function misbehaved
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.getNum() == 1);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
 
 		// Wait for timeout
 		cout << "Waiting now..." << endl;
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-		// Reset the BufArray
-		pktsSend.setNum(0);
-		pktsIn.setNum(0);
-
-		// One functino call, this should check for timeouts
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		// One function call, this should check for timeouts
+		sm.runPktBatch(pktsIn);
 
 		// Check if the state table is empty now
-		assert(sm.getStateTableSize() == 0);
+		assert(sm.getStateTableSize() == 1);
+
+		// Check if the timeout funtion was used
+		assert(timeoutFunctionUsed);
 
 	} catch (exception *e) {
 		// Just catch whatever fails there may be

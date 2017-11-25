@@ -122,62 +122,61 @@ int main(int argc, char **argv) {
 		// Setup sanity check
 		assert(sm.getStateTableSize() == 0);
 
-		// Prepare one input, and two output BufArrays
-		BufArray<SamplePacket> pktsIn(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-		BufArray<SamplePacket> pktsSend(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		// Prepare the packet array
+		SamplePacket *sp = getPkt();
+		SamplePacket **spArray = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+		spArray[0] = sp;
 
-		// Add one black packet into the input BufArray
-		pktsIn.addPkt(getPkt());
+		// Prepare one BufArray
+		BufArray<SamplePacket> pktsIn(spArray, 1);
 
 		// Set data in input packet to 0
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
 
 		// Run the packet through the state machine
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		sm.runPktBatch(pktsIn);
 
 		// Check if the function misbehaved
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.getNum() == 1);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
 
 		// Reset the BufArray
-		pktsSend.setNum(0);
+		pktsIn.markSendPkt(0);
 
 		// Same as above
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		sm.runPktBatch(pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 12);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.getNum() == 1);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
-		pktsSend.setNum(0);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
+
+		// Reset the BufArray
+		pktsIn.markSendPkt(0);
 
 		// Same as above
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		sm.runPktBatch(pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 24);
 		assert(sm.getStateTableSize() == 1);
-		assert(pktsIn.getNum() == 1);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
-		pktsSend.setNum(0);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
+
+		// Reset the BufArray
+		pktsIn.markSendPkt(0);
 
 		// Same as above - This time the endstate is reached
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 3;
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
+		sm.runPktBatch(pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 23);
 		assert(sm.getStateTableSize() == 0);
-		assert(pktsIn.getNum() == 1);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
-		pktsSend.setNum(0);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
+
+		// Reset the BufArray
+		pktsIn.markSendPkt(0);
 
 	} catch (exception *e) {
 		// Just catch whatever fails there may be

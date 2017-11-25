@@ -23,18 +23,25 @@ void *HelloByeServer_init() {
 	return obj;
 };
 
-void HelloByeServer_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
-	struct rte_mbuf **sendPkts, unsigned int *sendCount, struct rte_mbuf **freePkts,
-	unsigned int *freeCount) {
+void *HelloByeServer_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	unsigned int *sendCount, unsigned int *freeCount) {
 
-	BufArray<mbuf> inPktsBA(reinterpret_cast<mbuf **>(inPkts), inCount);
-	BufArray<mbuf> sendPktsBA(reinterpret_cast<mbuf **>(sendPkts), 0);
-	BufArray<mbuf> freePktsBA(reinterpret_cast<mbuf **>(freePkts), 0);
+	BufArray<mbuf> *inPktsBA = new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount);
 
 	auto *sm = reinterpret_cast<StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *>(obj);
-	sm->runPktBatch(inPktsBA, sendPktsBA, freePktsBA);
-	*sendCount = sendPktsBA.getNum();
-	*freeCount = freePktsBA.getNum();
+	sm->runPktBatch(*inPktsBA);
+	*sendCount = inPktsBA->getSendCount();
+	*freeCount = inPktsBA->getFreeCount();
+
+	return inPktsBA;
+};
+
+void HelloByeServer_getPkts(
+	void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts) {
+	BufArray<mbuf> *inPktsBA = reinterpret_cast<BufArray<mbuf> *>(obj);
+
+	inPktsBA->getSendBufs(reinterpret_cast<mbuf **>(sendPkts));
+	inPktsBA->getFreeBufs(reinterpret_cast<mbuf **>(freePkts));
 };
 
 void HelloByeServer_free(void *obj) {

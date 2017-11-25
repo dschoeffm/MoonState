@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 		pkts[i] = new SamplePacket(malloc(100), 100);
 	}
 
-	BufArraySM<SamplePacket> *ba = new BufArraySM<SamplePacket>(pkts, numPkts, true);
+	BufArray<SamplePacket> *ba = new BufArray<SamplePacket>(pkts, numPkts, true);
 
 	// Check some basic stuff
 	assert(ba->getFreeCount() == 0);

@@ -122,47 +122,26 @@ public:
 		friend class StateMachine<Identifier, Packet>;
 
 		StateMachine<Identifier, Packet> *sm;
-		Packet *pkt;
-		BufArray<Packet> &pktsSend;
-		BufArray<Packet> &pktsFree;
+		uint32_t pktIdx;
+		BufArray<Packet> &pktsBA;
 		ConnectionID &cID;
 		State &state;
 		bool sendPkt;
 
 		// Private -> nobody can misuse any FunIface objects
-		FunIface(StateMachine<Identifier, Packet> *sm, Packet *pkt,
-			BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree, ConnectionID &cID,
-			State &state)
-			: sm(sm), pkt(pkt), pktsSend(pktsSend), pktsFree(pktsFree), cID(cID),
-			  state(state), sendPkt(true){};
+		FunIface(StateMachine<Identifier, Packet> *sm, uint32_t pktIdx,
+			BufArray<Packet> &pktsBA, ConnectionID &cID, State &state)
+			: sm(sm), pktIdx(pktIdx), pktsBA(pktsBA), cID(cID), state(state), sendPkt(true){};
 
 	public:
 		~FunIface() {
-			if (sendPkt) {
-				pktsSend.addPkt(pkt);
-			} else {
-				pktsFree.addPkt(pkt);
+			if (!sendPkt) {
+				pktsBA.markDropPkt(pktIdx);
 			}
 		}
 
 		/*! Free the packets after the batch is processed, do not send it */
 		void freePkt() { sendPkt = false; }
-
-#if 0
-		Packet *getPkt() {
-			if (sm->pktsToFree.size() != 0) {
-				Packet *ret = sm->pktsToFree.back();
-				sm->pktsToFree.pop_back();
-				return ret;
-			} else if (sm->getPktCB) {
-				D(sm->getPktCBCounter++;)
-				return sm->getPktCB();
-			} else {
-				throw std::runtime_error(
-					"StateMachine::SMFunIface::getPkt no function registered");
-			}
-		}
-#endif
 
 		/*! Get an additional packet buffer
 		 * \return The new packet buffer
@@ -345,10 +324,11 @@ private:
 		return stateIt;
 	};
 
-	void runPkt(Packet *pktIn, BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
+	void runPkt(BufArray<Packet> &pktsIn, unsigned int cur) {
 		D(std::cout << "StateMachine::runPkt() called" << std::endl;)
 
 		try {
+			Packet *pktIn = pktsIn[cur];
 			ConnectionID identity = identifier.identify(pktIn);
 
 			auto stateIt = findState(identity);
@@ -373,7 +353,7 @@ private:
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
 
-			FunIface funIface(this, pktIn, pktsSend, pktsFree, identity, stateIt->second);
+			FunIface funIface(this, cur, pktsIn, identity, stateIt->second);
 
 			D(std::cout << "Running Function" << std::endl;)
 			(sfIt->second)(stateIt->second, pktIn, funIface);
@@ -384,8 +364,8 @@ private:
 			}
 		} catch (PacketNotIdentified *e) {
 			D(std::cout << "StateMachine::runPkt() Packet could not be identified"
-						<< std::endl;)
-			pktsFree.addPkt(pktIn);
+						<< std::endl;);
+			pktsIn.markDropPkt(cur);
 		}
 	}
 
@@ -464,15 +444,14 @@ public:
 	 * \param pktsSend Packets to send out (same as runPktBatch())
 	 * \param pktsFree Packets to free (same as runPktBatch())
 	 */
-	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn,
-		BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
+	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn) {
 
 		auto sfIt = functions.find(st.state);
 		if (sfIt == functions.end()) {
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 
-		FunIface funIface(this, pktsIn[0], pktsSend, pktsFree, id, st);
+		FunIface funIface(this, pktsIn[0], id, st);
 
 		D(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		(sfIt->second)(st, pktsIn[0], funIface);
@@ -504,11 +483,8 @@ public:
 	 * \param pktsFree Packets to be freed, after the method returns
 	 * 		(caller has to make sure, there is enough room)
 	 */
-	void runPktBatch(
-		BufArray<Packet> &pktsIn, BufArray<Packet> &pktsSend, BufArray<Packet> &pktsFree) {
-		for (auto pkt : pktsIn) {
-			runPkt(pkt, pktsSend, pktsFree);
-		}
+	void runPktBatch(BufArray<Packet> &pktsIn) {
+		uint32_t inCount = pktsIn.getTotalCount();
 
 		// This loop handles the timeouts
 		// It breaks, if there are no usable timeouts anymore
@@ -537,8 +513,8 @@ public:
 				std::move(timeoutDataIt->second);
 			auto stateIt = findState(timeoutData->id);
 			assert(stateIt != stateTable.end());
-			FunIface funIface(
-				this, nullptr, pktsSend, pktsFree, timeoutData->id, stateIt->second);
+			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), pktsIn,
+				timeoutData->id, stateIt->second);
 
 			// Clear the timeoutID from the state
 			stateIt->second.timeoutID = timeoutIDInvalid;
@@ -555,6 +531,11 @@ public:
 			// Clean up
 			timeoutsQ.pop();
 			timeoutFunctions.erase(timeoutDataIt);
+		}
+
+		// Run all the usual incoming packets
+		for (uint32_t i = 0; i < inCount; i++) {
+			runPkt(pktsIn, i);
 		}
 	}
 };
