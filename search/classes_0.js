@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bufarray',['BufArray',['../structBufArray.html',1,'']]]
+  ['bufarray',['BufArray',['../classBufArray.html',1,'']]]
 ];

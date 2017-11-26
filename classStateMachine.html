@@ -147,12 +147,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acb32e2ad53518611b1fded8dfe2f45f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5">removeState</a> (ConnectionID id)</td></tr>
 <tr class="memdesc:acb32e2ad53518611b1fded8dfe2f45f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a connection.  <a href="#acb32e2ad53518611b1fded8dfe2f45f5">More...</a><br /></td></tr>
 <tr class="separator:acb32e2ad53518611b1fded8dfe2f45f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a37752f45d852cdef265c61d82c8b6bb3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#a37752f45d852cdef265c61d82c8b6bb3">addState</a> (ConnectionID id, <a class="el" href="structStateMachine_1_1State.html">State</a> st, <a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsIn, <a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsSend, <a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsFree)</td></tr>
-<tr class="memdesc:a37752f45d852cdef265c61d82c8b6bb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open an outgoing connection.  <a href="#a37752f45d852cdef265c61d82c8b6bb3">More...</a><br /></td></tr>
-<tr class="separator:a37752f45d852cdef265c61d82c8b6bb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9ed35bc95766051eea890d77f132262"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#ad9ed35bc95766051eea890d77f132262">runPktBatch</a> (<a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsIn, <a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsSend, <a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsFree)</td></tr>
-<tr class="memdesc:ad9ed35bc95766051eea890d77f132262"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a batch of packets.  <a href="#ad9ed35bc95766051eea890d77f132262">More...</a><br /></td></tr>
-<tr class="separator:ad9ed35bc95766051eea890d77f132262"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a738c8e36eff606e6e11668ea1e441754"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#a738c8e36eff606e6e11668ea1e441754">addState</a> (ConnectionID id, <a class="el" href="structStateMachine_1_1State.html">State</a> st, <a class="el" href="classBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsIn)</td></tr>
+<tr class="memdesc:a738c8e36eff606e6e11668ea1e441754"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open an outgoing connection.  <a href="#a738c8e36eff606e6e11668ea1e441754">More...</a><br /></td></tr>
+<tr class="separator:a738c8e36eff606e6e11668ea1e441754"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1eae1413acf399a997e587c905e14aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#aa1eae1413acf399a997e587c905e14aa">runPktBatch</a> (<a class="el" href="classBufArray.html">BufArray</a>&lt; Packet &gt; &amp;pktsIn)</td></tr>
+<tr class="memdesc:aa1eae1413acf399a997e587c905e14aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a batch of packets.  <a href="#aa1eae1413acf399a997e587c905e14aa">More...</a><br /></td></tr>
+<tr class="separator:aa1eae1413acf399a997e587c905e14aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -237,12 +237,12 @@ template&lt;class Identifier, class Packet&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00399">399</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00381">381</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a37752f45d852cdef265c61d82c8b6bb3"></a>
+<a class="anchor" id="a738c8e36eff606e6e11668ea1e441754"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -266,20 +266,8 @@ template&lt;class Identifier, class Packet&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsIn</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsSend</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsFree</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="classBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
+          <td class="paramname"><em>pktsIn</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -301,13 +289,11 @@ template&lt;class Identifier, class Packet&gt; </div>
     <tr><td class="paramname">id</td><td>The connection id this connection will use </td></tr>
     <tr><td class="paramname">st</td><td>The state data </td></tr>
     <tr><td class="paramname">pktsIn</td><td>Packet buffer for the state to work with (only one packet) </td></tr>
-    <tr><td class="paramname">pktsSend</td><td>Packets to send out (same as <a class="el" href="classStateMachine.html#ad9ed35bc95766051eea890d77f132262" title="Run a batch of packets. ">runPktBatch()</a>) </td></tr>
-    <tr><td class="paramname">pktsFree</td><td>Packets to free (same as <a class="el" href="classStateMachine.html#ad9ed35bc95766051eea890d77f132262" title="Run a batch of packets. ">runPktBatch()</a>) </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00467">467</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00447">447</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -337,7 +323,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 <p>Get the number of tracked connections This is probably only for statistics. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of connections </dd></dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00408">408</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00390">390</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -373,7 +359,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00425">425</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00407">407</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -421,7 +407,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00418">418</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00400">400</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -457,7 +443,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00447">447</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00429">429</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -505,7 +491,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00436">436</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00418">418</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -542,11 +528,11 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00455">455</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00437">437</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ad9ed35bc95766051eea890d77f132262"></a>
+<a class="anchor" id="aa1eae1413acf399a997e587c905e14aa"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -558,25 +544,9 @@ template&lt;class Identifier, class Packet&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classStateMachine.html">StateMachine</a>&lt; Identifier, Packet &gt;::runPktBatch </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsIn</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="classBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
+          <td class="paramname"><em>pktsIn</em></td><td>)</td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsSend</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structBufArray.html">BufArray</a>&lt; Packet &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pktsFree</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -587,22 +557,20 @@ template&lt;class Identifier, class Packet&gt; </div>
 </div><div class="memdoc">
 
 <p>Run a batch of packets. </p>
-<p>This method is the function you want to call, in order to pump new packets into the state machine</p>
+<p>This method is the function you want to call, in order to pump new packets into the state machine. Timeouts get handled, as soon as this function is called.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pktsIn</td><td>Incoming packets </td></tr>
-    <tr><td class="paramname">pktsSend</td><td>Packets to be sent, after the method returns (caller has to make sure, there is enough room) </td></tr>
-    <tr><td class="paramname">pktsFree</td><td>Packets to be freed, after the method returns (caller has to make sure, there is enough room) </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00507">507</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00483">483</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classStateMachine_ad9ed35bc95766051eea890d77f132262_cgraph.svg" width="426" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classStateMachine_aa1eae1413acf399a997e587c905e14aa_cgraph.svg" width="426" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </p>
 

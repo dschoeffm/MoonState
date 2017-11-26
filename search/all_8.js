@@ -6,5 +6,7 @@ var searchData=
   ['ihl',['ihl',['../structHeaders_1_1IPv4.html#a89714234abf8cfe2eecf2dfe71c686ca',1,'Headers::IPv4']]],
   ['ipv4',['IPv4',['../structHeaders_1_1IPv4.html',1,'Headers']]],
   ['ipv4_5f5tuplel2ident',['IPv4_5TupleL2Ident',['../classIPv4__5TupleL2Ident.html',1,'']]],
-  ['ipv4_5f5tuplel2ident_2ehpp',['IPv4_5TupleL2Ident.hpp',['../IPv4__5TupleL2Ident_8hpp.html',1,'']]]
+  ['ipv4_5f5tuplel2ident_2ehpp',['IPv4_5TupleL2Ident.hpp',['../IPv4__5TupleL2Ident_8hpp.html',1,'']]],
+  ['iterator',['iterator',['../classBufArray_1_1iterator.html',1,'BufArray']]],
+  ['iterator',['iterator',['../classBufArray_1_1iterator.html#a74157c6a0d389cbf2e4c562c10ceeda7',1,'BufArray::iterator']]]
 ];

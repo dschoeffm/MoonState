@@ -1,0 +1,4 @@
+<map id="StateMachine::runPktBatch" name="StateMachine::runPktBatch">
+<area shape="rect" id="node2" href="$classBufArray.html#aee156cf7b63ae73f0de0ab971ccceb14" title="Get the number of all packets in the BufArray. " alt="" coords="247,5,409,32"/>
+<area shape="rect" id="node3" href="$classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5" title="Remove a connection. " alt="" coords="236,56,420,83"/>
+</map>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['version',['version',['../structHeaders_1_1IPv4.html#abecb8f8d2ff8d1390a6d39354452fa38',1,'Headers::IPv4']]]
+  ['unlock',['unlock',['../classSpinLock.html#a25ef6814d1e3fbd621db947ae7522d0e',1,'SpinLock::unlock()'],['../classSpinLockCLSize.html#a083f35c06a30034b5519751b7c62f6fc',1,'SpinLockCLSize::unlock()']]]
 ];

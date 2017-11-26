@@ -84,7 +84,7 @@
 </g>
 <!-- Node7 -->
 <g id="node7" class="node"><title>Node7</title>
-<g id="a_node7"><a xlink:href="classStateMachine_1_1FunIface.html#a1985ec03a8173ed85b6ad89a449c5f16" target="_top" xlink:title="Free the packets after the batch is processed, do not send it. ">
+<g id="a_node7"><a xlink:href="classStateMachine_1_1FunIface.html#a1985ec03a8173ed85b6ad89a449c5f16" target="_top" xlink:title="Free the packet after the batch is processed, do not send it. ">
 <polygon fill="none" stroke="black" points="340.5,-0.5 340.5,-30.5 461.5,-30.5 461.5,-0.5 340.5,-0.5"/>
 <text text-anchor="start" x="348.5" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">StateMachine::FunIface</text>
 <text text-anchor="middle" x="401" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">::freePkt</text>

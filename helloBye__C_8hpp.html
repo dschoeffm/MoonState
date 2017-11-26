@@ -104,7 +104,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for helloBye_C.hpp:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp__incl.svg" width="2200" height="426"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp__incl.svg" width="2126" height="426"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
@@ -119,32 +119,85 @@ Functions</h2></td></tr>
 <tr class="memitem:ab8842d8bfc9431a4ed748fc51feaf355"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#ab8842d8bfc9431a4ed748fc51feaf355">HelloByeServer_init</a> ()</td></tr>
 <tr class="memdesc:ab8842d8bfc9431a4ed748fc51feaf355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> server.  <a href="#ab8842d8bfc9431a4ed748fc51feaf355">More...</a><br /></td></tr>
 <tr class="separator:ab8842d8bfc9431a4ed748fc51feaf355"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef98240eb16e4443093f03fae51e3cbf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#aef98240eb16e4443093f03fae51e3cbf">HelloByeServer_process</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, struct rte_mbuf **sendPkts, unsigned int *sendCount, struct rte_mbuf **freePkts, unsigned int *freeCount)</td></tr>
-<tr class="memdesc:aef98240eb16e4443093f03fae51e3cbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a batch of packets.  <a href="#aef98240eb16e4443093f03fae51e3cbf">More...</a><br /></td></tr>
-<tr class="separator:aef98240eb16e4443093f03fae51e3cbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad34e4733317b35810cc504b6bd895041"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#ad34e4733317b35810cc504b6bd895041">HelloByeServer_process</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, unsigned int *sendCount, unsigned int *freeCount)</td></tr>
+<tr class="memdesc:ad34e4733317b35810cc504b6bd895041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a batch of packets.  <a href="#ad34e4733317b35810cc504b6bd895041">More...</a><br /></td></tr>
+<tr class="separator:ad34e4733317b35810cc504b6bd895041"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28390fc4be17f4af5b3336af452f1d95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a28390fc4be17f4af5b3336af452f1d95">HelloByeServer_getPkts</a> (void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts)</td></tr>
+<tr class="memdesc:a28390fc4be17f4af5b3336af452f1d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the packets to send and free.  <a href="#a28390fc4be17f4af5b3336af452f1d95">More...</a><br /></td></tr>
+<tr class="separator:a28390fc4be17f4af5b3336af452f1d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aebd2b3687879d2933a1f2cee3b651699"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#aebd2b3687879d2933a1f2cee3b651699">HelloByeServer_free</a> (void *obj)</td></tr>
 <tr class="memdesc:aebd2b3687879d2933a1f2cee3b651699"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free recources used by the state machine.  <a href="#aebd2b3687879d2933a1f2cee3b651699">More...</a><br /></td></tr>
 <tr class="separator:aebd2b3687879d2933a1f2cee3b651699"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50fcff4cd28a4445da1d9247087d3850"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a50fcff4cd28a4445da1d9247087d3850">HelloByeClient_init</a> (uint32_t srcIP, uint16_t dstPort)</td></tr>
-<tr class="memdesc:a50fcff4cd28a4445da1d9247087d3850"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> server.  <a href="#a50fcff4cd28a4445da1d9247087d3850">More...</a><br /></td></tr>
-<tr class="separator:a50fcff4cd28a4445da1d9247087d3850"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa41942010182ac52d8f059be2891c54d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#aa41942010182ac52d8f059be2891c54d">HelloByeClient_connect</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, struct rte_mbuf **sendPkts, unsigned int *sendCount, struct rte_mbuf **freePkts, unsigned int *freeCount, uint32_t dstIP, uint16_t srcPort)</td></tr>
-<tr class="memdesc:aa41942010182ac52d8f059be2891c54d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open a connection to a server.  <a href="#aa41942010182ac52d8f059be2891c54d">More...</a><br /></td></tr>
-<tr class="separator:aa41942010182ac52d8f059be2891c54d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1d7c701025631165885fec5c1aa5bcd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#ab1d7c701025631165885fec5c1aa5bcd">HelloByeClient_process</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, struct rte_mbuf **sendPkts, unsigned int *sendCount, struct rte_mbuf **freePkts, unsigned int *freeCount)</td></tr>
-<tr class="memdesc:ab1d7c701025631165885fec5c1aa5bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a batch of packets.  <a href="#ab1d7c701025631165885fec5c1aa5bcd">More...</a><br /></td></tr>
-<tr class="separator:ab1d7c701025631165885fec5c1aa5bcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e099e6aee4f509e3f4f4229a519d087"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a5e099e6aee4f509e3f4f4229a519d087">HelloByeClient_init</a> ()</td></tr>
+<tr class="memdesc:a5e099e6aee4f509e3f4f4229a519d087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> client.  <a href="#a5e099e6aee4f509e3f4f4229a519d087">More...</a><br /></td></tr>
+<tr class="separator:a5e099e6aee4f509e3f4f4229a519d087"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a952e55de7f78d6b693ba4a25a410e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a9a952e55de7f78d6b693ba4a25a410e6">HelloByeClient_config</a> (uint32_t srcIP, uint16_t dstPort)</td></tr>
+<tr class="memdesc:a9a952e55de7f78d6b693ba4a25a410e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the client.  <a href="#a9a952e55de7f78d6b693ba4a25a410e6">More...</a><br /></td></tr>
+<tr class="separator:a9a952e55de7f78d6b693ba4a25a410e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae47056daf8002ce8d8eb736725376621"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#ae47056daf8002ce8d8eb736725376621">HelloByeClient_connect</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, unsigned int *sendCount, unsigned int *freeCount, uint32_t dstIP, uint16_t srcPort)</td></tr>
+<tr class="memdesc:ae47056daf8002ce8d8eb736725376621"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open a connection to a server.  <a href="#ae47056daf8002ce8d8eb736725376621">More...</a><br /></td></tr>
+<tr class="separator:ae47056daf8002ce8d8eb736725376621"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe4074af0e562bfd96f27615464439a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#afe4074af0e562bfd96f27615464439a6">HelloByeClient_getPkts</a> (void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts)</td></tr>
+<tr class="memdesc:afe4074af0e562bfd96f27615464439a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the packets to send and free.  <a href="#afe4074af0e562bfd96f27615464439a6">More...</a><br /></td></tr>
+<tr class="separator:afe4074af0e562bfd96f27615464439a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d9928a910bdca018694fc1e396c23c9"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a4d9928a910bdca018694fc1e396c23c9">HelloByeClient_process</a> (void *obj, struct rte_mbuf **inPkts, unsigned int inCount, unsigned int *sendCount, unsigned int *freeCount)</td></tr>
+<tr class="memdesc:a4d9928a910bdca018694fc1e396c23c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process a batch of packets.  <a href="#a4d9928a910bdca018694fc1e396c23c9">More...</a><br /></td></tr>
+<tr class="separator:a4d9928a910bdca018694fc1e396c23c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a2c76acf4ed944debcda4e42456f38a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helloBye__C_8hpp.html#a1a2c76acf4ed944debcda4e42456f38a">HelloByeClient_free</a> (void *obj)</td></tr>
 <tr class="memdesc:a1a2c76acf4ed944debcda4e42456f38a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free recources used by the state machine.  <a href="#a1a2c76acf4ed944debcda4e42456f38a">More...</a><br /></td></tr>
 <tr class="separator:a1a2c76acf4ed944debcda4e42456f38a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="aa41942010182ac52d8f059be2891c54d"></a>
+<a class="anchor" id="a9a952e55de7f78d6b693ba4a25a410e6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void HelloByeClient_connect </td>
+          <td class="memname">void HelloByeClient_config </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>srcIP</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>dstPort</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configure the client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">srcIP</td><td>Source IP, will be the same for all connections, host byte order </td></tr>
+    <tr><td class="paramname">dstPort</td><td>Destination port, will be the same for all connections, host byte order </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00079">79</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_a9a952e55de7f78d6b693ba4a25a410e6_cgraph.svg" width="380" height="248"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ae47056daf8002ce8d8eb736725376621"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* HelloByeClient_connect </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>obj</em>, </td>
@@ -164,20 +217,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>sendPkts</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">unsigned int *&#160;</td>
           <td class="paramname"><em>sendCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>freePkts</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -208,18 +249,26 @@ Functions</h2></td></tr>
 <p>Open a connection to a server. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a50fcff4cd28a4445da1d9247087d3850" title="Init a HelloBye server. ">HelloByeClient_init()</a> </td></tr>
+    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a5e099e6aee4f509e3f4f4229a519d087" title="Init a HelloBye client. ">HelloByeClient_init()</a> </td></tr>
     <tr><td class="paramname">inPkts</td><td>incoming packets to process </td></tr>
     <tr><td class="paramname">inCount</td><td>number of incoming packets </td></tr>
-    <tr><td class="paramname">sendPkts</td><td>Packets to send out (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">sendCount</td><td>Number of packets in sendPkts </td></tr>
-    <tr><td class="paramname">freePkts</td><td>Packets to free (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">freeCount</td><td>Number of packets in freePkts </td></tr>
     <tr><td class="paramname">dstIP</td><td>IP of the listening server </td></tr>
     <tr><td class="paramname">srcPort</td><td>Port the client should use </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>void* to <a class="el" href="classBufArray.html" title="Wrapper around MoonGen bufarrays. ">BufArray</a> object (give to _getPkts() ) </dd></dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00087">87</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_ae47056daf8002ce8d8eb736725376621_cgraph.svg" width="392" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
 
 </div>
 </div>
@@ -240,28 +289,36 @@ Functions</h2></td></tr>
 <p>Free recources used by the state machine. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a50fcff4cd28a4445da1d9247087d3850" title="Init a HelloBye server. ">HelloByeClient_init()</a> </td></tr>
+    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a5e099e6aee4f509e3f4f4229a519d087" title="Init a HelloBye client. ">HelloByeClient_init()</a> </td></tr>
   </table>
   </dd>
 </dl>
 
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00145">145</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
 </div>
 </div>
-<a class="anchor" id="a50fcff4cd28a4445da1d9247087d3850"></a>
+<a class="anchor" id="afe4074af0e562bfd96f27615464439a6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void* HelloByeClient_init </td>
+          <td class="memname">void HelloByeClient_getPkts </td>
           <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>srcIP</em>, </td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>dstPort</em>&#160;</td>
+          <td class="paramtype">struct rte_mbuf **&#160;</td>
+          <td class="paramname"><em>sendPkts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct rte_mbuf **&#160;</td>
+          <td class="paramname"><em>freePkts</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -271,24 +328,53 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> server. </p>
+<p>Get the packets to send and free. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">srcIP</td><td>Source IP, will be the same for all connections, host byte order </td></tr>
-    <tr><td class="paramname">dstPort</td><td>Destination port, will be the same for all connections, host byte order </td></tr>
+    <tr><td class="paramname">obj</td><td>object returned by HelloByeClient_process </td></tr>
+    <tr><td class="paramname">sendPkts</td><td>Packets to send out (size if given in sendCount) </td></tr>
+    <tr><td class="paramname">freePkts</td><td>Packets to free (size if given in freeCount) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>void* to the object (opaque) </dd></dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00118">118</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_afe4074af0e562bfd96f27615464439a6_cgraph.svg" width="792" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
 
 </div>
 </div>
-<a class="anchor" id="ab1d7c701025631165885fec5c1aa5bcd"></a>
+<a class="anchor" id="a5e099e6aee4f509e3f4f4229a519d087"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void HelloByeClient_process </td>
+          <td class="memname">void* HelloByeClient_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> client. </p>
+<dl class="section return"><dt>Returns</dt><dd>void* to the object (opaque) </dd></dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00064">64</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a4d9928a910bdca018694fc1e396c23c9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* HelloByeClient_process </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>obj</em>, </td>
@@ -308,20 +394,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>sendPkts</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">unsigned int *&#160;</td>
           <td class="paramname"><em>sendCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>freePkts</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -340,16 +414,24 @@ Functions</h2></td></tr>
 <p>Process a batch of packets. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a50fcff4cd28a4445da1d9247087d3850" title="Init a HelloBye server. ">HelloByeClient_init()</a> </td></tr>
+    <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#a5e099e6aee4f509e3f4f4229a519d087" title="Init a HelloBye client. ">HelloByeClient_init()</a> </td></tr>
     <tr><td class="paramname">inPkts</td><td>incoming packets to process </td></tr>
     <tr><td class="paramname">inCount</td><td>number of incoming packets </td></tr>
-    <tr><td class="paramname">sendPkts</td><td>Packets to send out (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">sendCount</td><td>Number of packets in sendPkts </td></tr>
-    <tr><td class="paramname">freePkts</td><td>Packets to free (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">freeCount</td><td>Number of packets in freePkts </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>void* to <a class="el" href="classBufArray.html" title="Wrapper around MoonGen bufarrays. ">BufArray</a> object (give to _getPkts() ) </dd></dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00128">128</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_a4d9928a910bdca018694fc1e396c23c9_cgraph.svg" width="594" height="63"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
 
 </div>
 </div>
@@ -375,7 +457,58 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00040">40</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00056">56</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a28390fc4be17f4af5b3336af452f1d95"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HelloByeServer_getPkts </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct rte_mbuf **&#160;</td>
+          <td class="paramname"><em>sendPkts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">struct rte_mbuf **&#160;</td>
+          <td class="paramname"><em>freePkts</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the packets to send and free. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj</td><td>object returned by HelloByeServer_process </td></tr>
+    <tr><td class="paramname">sendPkts</td><td>Packets to send out (size if given in sendCount) </td></tr>
+    <tr><td class="paramname">freePkts</td><td>Packets to free (size if given in freeCount) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00046">46</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_a28390fc4be17f4af5b3336af452f1d95_cgraph.svg" width="796" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
 
 </div>
 </div>
@@ -395,16 +528,16 @@ Functions</h2></td></tr>
 <p>Init a <a class="el" href="namespaceHelloBye.html">HelloBye</a> server. </p>
 <dl class="section return"><dt>Returns</dt><dd>void* to the object (opaque) </dd></dl>
 
-<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00010">10</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00016">16</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="aef98240eb16e4443093f03fae51e3cbf"></a>
+<a class="anchor" id="ad34e4733317b35810cc504b6bd895041"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void HelloByeServer_process </td>
+          <td class="memname">void* HelloByeServer_process </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>obj</em>, </td>
@@ -424,20 +557,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>sendPkts</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">unsigned int *&#160;</td>
           <td class="paramname"><em>sendCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">struct rte_mbuf **&#160;</td>
-          <td class="paramname"><em>freePkts</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -459,20 +580,18 @@ Functions</h2></td></tr>
     <tr><td class="paramname">obj</td><td>object returned by <a class="el" href="helloBye__C_8hpp.html#ab8842d8bfc9431a4ed748fc51feaf355" title="Init a HelloBye server. ">HelloByeServer_init()</a> </td></tr>
     <tr><td class="paramname">inPkts</td><td>incoming packets to process </td></tr>
     <tr><td class="paramname">inCount</td><td>number of incoming packets </td></tr>
-    <tr><td class="paramname">sendPkts</td><td>Packets to send out (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">sendCount</td><td>Number of packets in sendPkts </td></tr>
-    <tr><td class="paramname">freePkts</td><td>Packets to free (caller has to make sure, there is enough room) </td></tr>
     <tr><td class="paramname">freeCount</td><td>Number of packets in freePkts </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00026">26</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
+<p>Definition at line <a class="el" href="helloBye__C_8cpp_source.html#l00032">32</a> of file <a class="el" href="helloBye__C_8cpp_source.html">helloBye_C.cpp</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_aef98240eb16e4443093f03fae51e3cbf_cgraph.svg" width="352" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="helloBye__C_8hpp_ad34e4733317b35810cc504b6bd895041_cgraph.svg" width="598" height="63"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </p>
 

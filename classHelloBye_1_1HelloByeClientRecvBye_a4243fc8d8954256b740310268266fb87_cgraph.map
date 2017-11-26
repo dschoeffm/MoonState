@@ -4,5 +4,5 @@
 <area shape="rect" id="node4" href="$structHeaders_1_1IPv4.html#acc4a8033c5da9c2ce147ee10e15d2a49" title="Get the SDU. " alt="" coords="443,71,621,98"/>
 <area shape="rect" id="node5" href="$structHeaders_1_1Udp.html#a531f2e8247abf7807c50d806208b7cb1" title="Get the SDU. " alt="" coords="444,122,620,149"/>
 <area shape="rect" id="node6" href="$structStateMachine_1_1State.html#a89a520519a2b8dab5f4ae7a90c2bee83" title="Transition to another state. " alt="" coords="461,173,603,215"/>
-<area shape="rect" id="node7" href="$classStateMachine_1_1FunIface.html#a1985ec03a8173ed85b6ad89a449c5f16" title="Free the packets after the batch is processed, do not send it. " alt="" coords="451,239,613,280"/>
+<area shape="rect" id="node7" href="$classStateMachine_1_1FunIface.html#a1985ec03a8173ed85b6ad89a449c5f16" title="Free the packet after the batch is processed, do not send it. " alt="" coords="451,239,613,280"/>
 </map>

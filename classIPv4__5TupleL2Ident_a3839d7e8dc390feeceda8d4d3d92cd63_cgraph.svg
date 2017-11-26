@@ -29,7 +29,7 @@
 </g>
 <!-- Node3 -->
 <g id="node3" class="node"><title>Node3</title>
-<g id="a_node3"><a xlink:href="common_8hpp.html#ab9ce1ea79c76c5726af17e271c20c6ec" target="_top" xlink:title="hexdump">
+<g id="a_node3"><a xlink:href="common_8hpp.html#ab9ce1ea79c76c5726af17e271c20c6ec" target="_top" xlink:title="Dump hex data. ">
 <polygon fill="none" stroke="black" points="178,-0.5 178,-19.5 234,-19.5 234,-0.5 178,-0.5"/>
 <text text-anchor="middle" x="206" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">hexdump</text>
 </a>
