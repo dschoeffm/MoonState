@@ -189,7 +189,7 @@ public:
 
 	/*! Get all the packets which are to be freed
 	 *
-	 * \param sendBufs Array at least the size returned by getFreeCount()
+	 * \param freeBufs Array at least the size returned by getFreeCount()
 	 */
 	void getFreeBufs(Packet **freeBufs) const {
 		uint32_t curFreeBufs = 0;
