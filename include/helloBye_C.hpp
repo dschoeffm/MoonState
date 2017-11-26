@@ -73,6 +73,7 @@ void HelloByeClient_config(uint32_t srcIP, uint16_t dstPort);
  * \param freeCount Number of packets in freePkts
  * \param dstIP IP of the listening server
  * \param srcPort Port the client should use
+ * \return void* to BufArray object (give to _getPkts() )
  */
 void *HelloByeClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount, uint32_t dstIP, uint16_t srcPort);
@@ -93,6 +94,7 @@ void HelloByeClient_getPkts(
  * \param inCount number of incoming packets
  * \param sendCount Number of packets in sendPkts
  * \param freeCount Number of packets in freePkts
+ * \return void* to BufArray object (give to _getPkts() )
  */
 void *HelloByeClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount);

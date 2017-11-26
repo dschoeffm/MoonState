@@ -104,6 +104,7 @@ public:
 		State(const State &s) : stateData(s.stateData), state(s.state){};
 
 		/*! Transition to another state
+		 *
 		 * \param newState The state to transition to
 		 */
 		void transition(StateID newState) { state = newState; }
@@ -140,10 +141,11 @@ public:
 			}
 		}
 
-		/*! Free the packets after the batch is processed, do not send it */
+		/*! Free the packet after the batch is processed, do not send it */
 		void freePkt() { sendPkt = false; }
 
 		/*! Get an additional packet buffer
+		 *
 		 * \return The new packet buffer
 		 */
 		Packet *getPkt() {
@@ -441,8 +443,6 @@ public:
 	 * \param id The connection id this connection will use
 	 * \param st The state data
 	 * \param pktsIn Packet buffer for the state to work with (only one packet)
-	 * \param pktsSend Packets to send out (same as runPktBatch())
-	 * \param pktsFree Packets to free (same as runPktBatch())
 	 */
 	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn) {
 
@@ -475,13 +475,10 @@ public:
 	/*! Run a batch of packets
 	 *
 	 * This method is the function you want to call, in order to pump new packets
-	 * into the state machine
+	 * into the state machine.
+	 * Timeouts get handled, as soon as this function is called.
 	 *
 	 * \param pktsIn Incoming packets
-	 * \param pktsSend Packets to be sent, after the method returns
-	 * 		(caller has to make sure, there is enough room)
-	 * \param pktsFree Packets to be freed, after the method returns
-	 * 		(caller has to make sure, there is enough room)
 	 */
 	void runPktBatch(BufArray<Packet> &pktsIn) {
 		uint32_t inCount = pktsIn.getTotalCount();

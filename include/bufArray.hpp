@@ -205,6 +205,10 @@ public:
 		}
 	}
 
+	/*! Get the number of all packets in the BufArray
+	 *
+	 * \return Number of all packets
+	 */
 	uint32_t getTotalCount() const { return numBufs; }
 
 	Packet *operator[](unsigned int idx) const { return pkts[idx]; }
