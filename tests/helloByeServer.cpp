@@ -60,15 +60,13 @@ int main(int argc, char **argv) {
 	cout << "main(): Entering loop now" << endl;
 
 	while (1) {
-		BufArray<SamplePacket> pktsIn = pcap.recvBatch();
-		BufArray<SamplePacket> pktsSend(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		BufArray<SamplePacket> *pktsIn = pcap.recvBatch();
 
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-		pcap.sendBatch(pktsSend);
-		pcap.freeBatch(pktsFree);
+		sm.runPktBatch(*pktsIn);
+		pcap.sendBatch(*pktsIn);
+		pcap.freeBatch(*pktsIn);
+
+		delete (pktsIn);
 	}
 
 	return 0;

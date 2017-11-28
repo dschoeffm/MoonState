@@ -36,7 +36,6 @@ private:
 
 	std::vector<SamplePacket *> packetPool;
 	std::array<uint8_t, 6> srcMac;
-	BufArray<SamplePacket> bufArray;
 
 public:
 	// WARNING: THIS CLASS IS NOT THREAD SAFE
@@ -50,7 +49,7 @@ public:
 	void sendBatch(BufArray<SamplePacket> &pkts);
 	void freeBatch(BufArray<SamplePacket> &pkts);
 
-	BufArray<SamplePacket> recvBatch();
+	BufArray<SamplePacket> *recvBatch();
 
 	SamplePacket *getPkt();
 };

@@ -102,14 +102,10 @@ int main(int argc, char **argv) {
 
 	try {
 		{
-			BufArray<SamplePacket> pktsIn(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-			BufArray<SamplePacket> pktsSend(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
-			BufArray<SamplePacket> pktsFree(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
+
+			SamplePacket **pktsP = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+			BufArray<SamplePacket> pktsIn(pktsP, 1);
+			pktsP[0] = &spc1;
 
 			IPv4_5TupleL2Ident<SamplePacket>::ConnectionID cID;
 			cID.dstIP = htonl(0x7f000001);
@@ -125,35 +121,29 @@ int main(int argc, char **argv) {
 
 			pktsIn.addPkt(&spc1);
 
-			sm.addState(cID, state, pktsIn, pktsSend, pktsFree);
+			sm.addState(cID, state, pktsIn);
 
 			clientCookie = reinterpret_cast<uint8_t *>(spc1.getData())[0x37];
 			cout << "clientCookie: 0x" << hex << static_cast<int>(clientCookie) << endl;
 
-			assert(pktsSend.getNum() == 1);
-			assert(pktsFree.getNum() == 0);
+			assert(pktsIn.getSendCount() == 1);
+			assert(pktsIn.getFreeCount() == 0);
 			cout << "Dump of packet output" << endl;
 			hexdump(spc1.getData(), spc1.getDataLen());
 		}
 		{
 			// reinterpret_cast<uint8_t *>(sps1.getData())[0x37] = clientCookie;
 
-			BufArray<SamplePacket> pktsIn(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-			BufArray<SamplePacket> pktsSend(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
-			BufArray<SamplePacket> pktsFree(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
+			SamplePacket **pktsP = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+			BufArray<SamplePacket> pktsIn(pktsP, 1);
+			pktsP[0] = &sps1;
 
-			pktsIn.addPkt(&sps1);
 			cout << "Dump of packet input" << endl;
 			hexdump(sps1.getData(), sps1.getDataLen());
 
-			sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-			assert(pktsSend.getNum() == 1);
-			assert(pktsFree.getNum() == 0);
+			sm.runPktBatch(pktsIn);
+			assert(pktsIn.getSendCount() == 1);
+			assert(pktsIn.getFreeCount() == 0);
 
 			serverCookie = reinterpret_cast<uint8_t *>(sps1.getData())[0x35];
 
@@ -163,22 +153,16 @@ int main(int argc, char **argv) {
 		{
 			reinterpret_cast<uint8_t *>(sps2.getData())[0x35] = clientCookie;
 
-			BufArray<SamplePacket> pktsIn(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-			BufArray<SamplePacket> pktsSend(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
-			BufArray<SamplePacket> pktsFree(
-				reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())),
-				0);
+			SamplePacket **pktsP = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+			BufArray<SamplePacket> pktsIn(pktsP, 1);
+			pktsP[0] = &sps2;
 
-			pktsIn.addPkt(&sps2);
 			cout << "Dump of packet input" << endl;
 			hexdump(sps2.getData(), sps2.getDataLen());
 
-			sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-			assert(pktsSend.getNum() == 0);
-			assert(pktsFree.getNum() == 1);
+			sm.runPktBatch(pktsIn);
+			assert(pktsIn.getSendCount() == 0);
+			assert(pktsIn.getFreeCount() == 1);
 		}
 
 	} catch (exception *e) {

@@ -93,23 +93,19 @@ int main(int argc, char **argv) {
 	cout << "main(): Processing packets now" << endl;
 
 	{
-		BufArray<SamplePacket> pktsIn(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-		BufArray<SamplePacket> pktsSend(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		SamplePacket **pktsP = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+		BufArray<SamplePacket> pktsIn(pktsP, 1);
+		pktsP[0] = &spc1;
 
-		pktsIn.addPkt(&spc1);
 		cout << "Dump of packet input" << endl;
 		hexdump(spc1.getData(), spc1.getDataLen());
 
 		clientCookie = reinterpret_cast<uint8_t *>(spc1.getData())[0x37];
 		cout << "clientCookie: 0x" << hex << static_cast<int>(clientCookie) << endl;
 
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
+		sm.runPktBatch(pktsIn);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
 		cout << "Dump of packet output" << endl;
 		hexdump(spc1.getData(), spc1.getDataLen());
 
@@ -119,20 +115,16 @@ int main(int argc, char **argv) {
 	{
 		reinterpret_cast<uint8_t *>(spc2.getData())[0x35] = serverCookie;
 
-		BufArray<SamplePacket> pktsIn(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *))), 0);
-		BufArray<SamplePacket> pktsSend(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
-		BufArray<SamplePacket> pktsFree(
-			reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * pktsIn.getNum())), 0);
+		SamplePacket **pktsP = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *)));
+		BufArray<SamplePacket> pktsIn(pktsP, 1);
+		pktsP[0] = &spc2;
 
-		pktsIn.addPkt(&spc2);
 		cout << "Dump of packet input" << endl;
 		hexdump(spc2.getData(), spc2.getDataLen());
 
-		sm.runPktBatch(pktsIn, pktsSend, pktsFree);
-		assert(pktsSend.getNum() == 1);
-		assert(pktsFree.getNum() == 0);
+		sm.runPktBatch(pktsIn);
+		assert(pktsIn.getSendCount() == 1);
+		assert(pktsIn.getFreeCount() == 0);
 
 		assert(reinterpret_cast<uint8_t *>(spc2.getData())[0x35] == clientCookie);
 

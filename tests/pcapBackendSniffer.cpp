@@ -34,12 +34,15 @@ int main(int argc, char **argv) {
 	PcapBackend pcap(string(argv[1]), {{0, 0, 0, 0, 0, 0}});
 
 	while (!interrupted) {
-		BufArray<SamplePacket> pkts = pcap.recvBatch();
-		for (auto p : pkts) {
+		BufArray<SamplePacket> *pkts = pcap.recvBatch();
+		for (uint32_t i = 0; i < pkts->getTotalCount(); i++) {
+			SamplePacket *p = (*pkts)[i];
 			cout << endl << "Packet Hexdump:" << endl;
 			hexdump(p->getData(), p->getDataLen());
+			pkts->markDropPkt(i);
 		}
-		pcap.freeBatch(pkts);
+		pcap.freeBatch(*pkts);
+		delete (pkts);
 	}
 
 	return 0;

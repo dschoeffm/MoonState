@@ -12,9 +12,7 @@ PcapBackend::PcapBackend(
 	string dev, array<uint8_t, 6> srcMac //,
 										 // StateMachine<TupleIdent, SamplePacket> &sm
 	)
-	: dev(dev), /* sm(sm), */ srcMac(srcMac),
-	  bufArray(
-		  reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * maxBufArraySize)), 0) {
+	: dev(dev), /* sm(sm), */ srcMac(srcMac) {
 
 	if (geteuid() != 0) {
 		cout << "WARNING: Running pcap wihout root priviledges may be a bad idea" << endl;
@@ -39,14 +37,16 @@ PcapBackend::~PcapBackend() {
 	for (auto i : packetPool) {
 		delete (i);
 	}
-	for (auto i : bufArray) {
-		delete (i);
-	}
-	delete (bufArray.getArray());
 };
 
 void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
-	for (SamplePacket *p : pkts) {
+	auto sendCount = pkts.getSendCount();
+	SamplePacket **spArray = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * 64));
+	pkts.getSendBufs(spArray);
+
+	for (uint32_t i = 0; i < sendCount; i++) {
+		SamplePacket *p = spArray[i];
+
 		// Set some valid ethernet header
 		struct ether_header *eth = reinterpret_cast<ether_header *>(p->getData());
 		memset(eth->ether_dhost, 0xff, 6);
@@ -62,23 +62,29 @@ void PcapBackend::sendBatch(BufArray<SamplePacket> &pkts) {
 		// Give buffer back to the pool
 		packetPool.push_back(p);
 	}
-	pkts.setNum(0);
+
+	free(spArray);
 };
 
 void PcapBackend::freeBatch(BufArray<SamplePacket> &pkts) {
-	for (SamplePacket *p : pkts) {
-		packetPool.push_back(p);
+	auto freeCount = pkts.getFreeCount();
+	SamplePacket **spArray = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * 64));
+	pkts.getFreeBufs(spArray);
+
+	for (uint32_t i = 0; i < freeCount; i++) {
+		packetPool.push_back(spArray[i]);
 	}
-	pkts.setNum(0);
+
+	free(spArray);
 };
 
-BufArray<SamplePacket> PcapBackend::recvBatch() {
+BufArray<SamplePacket> *PcapBackend::recvBatch() {
+
+	// Prepare the packet array
+	SamplePacket **spArray = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * 64));
 
 	struct pcap_pkthdr header;
 	const u_char *pcapPacket;
-
-	SamplePacket **array = reinterpret_cast<SamplePacket **>(malloc(sizeof(void *) * 64));
-	BufArray<SamplePacket> pkts(array, 0);
 
 	unsigned int count = 0;
 
@@ -90,10 +96,12 @@ BufArray<SamplePacket> PcapBackend::recvBatch() {
 		SamplePacket *pkt = getPkt();
 		memcpy(pkt->getData(), pcapPacket, header.len);
 		pkt->setDataLen(header.len);
-		pkts.addPkt(pkt);
 		count++;
 		D(cout << "PcapBackend::recvBatch() got another packet" << endl;)
 	}
+
+	// Prepare one BufArray
+	BufArray<SamplePacket> *pkts = new BufArray<SamplePacket>(spArray, count);
 
 	return pkts;
 };
