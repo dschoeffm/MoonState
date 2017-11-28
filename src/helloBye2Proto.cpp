@@ -25,7 +25,7 @@ namespace Server {
  */
 
 template <class Identifier, class Packet> Hello<Identifier, Packet>::Hello() {
-	this->serverCookie = rand();
+	this->serverCookie = rand() % 256;
 };
 
 template <class Identifier, class Packet>
@@ -146,7 +146,7 @@ namespace Client {
 template <class Identifier, class Packet>
 Hello<Identifier, Packet>::Hello(uint32_t dstIp, uint16_t srcPort, uint64_t ident)
 	: dstIp(dstIp), srcPort(srcPort), ident(ident) {
-	this->clientCookie = rand();
+	this->clientCookie = rand() % 256;
 };
 
 template <class Identifier, class Packet>
@@ -282,6 +282,8 @@ void RecvBye<Identifier, Packet>::fun(
 	if (msg->cookie != this->clientCookie) {
 		std::cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie"
 				  << std::endl;
+		std::cout << "Expected: " << static_cast<int>(this->clientCookie);
+		std::cout << ", Got: " << static_cast<int>(msg->cookie) << std::endl;
 		funIface.transition(States::Terminate);
 		return;
 	}

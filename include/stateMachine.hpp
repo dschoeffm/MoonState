@@ -334,6 +334,12 @@ private:
 		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
 
+			// TODO disable this for now...
+			// TODO if 2 SMs (client and server) are executed on the same
+			// TODO host, than they also share connections, although they
+			// TODO should be isolated...
+			// TODO possible fix: connection pools
+			/*
 			// Check, if this is a connection opened by another core
 			{
 				std::lock_guard<SpinLockCLSize> guard(newStatesLock);
@@ -345,6 +351,7 @@ private:
 					goto findStateLoop;
 				}
 			}
+			*/
 
 			// Maybe accept the new connection
 			if (listenToConnections) {
@@ -520,6 +527,9 @@ public:
 			return;
 		}
 
+		// TODO Connection shating is buggy...
+		// TODO for more info look at findState()
+		/*
 		{
 			D(std::cout << "StateMachine::addState() adding connection to newStates"
 						<< std::endl;)
@@ -528,6 +538,9 @@ public:
 			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
 			newStates.insert({id, st});
 		}
+		*/
+		// TODO this is used instead for now
+		stateTable.insert({id, st});
 	}
 
 	/*! Run a batch of packets

@@ -62,7 +62,9 @@ public:
 			throw new PacketNotIdentified();
 		}
 
-		struct msg *msg = reinterpret_cast<struct msg *>(ipv4->getPayload());
+		Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
+
+		struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 		return msg->ident;
 	};
 };
