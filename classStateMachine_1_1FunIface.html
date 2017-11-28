@@ -119,6 +119,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac044ca4bb7aaf96f10715a1634ca78f5"><td class="memItemLeft" align="right" valign="top">Packet *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1FunIface.html#ac044ca4bb7aaf96f10715a1634ca78f5">getPkt</a> ()</td></tr>
 <tr class="memdesc:ac044ca4bb7aaf96f10715a1634ca78f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an additional packet buffer.  <a href="#ac044ca4bb7aaf96f10715a1634ca78f5">More...</a><br /></td></tr>
 <tr class="separator:ac044ca4bb7aaf96f10715a1634ca78f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af87038e844cd7e3e778252ef1c15ed28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1FunIface.html#af87038e844cd7e3e778252ef1c15ed28">transition</a> (<a class="el" href="common_8hpp.html#ab768e6a43a1881438f25e3b62e409889">StateID</a> newState)</td></tr>
+<tr class="memdesc:af87038e844cd7e3e778252ef1c15ed28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition to another state.  <a href="#af87038e844cd7e3e778252ef1c15ed28">More...</a><br /></td></tr>
+<tr class="separator:af87038e844cd7e3e778252ef1c15ed28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb328af4a65bf341434ebf5401160d0b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1FunIface.html#abb328af4a65bf341434ebf5401160d0b">transitionNow</a> (<a class="el" href="common_8hpp.html#ab768e6a43a1881438f25e3b62e409889">StateID</a> newState)</td></tr>
+<tr class="memdesc:abb328af4a65bf341434ebf5401160d0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Immediately transition to another state.  <a href="#abb328af4a65bf341434ebf5401160d0b">More...</a><br /></td></tr>
+<tr class="separator:abb328af4a65bf341434ebf5401160d0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e418f6d67cc73c2969ce053ade6d40a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1FunIface.html#a0e418f6d67cc73c2969ce053ade6d40a">setTimeout</a> (std::chrono::milliseconds timeout, <a class="el" href="classStateMachine.html#ad7759edf61bc3788b14a6b9d5d2332d8">timeoutFun</a> fun)</td></tr>
 <tr class="memdesc:a0e418f6d67cc73c2969ce053ade6d40a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a timeout, after which a transition will happen.  <a href="#a0e418f6d67cc73c2969ce053ade6d40a">More...</a><br /></td></tr>
 <tr class="separator:a0e418f6d67cc73c2969ce053ade6d40a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,7 +140,7 @@ class StateMachine&lt; Identifier, Packet &gt;::FunIface</h3>
 
 <p>Main interface for the needs of a state function. </p>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00121">121</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00115">115</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a0322b3ed63bbd5bb7b02dedad7d14075"></a>
 <div class="memitem">
@@ -159,7 +165,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00138">138</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00134">134</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -196,7 +202,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 
 <p>Free the packet after the batch is processed, do not send it. </p>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00145">145</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00164">164</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -226,7 +232,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 <p>Get an additional packet buffer. </p>
 <dl class="section return"><dt>Returns</dt><dd>The new packet buffer </dd></dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00151">151</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00170">170</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -273,7 +279,81 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00159">159</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00202">202</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af87038e844cd7e3e778252ef1c15ed28"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Identifier, class Packet&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classStateMachine.html">StateMachine</a>&lt; Identifier, Packet &gt;::FunIface::transition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="common_8hpp.html#ab768e6a43a1881438f25e3b62e409889">StateID</a>&#160;</td>
+          <td class="paramname"><em>newState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transition to another state. </p>
+<p>The new state will be used, as soon as the next packet for this connection is inbound.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newState</td><td>The state to transition to </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00181">181</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abb328af4a65bf341434ebf5401160d0b"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Identifier, class Packet&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classStateMachine.html">StateMachine</a>&lt; Identifier, Packet &gt;::FunIface::transitionNow </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="common_8hpp.html#ab768e6a43a1881438f25e3b62e409889">StateID</a>&#160;</td>
+          <td class="paramname"><em>newState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Immediately transition to another state. </p>
+<p>The new state will be called with the appropriate function, as soon as the current function returns. There is a check, if the endstate is reached. The new function call will receive the same packet as the function calling <a class="el" href="classStateMachine_1_1FunIface.html#abb328af4a65bf341434ebf5401160d0b" title="Immediately transition to another state. ">transitionNow()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newState</td><td>The state to transition to </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00193">193</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -298,7 +378,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00123">123</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00117">117</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>

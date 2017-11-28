@@ -14,5 +14,5 @@
 <area shape="rect" id="node14" href="$classHelloBye_1_1HelloByeClientConfig.html#a632d9fcc0cdea73b31e5871ae6b54c24" title="HelloBye::HelloByeClient\lConfig::getDstPort" alt="" coords="453,595,624,636"/>
 <area shape="rect" id="node15" href="$structHeaders_1_1Udp.html#ab28d05a7270cf1537848db896588ca01" title="Set the source port. " alt="" coords="452,661,625,687"/>
 <area shape="rect" id="node16" href="$structHeaders_1_1Udp.html#ac5397a534d246cfa93ac157eee3c565e" title="Set the length of the L4&#45;SDU (UDP payload) " alt="" coords="451,712,627,753"/>
-<area shape="rect" id="node17" href="$structStateMachine_1_1State.html#a89a520519a2b8dab5f4ae7a90c2bee83" title="Transition to another state. " alt="" coords="468,777,609,819"/>
+<area shape="rect" id="node17" href="$classStateMachine_1_1FunIface.html#af87038e844cd7e3e778252ef1c15ed28" title="Transition to another state. " alt="" coords="458,777,619,819"/>
 </map>

@@ -2,5 +2,5 @@
 <area shape="rect" id="node2" href="$structHeaders_1_1Ethernet.html#ad59e9fe1ec95b8e2ed11f97b44a20650" title="Get the SDU. " alt="" coords="249,5,385,47"/>
 <area shape="rect" id="node3" href="$structHeaders_1_1IPv4.html#acc4a8033c5da9c2ce147ee10e15d2a49" title="Get the SDU. " alt="" coords="228,71,407,98"/>
 <area shape="rect" id="node4" href="$structHeaders_1_1Udp.html#a531f2e8247abf7807c50d806208b7cb1" title="Get the SDU. " alt="" coords="229,122,405,149"/>
-<area shape="rect" id="node5" href="$structStateMachine_1_1State.html#a89a520519a2b8dab5f4ae7a90c2bee83" title="Transition to another state. " alt="" coords="247,173,388,215"/>
+<area shape="rect" id="node5" href="$classStateMachine_1_1FunIface.html#af87038e844cd7e3e778252ef1c15ed28" title="Transition to another state. " alt="" coords="237,173,398,215"/>
 </map>

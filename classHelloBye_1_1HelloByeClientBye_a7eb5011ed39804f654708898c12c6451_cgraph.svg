@@ -70,9 +70,9 @@
 </g>
 <!-- Node6 -->
 <g id="node6" class="node"><title>Node6</title>
-<g id="a_node6"><a xlink:href="structStateMachine_1_1State.html#a89a520519a2b8dab5f4ae7a90c2bee83" target="_top" xlink:title="Transition to another state. ">
-<polygon fill="none" stroke="black" points="342,-0.5 342,-30.5 448,-30.5 448,-0.5 342,-0.5"/>
-<text text-anchor="start" x="350" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">StateMachine::State</text>
+<g id="a_node6"><a xlink:href="classStateMachine_1_1FunIface.html#af87038e844cd7e3e778252ef1c15ed28" target="_top" xlink:title="Transition to another state. ">
+<polygon fill="none" stroke="black" points="334.5,-0.5 334.5,-30.5 455.5,-30.5 455.5,-0.5 334.5,-0.5"/>
+<text text-anchor="start" x="342.5" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">StateMachine::FunIface</text>
 <text text-anchor="middle" x="395" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">::transition</text>
 </a>
 </g>

@@ -1,7 +1,12 @@
 <map id="/home/dominik/uni/MoonState/include/stateMachine.hpp" name="/home/dominik/uni/MoonState/include/stateMachine.hpp">
-<area shape="rect" id="node2" href="$helloByeProto_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloByeProto.hpp" alt="" coords="225,95,421,136"/>
-<area shape="rect" id="node4" href="$helloBye__C_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloBye_C.cpp" alt="" coords="293,273,489,315"/>
-<area shape="rect" id="node3" href="$helloBye__C_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloBye_C.hpp" alt="" coords="5,184,201,225"/>
-<area shape="rect" id="node5" href="$helloByeProto_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloByeProto.cpp" alt="" coords="225,184,421,225"/>
-<area shape="rect" id="node6" href="$helloByeProtoStatic_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloByeProtoStatic.cpp" alt="" coords="445,184,641,225"/>
+<area shape="rect" id="node2" href="$helloBye2Proto_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloBye2Proto.hpp" alt="" coords="225,95,421,136"/>
+<area shape="rect" id="node4" href="$helloBye2__C_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloBye2_C.cpp" alt="" coords="416,273,612,315"/>
+<area shape="rect" id="node7" href="$helloByeProto_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloByeProto.hpp" alt="" coords="937,95,1133,136"/>
+<area shape="rect" id="node9" href="$helloBye__C_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloBye_C.cpp" alt="" coords="881,273,1077,315"/>
+<area shape="rect" id="node3" href="$helloBye2__C_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloBye2_C.hpp" alt="" coords="5,184,201,225"/>
+<area shape="rect" id="node5" href="$helloBye2Proto_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloBye2Proto.cpp" alt="" coords="225,184,421,225"/>
+<area shape="rect" id="node6" href="$helloBye2ProtoStatic_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloBye2ProtoStatic.cpp" alt="" coords="445,184,641,225"/>
+<area shape="rect" id="node8" href="$helloBye__C_8hpp.html" title="/home/dominik/uni/MoonState\l/include/helloBye_C.hpp" alt="" coords="717,184,913,225"/>
+<area shape="rect" id="node10" href="$helloByeProto_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloByeProto.cpp" alt="" coords="937,184,1133,225"/>
+<area shape="rect" id="node11" href="$helloByeProtoStatic_8cpp.html" title="/home/dominik/uni/MoonState\l/src/helloByeProtoStatic.cpp" alt="" coords="1157,184,1353,225"/>
 </map>

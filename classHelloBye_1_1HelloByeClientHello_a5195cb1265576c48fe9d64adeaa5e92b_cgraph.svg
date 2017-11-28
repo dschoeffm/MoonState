@@ -202,17 +202,17 @@
 </g>
 <!-- Node16 -->
 <g id="node16" class="node"><title>Node16</title>
-<g id="a_node16"><a xlink:href="structStateMachine_1_1State.html#a89a520519a2b8dab5f4ae7a90c2bee83" target="_top" xlink:title="Transition to another state. ">
-<polygon fill="none" stroke="black" points="183,-0.5 183,-30.5 289,-30.5 289,-0.5 183,-0.5"/>
-<text text-anchor="start" x="191" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">StateMachine::State</text>
+<g id="a_node16"><a xlink:href="classStateMachine_1_1FunIface.html#af87038e844cd7e3e778252ef1c15ed28" target="_top" xlink:title="Transition to another state. ">
+<polygon fill="none" stroke="black" points="175.5,-0.5 175.5,-30.5 296.5,-30.5 296.5,-0.5 175.5,-0.5"/>
+<text text-anchor="start" x="183.5" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">StateMachine::FunIface</text>
 <text text-anchor="middle" x="236" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">::transition</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node16 -->
 <g id="edge15" class="edge"><title>Node1&#45;&gt;Node16</title>
-<path fill="none" stroke="midnightblue" d="M66.1522,-295.265C70.3894,-249.94 89.0311,-114.509 164,-40.5 167.034,-37.5047 170.448,-34.8669 174.096,-32.544"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="175.881,-35.5566 182.962,-27.6755 172.512,-29.4207 175.881,-35.5566"/>
+<path fill="none" stroke="midnightblue" d="M66.1522,-295.265C70.3894,-249.94 89.0311,-114.509 164,-40.5 165.465,-39.054 167.018,-37.6913 168.643,-36.4072"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="170.93,-39.0885 177.295,-30.6185 167.037,-33.2707 170.93,-39.0885"/>
 </g>
 </g>
 </svg>
