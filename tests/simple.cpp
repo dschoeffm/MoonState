@@ -61,7 +61,7 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 	// if pktIn == 2 -> transition to state 2 and fill packet with 12
 	if (*(reinterpret_cast<uint32_t *>(pktIn->getData())) == 2) {
 		cout << "fun1: transision to state 2" << endl;
-		state.transition(2);
+		fi.transition(2);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 12;
 		return;
 	}
@@ -69,7 +69,7 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 	// if pktIn == 3 -> transition to state 3 and fill packet with 13
 	if (*(reinterpret_cast<uint32_t *>(pktIn->getData())) == 3) {
 		cout << "fun1: transision to state 3" << endl;
-		state.transition(3);
+		fi.transition(3);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 13;
 		return;
 	}
@@ -91,7 +91,7 @@ void fun2(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 
 	if (*(reinterpret_cast<uint32_t *>(pktIn->getData())) == 3) {
 		cout << "fun2: transision to state 3" << endl;
-		state.transition(3);
+		fi.transition(3);
 		*(reinterpret_cast<uint32_t *>(pktIn->getData())) = 23;
 		return;
 	}

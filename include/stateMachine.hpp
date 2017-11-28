@@ -102,12 +102,6 @@ public:
 		State(StateID state, void *stateData)
 			: stateData(stateData), state(state), timeoutID(timeoutIDInvalid){};
 		State(const State &s) : stateData(s.stateData), state(s.state){};
-
-		/*! Transition to another state
-		 *
-		 * \param newState The state to transition to
-		 */
-		void transition(StateID newState) { state = newState; }
 	};
 
 	/*
@@ -128,16 +122,41 @@ public:
 		ConnectionID &cID;
 		State &state;
 		bool sendPkt;
+		bool immediateTransition;
 
 		// Private -> nobody can misuse any FunIface objects
 		FunIface(StateMachine<Identifier, Packet> *sm, uint32_t pktIdx,
 			BufArray<Packet> &pktsBA, ConnectionID &cID, State &state)
-			: sm(sm), pktIdx(pktIdx), pktsBA(pktsBA), cID(cID), state(state), sendPkt(true){};
+			: sm(sm), pktIdx(pktIdx), pktsBA(pktsBA), cID(cID), state(state), sendPkt(true),
+			  immediateTransition(false){};
 
 	public:
 		~FunIface() {
 			if (!sendPkt) {
 				pktsBA.markDropPkt(pktIdx);
+			}
+
+			// We are not in the endstate - checked by runPkt
+
+			if (immediateTransition) {
+				auto sfIt = sm->functions.find(state.state);
+				if (sfIt == sm->functions.end()) {
+					D(
+						std::cout
+							<< "FunIface::~FunIface() Didn't find a function for this state"
+							<< std::endl;)
+					// Don't throw, we are in a destructor
+					// throw std::runtime_error("FunIface::~FunIface() No such function
+					// found");
+				}
+
+				D(std::cout << "Running Function" << std::endl;)
+				(sfIt->second)(state, pktsBA[pktIdx], *this);
+
+				if (state.state == sm->endStateID) {
+					D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+					sm->removeState(cID);
+				}
 			}
 		}
 
@@ -150,6 +169,30 @@ public:
 		 */
 		Packet *getPkt() {
 			throw new std::runtime_error("StateMachine::FunIface::getPkt() not implemented");
+		}
+
+		/*! Transition to another state
+		 *
+		 * The new state will be used, as soon as the next packet for this
+		 * connection is inbound.
+		 *
+		 * \param newState The state to transition to
+		 */
+		void transition(StateID newState) { state.state = newState; }
+
+		/*! Immediately transition to another state
+		 *
+		 * The new state will be called with the appropriate function, as soon
+		 * as the current function returns.
+		 * There is a check, if the endstate is reached.
+		 * The new function call will receive the same packet as the function
+		 * calling transitionNow().
+		 *
+		 * \param newState The state to transition to
+		 */
+		void transitionNow(StateID newState) {
+			state.state = newState;
+			this->immediateTransition = true;
 		}
 
 		/*! Set a timeout, after which a transition will happen
@@ -330,9 +373,13 @@ private:
 		D(std::cout << "StateMachine::runPkt() called" << std::endl;)
 
 		try {
+			// Retrieve the current packet
 			Packet *pktIn = pktsIn[cur];
+
+			// Try to identify the inbound packet
 			ConnectionID identity = identifier.identify(pktIn);
 
+			// Find a state/connection associated with this packet
 			auto stateIt = findState(identity);
 
 			if (stateIt == stateTable.end()) {
@@ -343,11 +390,13 @@ private:
 				return;
 			}
 
+			// Invalidate any previous timeouts
 			if (stateIt->second.timeoutID != timeoutIDInvalid) {
 				this->timeoutFunctions.erase(stateIt->second.timeoutID);
 				stateIt->second.timeoutID = timeoutIDInvalid;
 			}
 
+			// Try to retrieve a appropriate function
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
 				D(std::cout << "StateMachine::runPkt() Didn't find a function for this state"
@@ -355,15 +404,24 @@ private:
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
 
+			// Create the custom function interface
 			FunIface funIface(this, cur, pktsIn, identity, stateIt->second);
 
+			// Run the function
 			D(std::cout << "Running Function" << std::endl;)
 			(sfIt->second)(stateIt->second, pktIn, funIface);
 
+			// Check if the endstate is reached
 			if (stateIt->second.state == endStateID) {
 				D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
 				removeState(identity);
 			}
+
+			// At this point, the funIface is destroyed, and it is checked, if
+			// any transitionNow calls were made.
+			// XXX Therefore: DO NOT WRITE ANY CODE BELOW THIS COMMENT
+			// (or at least give it a hard thought)
+
 		} catch (PacketNotIdentified *e) {
 			D(std::cout << "StateMachine::runPkt() Packet could not be identified"
 						<< std::endl;);

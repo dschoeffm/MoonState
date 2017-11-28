@@ -29,6 +29,8 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeServerHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
+	(void)state;
+
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
@@ -37,7 +39,7 @@ void HelloBye::HelloByeServerHello<Identifier, Packet>::fun(
 	char clientStr[] = "CLIENT HELLO:";
 	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
 		std::cout << "HelloByeServerHello::fun() clientStr didn't match" << std::endl;
-		state.transition(HelloByeServer::Terminate);
+		funIface.transition(HelloByeServer::Terminate);
 		funIface.freePkt();
 		return;
 	}
@@ -70,7 +72,7 @@ void HelloBye::HelloByeServerHello<Identifier, Packet>::fun(
 	udp->dstPort = udp->srcPort;
 	udp->srcPort = tmp16;
 
-	state.transition(HelloByeServer::Bye);
+	funIface.transition(HelloByeServer::Bye);
 };
 
 /*
@@ -89,8 +91,7 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
-	// Not needed in this function
-	(void)funIface;
+	(void)state;
 
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
@@ -100,7 +101,7 @@ void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	char clientStr[] = "CLIENT BYE:";
 	if (memcmp(udp->getPayload(), clientStr, sizeof(clientStr) - 1) != 0) {
 		std::cout << "HelloByeServerBye::fun() clientStr didn't match" << std::endl;
-		state.transition(HelloByeServer::Terminate);
+		funIface.transition(HelloByeServer::Terminate);
 		return;
 	}
 
@@ -111,7 +112,7 @@ void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 
 	if (recvCookie != this->serverCookie) {
 		std::cout << "HelloByeServerBye::fun() Client sent over wrong cookie" << std::endl;
-		state.transition(HelloByeServer::Terminate);
+		funIface.transition(HelloByeServer::Terminate);
 		return;
 	}
 
@@ -137,7 +138,7 @@ void HelloBye::HelloByeServerBye<Identifier, Packet>::fun(
 	udp->srcPort = tmp16;
 
 	// We are done after this -> transition to Terminate
-	state.transition(HelloByeServer::Terminate);
+	funIface.transition(HelloByeServer::Terminate);
 };
 
 /*
@@ -158,7 +159,7 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
-	(void)funIface;
+	(void)state;
 
 	memset(pkt->getData(), 0, pkt->getDataLen());
 
@@ -196,7 +197,7 @@ void HelloBye::HelloByeClientHello<Identifier, Packet>::fun(
 	udp->setSrcPort(this->srcPort);
 	udp->setPayloadLength(50);
 
-	state.transition(HelloByeClient::Bye);
+	funIface.transition(HelloByeClient::Bye);
 };
 
 /*
@@ -215,8 +216,7 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
-	// Not needed in this function
-	(void)funIface;
+	(void)state;
 
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
@@ -226,7 +226,7 @@ void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	char serverStr[] = "SERVER HELLO:";
 	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
 		std::cout << "HelloByeClientBye::fun() serverStr didn't match" << std::endl;
-		state.transition(HelloByeClient::Terminate);
+		funIface.transition(HelloByeClient::Terminate);
 		return;
 	}
 
@@ -260,7 +260,7 @@ void HelloBye::HelloByeClientBye<Identifier, Packet>::fun(
 	udp->srcPort = tmp16;
 
 	// We need to wait for the server reply
-	state.transition(HelloByeClient::RecvBye);
+	funIface.transition(HelloByeClient::RecvBye);
 };
 
 /*
@@ -279,6 +279,8 @@ template <class Identifier, class Packet>
 void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 	typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 
+	(void)state;
+
 	// Get info from packet
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
@@ -287,7 +289,7 @@ void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 	char serverStr[] = "SERVER BYE:";
 	if (memcmp(udp->getPayload(), serverStr, sizeof(serverStr) - 1) != 0) {
 		std::cout << "HelloByeClientRecvBye::fun() serverStr didn't match" << std::endl;
-		state.transition(HelloByeClient::Terminate);
+		funIface.transition(HelloByeClient::Terminate);
 		return;
 	}
 
@@ -299,14 +301,14 @@ void HelloBye::HelloByeClientRecvBye<Identifier, Packet>::fun(
 	if (recvCookie != this->clientCookie) {
 		std::cout << "HelloByeClientRecvBye::fun() Server sent over wrong cookie"
 				  << std::endl;
-		state.transition(HelloByeClient::Terminate);
+		funIface.transition(HelloByeClient::Terminate);
 		return;
 	}
 
 	funIface.freePkt();
 
 	// We are done after this -> transition to Terminate
-	state.transition(HelloByeClient::Terminate);
+	funIface.transition(HelloByeClient::Terminate);
 };
 
 	/*
