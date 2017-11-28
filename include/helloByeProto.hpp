@@ -223,6 +223,8 @@ public:
 
 }; // namespace HelloBye
 
+#ifndef HELLOBYEPROTO_CPP
 #include "../src/helloByeProto.cpp"
+#endif
 
 #endif /* HELLOBYEPROTO_HPP */
