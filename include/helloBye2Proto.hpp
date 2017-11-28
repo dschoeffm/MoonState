@@ -2,8 +2,11 @@
 #define HELLOBYE2PROTO_HPP
 
 #include <mutex>
+#include <sstream>
 
 #include "common.hpp"
+#include "exceptions.hpp"
+#include "headers.hpp"
 #include "stateMachine.hpp"
 
 namespace HelloBye2 {
@@ -19,6 +22,49 @@ struct __attribute__((packed)) msg {
 
 	static constexpr uint8_t MSG_HELLO = 0;
 	static constexpr uint8_t MSG_BYE = 0;
+};
+
+/*
+ * ===================================
+ * Identifier
+ * ===================================
+ *
+ */
+
+template <typename Packet> class Identifier {
+public:
+	class ConnectionID {
+	public:
+		uint64_t ident;
+
+		bool operator==(const ConnectionID &c) const { return ident == c.ident; };
+		bool operator<(const ConnectionID &c) const { return ident < c.ident; };
+		operator std::string() const {
+			std::stringstream sstream;
+			sstream << ident;
+			return sstream.str();
+		};
+		ConnectionID(const ConnectionID &c) : ident(c.ident){};
+		ConnectionID() : ident(0){};
+		ConnectionID(uint64_t i) : ident(i){};
+	};
+	struct Hasher {
+		size_t operator()(const ConnectionID &c) const { return c.ident; };
+	};
+	static ConnectionID identify(Packet *pkt) {
+		Headers::Ethernet *eth = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+		if (eth->getEthertype() != Headers::Ethernet::ETHERTYPE_IPv4) {
+			throw new PacketNotIdentified();
+		}
+
+		Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(eth->getPayload());
+		if (ipv4->proto != Headers::IPv4::PROTO_UDP) {
+			throw new PacketNotIdentified();
+		}
+
+		struct msg *msg = reinterpret_cast<struct msg *>(ipv4->getPayload());
+		return msg->ident;
+	};
 };
 
 /*

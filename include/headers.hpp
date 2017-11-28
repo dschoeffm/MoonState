@@ -43,6 +43,9 @@ struct Ethernet {
 	 */
 	uint16_t getEthertype() { return ntohs(this->ethertype); }
 
+	static constexpr uint16_t ETHERTYPE_IPv4 = 0x0800;
+	static constexpr uint16_t ETHERTYPE_IPv6 = 0x86dd;
+
 	/*! Set the ethertype
 	 * \param type Ethertype in host byte order
 	 */
