@@ -339,19 +339,20 @@ private:
 			// TODO host, than they also share connections, although they
 			// TODO should be isolated...
 			// TODO possible fix: connection pools
-			/*
+
 			// Check, if this is a connection opened by another core
 			{
 				std::lock_guard<SpinLockCLSize> guard(newStatesLock);
 				auto maybeStateIt = newStates.find(id);
 				if (maybeStateIt != newStates.end()) {
 					// Found a suitable state, insert it into own stateTable
+					D(std::cout << "StateMachine::findState() found state in newStates"
+								<< std::endl;)
 					stateTable.insert(*maybeStateIt);
 					newStates.erase(maybeStateIt);
 					goto findStateLoop;
 				}
 			}
-			*/
 
 			// Maybe accept the new connection
 			if (listenToConnections) {
@@ -377,7 +378,7 @@ private:
 	};
 
 	void runPkt(BufArray<Packet> &pktsIn, unsigned int cur) {
-		D(std::cout << "StateMachine::runPkt() called" << std::endl;)
+		D(std::cout << std::endl << "StateMachine::runPkt() called" << std::endl;)
 
 		try {
 			// Retrieve the current packet
@@ -415,12 +416,18 @@ private:
 			FunIface funIface(this, cur, pktsIn, identity, stateIt->second);
 
 			// Run the function
-			D(std::cout << "Running Function" << std::endl;)
+			D(std::cout << "StateMachine::runPkt() Running Function" << std::endl;)
+			D(std::cout << "StateMachine::runPkt() identity: "
+						<< static_cast<std::string>(identity) << std::endl;)
+			D(std::cout << "StateMachine::runPkt() hexdump of packet: " << std::endl;)
+			D(hexdump(pktIn->getData(), pktIn->getDataLen());)
 			(sfIt->second)(stateIt->second, pktIn, funIface);
 
 			// Check if the endstate is reached
 			if (stateIt->second.state == endStateID) {
-				D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+				D(std::cout
+						<< "StateMachine::runPkt() Reached endStateID - deleting connection"
+						<< std::endl;)
 				removeState(identity);
 			}
 
@@ -529,7 +536,7 @@ public:
 
 		// TODO Connection shating is buggy...
 		// TODO for more info look at findState()
-		/*
+
 		{
 			D(std::cout << "StateMachine::addState() adding connection to newStates"
 						<< std::endl;)
@@ -538,9 +545,9 @@ public:
 			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
 			newStates.insert({id, st});
 		}
-		*/
+
 		// TODO this is used instead for now
-		stateTable.insert({id, st});
+		// stateTable.insert({id, st});
 	}
 
 	/*! Run a batch of packets
@@ -553,6 +560,10 @@ public:
 	 */
 	void runPktBatch(BufArray<Packet> &pktsIn) {
 		uint32_t inCount = pktsIn.getTotalCount();
+
+		D(std::cout << std::endl
+					<< "StateMachine::runPktBatch() running incoming batch now, #Pkts: "
+					<< inCount << std::endl;)
 
 		// This loop handles the timeouts
 		// It breaks, if there are no usable timeouts anymore

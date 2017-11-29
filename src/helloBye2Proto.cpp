@@ -26,6 +26,8 @@ namespace Server {
 
 template <class Identifier, class Packet> Hello<Identifier, Packet>::Hello() {
 	this->serverCookie = rand() % 256;
+	D(std::cout << "HelloBye2::Server::Hello::Hello() serverCookie: "
+				<< static_cast<int>(serverCookie) << std::endl;)
 };
 
 template <class Identifier, class Packet>
@@ -41,6 +43,9 @@ void Hello<Identifier, Packet>::fun(
 
 	struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 
+	D(std::cout << "HelloBye2::Server::Hello::fun() pkt: " << (void *)pkt->getData()
+				<< ", ident: " << msg->ident << std::endl;)
+
 	if ((msg->role != msg::ROLE_CLIENT) || (msg->msg != msg::MSG_HELLO)) {
 		std::cout << "HelloBye2::Server::Hello::fun() client hello wrong" << std::endl;
 		funIface.transition(States::Terminate);
@@ -50,6 +55,8 @@ void Hello<Identifier, Packet>::fun(
 
 	// Get client cookie
 	this->clientCookie = msg->cookie;
+	D(std::cout << "HelloBye2::Server::Hello::fun() clientCookie: "
+				<< static_cast<int>(clientCookie) << std::endl;)
 
 	msg->role = msg::ROLE_SERVER;
 	msg->msg = msg::MSG_HELLO;
@@ -218,6 +225,9 @@ void Bye<Identifier, Packet>::fun(
 
 	struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 
+	D(std::cout << "HelloBye2::Client::Bye::fun() function called, ident:" << msg->ident
+				<< std::endl;)
+
 	if ((msg->role != msg::ROLE_SERVER) || (msg->msg != msg::MSG_HELLO)) {
 		std::cout << "HelloBye2::Client::Bye::fun() msg fields wrong" << std::endl;
 		funIface.transition(States::Terminate);
@@ -244,6 +254,9 @@ void Bye<Identifier, Packet>::fun(
 	uint16_t tmp16 = udp->dstPort;
 	udp->dstPort = udp->srcPort;
 	udp->srcPort = tmp16;
+
+	D(std::cout << "HelloBye2::Client::Bye::fun() Dump of outgoing packet" << std::endl;)
+	D(hexdump(pkt->getData(), 64);)
 
 	// We need to wait for the server reply
 	funIface.transition(States::RecvBye);

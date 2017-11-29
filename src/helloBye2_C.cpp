@@ -14,6 +14,8 @@ extern "C" {
 
 void *HelloBye2_Server_init() {
 
+	srand(time(NULL));
+
 	auto *obj = new StateMachine<HelloBye2::Identifier<mbuf>, mbuf>();
 
 	obj->registerEndStateID(HelloBye2::Server::States::Terminate);
@@ -61,6 +63,9 @@ void HelloBye2_Server_free(void *obj) {
  */
 
 void *HelloBye2_Client_init() {
+
+	srand(time(NULL));
+
 	auto *obj = new StateMachine<HelloBye2::Identifier<mbuf>, mbuf>();
 
 	obj->registerEndStateID(HelloBye2::Client::States::Terminate);

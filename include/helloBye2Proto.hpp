@@ -21,7 +21,7 @@ struct __attribute__((packed)) msg {
 	static constexpr uint8_t ROLE_SERVER = 1;
 
 	static constexpr uint8_t MSG_HELLO = 0;
-	static constexpr uint8_t MSG_BYE = 0;
+	static constexpr uint8_t MSG_BYE = 1;
 };
 
 /*
