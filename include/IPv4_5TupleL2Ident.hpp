@@ -58,8 +58,8 @@ public:
 
 	struct Hasher {
 		// In the future, maybe we find something more random...
-		size_t operator()(const ConnectionID &c) const {
-			uint32_t res = c.dstPort;
+		uint64_t operator()(const ConnectionID &c) const {
+			uint64_t res = c.dstPort;
 			res |= c.srcPort << 16;
 			res ^= c.dstIP;
 			res += c.srcIP;

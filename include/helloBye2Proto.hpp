@@ -49,7 +49,7 @@ public:
 		ConnectionID(uint64_t i) : ident(i){};
 	};
 	struct Hasher {
-		size_t operator()(const ConnectionID &c) const { return c.ident; };
+		uint64_t operator()(const ConnectionID &c) const { return c.ident; };
 	};
 	static ConnectionID identify(Packet *pkt) {
 		Headers::Ethernet *eth = reinterpret_cast<Headers::Ethernet *>(pkt->getData());

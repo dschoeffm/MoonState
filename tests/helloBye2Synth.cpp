@@ -30,6 +30,12 @@ int main(int argc, char **argv) {
 	SM client;
 	SM server;
 
+	SM::ConnectionPool clientPool;
+	SM::ConnectionPool serverPool;
+
+	client.setConnectionPool(&clientPool);
+	server.setConnectionPool(&serverPool);
+
 	client.registerEndStateID(Client::States::Terminate);
 	client.registerFunction(Client::States::Hello, Client::Hello<Ident, Packet>::run);
 	client.registerFunction(Client::States::Bye, Client::Bye<Ident, Packet>::run);
@@ -66,7 +72,7 @@ int main(int argc, char **argv) {
 	}
 
 	// The new connections are all not bound to the core/instance yet
-	assert(client.getStateTableSize() == BATCH_SIZE);
+	assert(client.getStateTableSize() == 0);
 	assert(server.getStateTableSize() == 0);
 
 	cout << "-----------------------------------" << endl;
@@ -77,7 +83,7 @@ int main(int argc, char **argv) {
 	server.runPktBatch(bufArray);
 	assert(bufArray.getSendCount() == BATCH_SIZE);
 	assert(bufArray.getFreeCount() == 0);
-	assert(client.getStateTableSize() == BATCH_SIZE);
+	assert(client.getStateTableSize() == 0);
 	assert(server.getStateTableSize() == BATCH_SIZE);
 
 	cout << "-----------------------------------" << endl;

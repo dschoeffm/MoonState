@@ -42,7 +42,7 @@
  *		struct Hasher {
  *			// This should be uniformly distributed
  *			// Collisions can happen, but are not great
- *			size_t operator()(const ConnectionID &c) const;
+ *			uint64_t operator()(const ConnectionID &c) const;
  *		};
  *
  *		static ConnectionID identify(Packet *pkt);
@@ -99,9 +99,16 @@ public:
 		StateID state;
 		uint32_t timeoutID;
 
+		State() : stateData(nullptr), state(StateIDInvalid), timeoutID(timeoutIDInvalid){};
 		State(StateID state, void *stateData)
 			: stateData(stateData), state(state), timeoutID(timeoutIDInvalid){};
 		State(const State &s) : stateData(s.stateData), state(s.state){};
+
+		void set(const State &s) {
+			stateData = s.stateData;
+			state = s.state;
+			timeoutID = s.timeoutID;
+		}
 	};
 
 	/*
@@ -226,6 +233,56 @@ public:
 		}
 	};
 
+	class ConnectionPool {
+	private:
+		SpinLockCLSize newStatesLock;
+		std::unordered_map<ConnectionID, State, Hasher> newStates;
+
+	public:
+		ConnectionPool(){};
+
+		/*! Add connection and state to the connection pool
+		 *
+		 * \param cID ID of the connection
+		 * \param st State for the connection
+		 */
+		void add(ConnectionID &cID, State &st) {
+			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
+			newStates.insert({cID, st});
+		};
+
+		/*! Try to find a state for a given connection ID
+		 *
+		 * This function tries to find the state for a given connection ID.
+		 * If a state is found, it is written in *st, otherwise nothing is written.
+		 * True is returned, if a state is found. False otherwise.
+		 *
+		 * \param cID Connection ID to look for
+		 * \param st Pointer to memory for the state
+		 * \return Found or not found
+		 */
+		bool find(ConnectionID &cID, State *st) {
+			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
+			auto ret = newStates.find(cID);
+
+			if (ret != newStates.end()) {
+				st->set(ret->second);
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+#if 0
+		// If this is needed later, I will add it later
+		/*! Erase a connection from the pool
+		 *
+		 * \param cID Connection ID to erase
+		 */
+		void erase(ConnectionID &cID);
+#endif
+	};
+
 private:
 	/*
 	 * XXX -------------------------------------------- XXX
@@ -320,8 +377,8 @@ private:
 
 	// These two members allow to open a connection on one core,
 	// and receive subsequent packets on another
-	static SpinLockCLSize newStatesLock;
-	static std::unordered_map<ConnectionID, State, Hasher> newStates;
+	static ConnectionPool connPoolStatic;
+	ConnectionPool *connPool;
 
 	/*
 	 * XXX -------------------------------------------- XXX
@@ -334,22 +391,13 @@ private:
 		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
 
-			// TODO disable this for now...
-			// TODO if 2 SMs (client and server) are executed on the same
-			// TODO host, than they also share connections, although they
-			// TODO should be isolated...
-			// TODO possible fix: connection pools
-
-			// Check, if this is a connection opened by another core
+			// Try to find state in the connection pool
 			{
-				std::lock_guard<SpinLockCLSize> guard(newStatesLock);
-				auto maybeStateIt = newStates.find(id);
-				if (maybeStateIt != newStates.end()) {
-					// Found a suitable state, insert it into own stateTable
-					D(std::cout << "StateMachine::findState() found state in newStates"
+				State st;
+				if (connPool->find(id, &st)) {
+					D(std::cout << "StateMachine::findState() found state in connPool"
 								<< std::endl;)
-					stateTable.insert(*maybeStateIt);
-					newStates.erase(maybeStateIt);
+					stateTable.insert({id, st});
 					goto findStateLoop;
 				}
 			}
@@ -452,7 +500,7 @@ public:
 
 	StateMachine()
 		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false),
-		  curTimeoutID(0){};
+		  curTimeoutID(0), connPool(&connPoolStatic){};
 
 	/*! Get the number of tracked connections
 	 * This is probably only for statistics
@@ -500,6 +548,8 @@ public:
 	 */
 	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
 
+	void setConnectionPool(ConnectionPool *cp) { connPool = cp; }
+
 	/*! Remove a connection
 	 *
 	 * Using this function you can delete a connection.
@@ -534,20 +584,11 @@ public:
 			return;
 		}
 
-		// TODO Connection shating is buggy...
-		// TODO for more info look at findState()
-
-		{
-			D(std::cout << "StateMachine::addState() adding connection to newStates"
-						<< std::endl;)
-			D(std::cout << "StateMachine::addState() identity: "
-						<< static_cast<std::string>(id) << std::endl;)
-			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
-			newStates.insert({id, st});
-		}
-
-		// TODO this is used instead for now
-		// stateTable.insert({id, st});
+		D(std::cout << "StateMachine::addState() adding connection to newStates"
+					<< std::endl;)
+		D(std::cout << "StateMachine::addState() identity: " << static_cast<std::string>(id)
+					<< std::endl;)
+		connPool->add(id, st);
 	}
 
 	/*! Run a batch of packets
@@ -623,11 +664,7 @@ public:
 
 // Don't try to understand the template stuff, it works...
 template <class Identifier, class Packet>
-std::unordered_map<typename Identifier::ConnectionID,
-	typename StateMachine<Identifier, Packet>::State, typename Identifier::Hasher>
-	StateMachine<Identifier, Packet>::newStates;
-
-template <class Identifier, class Packet>
-SpinLockCLSize StateMachine<Identifier, Packet>::newStatesLock;
+typename StateMachine<Identifier, Packet>::ConnectionPool
+	StateMachine<Identifier, Packet>::connPoolStatic;
 
 #endif /* STATE_MACHINE_HPP */
