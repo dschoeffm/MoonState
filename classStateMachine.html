@@ -109,6 +109,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1ConnectionPool.html">ConnectionPool</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine_1_1FunIface.html">FunIface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main interface for the needs of a state function.  <a href="classStateMachine_1_1FunIface.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,6 +146,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9084c760d691a68490303316b0172aba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#a9084c760d691a68490303316b0172aba">registerGetPktCB</a> (std::function&lt; Packet *()&gt; fun)</td></tr>
 <tr class="memdesc:a9084c760d691a68490303316b0172aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback in order to get new buffer.  <a href="#a9084c760d691a68490303316b0172aba">More...</a><br /></td></tr>
 <tr class="separator:a9084c760d691a68490303316b0172aba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14e1b0ffab20ba97cfab43fba617720b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#a14e1b0ffab20ba97cfab43fba617720b">setConnectionPool</a> (<a class="el" href="classStateMachine_1_1ConnectionPool.html">ConnectionPool</a> *cp)</td></tr>
+<tr class="separator:a14e1b0ffab20ba97cfab43fba617720b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb32e2ad53518611b1fded8dfe2f45f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5">removeState</a> (ConnectionID id)</td></tr>
 <tr class="memdesc:acb32e2ad53518611b1fded8dfe2f45f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a connection.  <a href="#acb32e2ad53518611b1fded8dfe2f45f5">More...</a><br /></td></tr>
 <tr class="separator:acb32e2ad53518611b1fded8dfe2f45f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,7 +171,7 @@ class StateMachine&lt; Identifier, Packet &gt;</h3>
 <p><a class="el" href="structStateMachine_1_1State.html" title="Represents one connection. ">State</a> machine framework. </p>
 <p>This class is a comprehensive framework, on top of which a developer can build high-performance state machines.</p>
 <p>It can be specialized to work with different underlying packet packet sources and packet identifiers.</p>
-<p>The Identifier needs to have the following form: </p><div class="fragment"><div class="line"><span class="keyword">class </span>Identifier {</div><div class="line">        <span class="comment">// This class needs to be unique for each packet</span></div><div class="line">    <span class="keyword">class </span>ConnectionID {</div><div class="line">        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">        <span class="keywordtype">bool</span> operator&lt;(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">        <span class="keyword">operator</span> std::string() <span class="keyword">const</span>;</div><div class="line">        ConnectionID(<span class="keyword">const</span> ConnectionID &amp;c);</div><div class="line">        ConnectionID();</div><div class="line">    };</div><div class="line"></div><div class="line">    <span class="keyword">struct </span>Hasher {</div><div class="line">        <span class="comment">// This should be uniformly distributed</span></div><div class="line">        <span class="comment">// Collisions can happen, but are not great</span></div><div class="line">        <span class="keywordtype">size_t</span> operator()(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">    };</div><div class="line"></div><div class="line">    <span class="keyword">static</span> ConnectionID identify(Packet *pkt);</div><div class="line">};</div></div><!-- fragment --><p>The Packet needs to have the following form: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>Packet {</div><div class="line">    <span class="keywordtype">void</span> *getData();</div><div class="line">    uint16_t getDataLen();</div><div class="line">    <span class="keywordtype">void</span> setDataLen(uint16_t l);</div><div class="line">    uint16_t getBufLen();</div><div class="line">};</div></div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>The Identifier needs to have the following form: </p><div class="fragment"><div class="line"><span class="keyword">class </span>Identifier {</div><div class="line">        <span class="comment">// This class needs to be unique for each packet</span></div><div class="line">    <span class="keyword">class </span>ConnectionID {</div><div class="line">        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">        <span class="keywordtype">bool</span> operator&lt;(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">        <span class="keyword">operator</span> std::string() <span class="keyword">const</span>;</div><div class="line">        ConnectionID(<span class="keyword">const</span> ConnectionID &amp;c);</div><div class="line">        ConnectionID();</div><div class="line">    };</div><div class="line"></div><div class="line">    <span class="keyword">struct </span>Hasher {</div><div class="line">        <span class="comment">// This should be uniformly distributed</span></div><div class="line">        <span class="comment">// Collisions can happen, but are not great</span></div><div class="line">        uint64_t operator()(<span class="keyword">const</span> ConnectionID &amp;c) <span class="keyword">const</span>;</div><div class="line">    };</div><div class="line"></div><div class="line">    <span class="keyword">static</span> ConnectionID identify(Packet *pkt);</div><div class="line">};</div></div><!-- fragment --><p>The Packet needs to have the following form: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>Packet {</div><div class="line">    <span class="keywordtype">void</span> *getData();</div><div class="line">    uint16_t getDataLen();</div><div class="line">    <span class="keywordtype">void</span> setDataLen(uint16_t l);</div><div class="line">    uint16_t getBufLen();</div><div class="line">};</div></div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Identifier</td><td>This class is used to uniquely identify incoming packets (see above) </td></tr>
     <tr><td class="paramname">Packet</td><td>This class wraps around any kind of packet buffer (see above) </td></tr>
@@ -237,7 +241,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00439">439</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00510">510</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -293,7 +297,14 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00505">505</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00578">578</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classStateMachine_a738c8e36eff606e6e11668ea1e441754_cgraph.svg" width="398" height="52"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</p>
 
 </div>
 </div>
@@ -323,7 +334,7 @@ template&lt;class Identifier, class Packet&gt; </div>
 <p>Get the number of tracked connections This is probably only for statistics. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of connections </dd></dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00448">448</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00519">519</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -359,7 +370,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00465">465</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00536">536</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -407,7 +418,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00458">458</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00529">529</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -443,7 +454,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00487">487</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00558">558</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -491,7 +502,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00476">476</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00547">547</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -528,7 +539,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00495">495</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00568">568</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>
@@ -565,7 +576,7 @@ template&lt;class Identifier, class Packet&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00541">541</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00611">611</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -573,6 +584,34 @@ Here is the call graph for this function:</div>
 <div class="center"><iframe scrolling="no" frameborder="0" src="classStateMachine_aa1eae1413acf399a997e587c905e14aa_cgraph.svg" width="426" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </p>
+
+</div>
+</div>
+<a class="anchor" id="a14e1b0ffab20ba97cfab43fba617720b"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Identifier, class Packet&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classStateMachine.html">StateMachine</a>&lt; Identifier, Packet &gt;::setConnectionPool </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStateMachine_1_1ConnectionPool.html">ConnectionPool</a> *&#160;</td>
+          <td class="paramname"><em>cp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="stateMachine_8hpp_source.html#l00560">560</a> of file <a class="el" href="stateMachine_8hpp_source.html">stateMachine.hpp</a>.</p>
 
 </div>
 </div>

@@ -1,6 +1,7 @@
 var searchData=
 [
   ['factory',['factory',['../classHelloBye2_1_1Server_1_1Hello.html#a7e73d4d92c9af8196fbf58b0bfd1b4e2',1,'HelloBye2::Server::Hello::factory()'],['../classHelloBye_1_1HelloByeServerHello.html#a6862703b585fb944698b4450c541ae50',1,'HelloBye::HelloByeServerHello::factory()']]],
+  ['find',['find',['../classStateMachine_1_1ConnectionPool.html#af0f657f2389a850365252b13302960e9',1,'StateMachine::ConnectionPool']]],
   ['flags',['flags',['../structHeaders_1_1IPv4.html#af566a122af63f45f5f9cf610b5081b4d',1,'Headers::IPv4']]],
   ['flags_5ffragmentation',['flags_fragmentation',['../structHeaders_1_1IPv4.html#addd5e6fdcc881bdc280d38150b7f9989',1,'Headers::IPv4']]],
   ['fragmentation',['fragmentation',['../structHeaders_1_1IPv4.html#a39cfc19a46c08d944a8258102126455d',1,'Headers::IPv4']]],

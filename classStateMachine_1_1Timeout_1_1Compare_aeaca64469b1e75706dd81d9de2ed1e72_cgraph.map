@@ -1,4 +1,7 @@
 <map id="StateMachine::Timeout::Compare::operator()" name="StateMachine::Timeout::Compare::operator()">
-<area shape="rect" id="node2" href="$classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5" title="Remove a connection. " alt="" coords="211,5,395,32"/>
-<area shape="rect" id="node3" href="$classBufArray.html#ad9a4fc65d7d2528cba69f3089ad98098" title="Mark one packet as drop. " alt="" coords="223,56,382,83"/>
+<area shape="rect" id="node2" href="$classStateMachine_1_1ConnectionPool.html#af0f657f2389a850365252b13302960e9" title="Try to find a state for a given connection ID. " alt="" coords="215,5,391,47"/>
+<area shape="rect" id="node4" href="$common_8hpp.html#ab9ce1ea79c76c5726af17e271c20c6ec" title="Dump hex data. " alt="" coords="265,71,340,98"/>
+<area shape="rect" id="node5" href="$classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5" title="Remove a connection. " alt="" coords="211,122,395,149"/>
+<area shape="rect" id="node6" href="$classBufArray.html#ad9a4fc65d7d2528cba69f3089ad98098" title="Mark one packet as drop. " alt="" coords="223,173,382,199"/>
+<area shape="rect" id="node3" href="$structStateMachine_1_1State.html#ac677f1c9373a6ca421ac2f1f159fe8a6" title="StateMachine::State::set" alt="" coords="443,13,609,39"/>
 </map>
