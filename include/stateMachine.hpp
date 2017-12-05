@@ -235,8 +235,11 @@ public:
 
 	class ConnectionPool {
 	private:
-		SpinLockCLSize newStatesLock;
-		std::unordered_map<ConnectionID, State, Hasher> newStates;
+		static const unsigned int numBuckets = 8;
+		static const uint64_t bucketMask = 0x7;
+
+		std::unordered_map<ConnectionID, State, Hasher> newStates[numBuckets];
+		SpinLockCLSize newStatesLock[numBuckets];
 
 	public:
 		ConnectionPool(){};
@@ -247,8 +250,11 @@ public:
 		 * \param st State for the connection
 		 */
 		void add(ConnectionID &cID, State &st) {
-			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
-			newStates.insert({cID, st});
+			Hasher hasher;
+			uint64_t bucket = hasher(cID) & bucketMask;
+
+			std::lock_guard<SpinLockCLSize> lock(newStatesLock[bucket]);
+			newStates[bucket].insert({cID, st});
 		};
 
 		/*! Try to find a state for a given connection ID
@@ -262,10 +268,13 @@ public:
 		 * \return Found or not found
 		 */
 		bool find(ConnectionID &cID, State *st) {
-			std::lock_guard<SpinLockCLSize> lock(newStatesLock);
-			auto ret = newStates.find(cID);
+			Hasher hasher;
+			uint64_t bucket = hasher(cID) & bucketMask;
 
-			if (ret != newStates.end()) {
+			std::lock_guard<SpinLockCLSize> lock(newStatesLock[bucket]);
+			auto ret = newStates[bucket].find(cID);
+
+			if (ret != newStates[bucket].end()) {
 				st->set(ret->second);
 				return true;
 			} else {
@@ -666,5 +675,11 @@ public:
 template <class Identifier, class Packet>
 typename StateMachine<Identifier, Packet>::ConnectionPool
 	StateMachine<Identifier, Packet>::connPoolStatic;
+
+template <class Identifier, class Packet>
+const uint64_t StateMachine<Identifier, Packet>::ConnectionPool::bucketMask;
+
+template <class Identifier, class Packet>
+const unsigned int StateMachine<Identifier, Packet>::ConnectionPool::numBuckets;
 
 #endif /* STATE_MACHINE_HPP */
