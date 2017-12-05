@@ -236,7 +236,7 @@ public:
 	class ConnectionPool {
 	private:
 		static const unsigned int numBuckets = 8;
-		static const uint64_t bucketMask = 0x7;
+		static const uint64_t bucketMask = 0b111;
 
 		std::unordered_map<ConnectionID, State, Hasher> newStates[numBuckets];
 		SpinLockCLSize newStatesLock[numBuckets];
