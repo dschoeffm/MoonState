@@ -391,6 +391,15 @@ private:
 
 	/*
 	 * XXX -------------------------------------------- XXX
+	 *       Statistics
+	 * XXX -------------------------------------------- XXX
+	 */
+
+	uint64_t stat_statesAdded = 0;
+	uint64_t stat_statesClosed = 0;
+
+	/*
+	 * XXX -------------------------------------------- XXX
 	 *       Private helper methods
 	 * XXX -------------------------------------------- XXX
 	 */
@@ -407,6 +416,9 @@ private:
 					D(std::cout << "StateMachine::findState() found state in connPool"
 								<< std::endl;)
 					stateTable.insert({id, st});
+
+					stat_statesAdded++;
+
 					goto findStateLoop;
 				}
 			}
@@ -425,6 +437,9 @@ private:
 
 				State s(startStateID, stateData);
 				stateTable.insert({id, s});
+
+				stat_statesAdded++;
+
 				goto findStateLoop;
 			}
 
@@ -486,6 +501,8 @@ private:
 						<< "StateMachine::runPkt() Reached endStateID - deleting connection"
 						<< std::endl;)
 				removeState(identity);
+
+				stat_statesClosed++;
 			}
 
 			// At this point, the funIface is destroyed, and it is checked, if
@@ -510,6 +527,13 @@ public:
 	StateMachine()
 		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false),
 		  curTimeoutID(0), connPool(&connPoolStatic){};
+
+	~StateMachine() {
+		std::cout << "StateMachine stats:" << std::endl;
+		std::cout << "stateTable.size() = " << stateTable.size() << std::endl;
+		std::cout << "statesAdded  = " << stat_statesAdded << std::endl;
+		std::cout << "statesClosed = " << stat_statesClosed << std::endl;
+	}
 
 	/*! Get the number of tracked connections
 	 * This is probably only for statistics
