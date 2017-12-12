@@ -1,3 +1,6 @@
+#ifndef COMMON_HPP
+#define COMMON_HPP
+
 #include <array>
 #include <cassert>
 
@@ -82,7 +85,7 @@ struct uint24 {
 	std::array<uint8_t, 3> arr;
 
 	void set(uint32_t val) {
-		assert((val >> 48) == 0);
+		assert((val >> 24) == 0);
 		arr[0] = static_cast<uint8_t>(val & 0xff);
 		arr[1] = static_cast<uint8_t>((val >> 8) & 0xff);
 		arr[2] = static_cast<uint8_t>((val >> 16) & 0xff);
@@ -109,3 +112,5 @@ struct uint24 {
 		return val;
 	};
 };
+
+#endif /* COMMON_HPP */
