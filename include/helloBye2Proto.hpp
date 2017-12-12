@@ -191,6 +191,9 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		Bye *t = reinterpret_cast<Bye *>(state.stateData);
 		t->fun(state, pkt, funIface);
+		if (state.state == States::Terminate) {
+			delete (t);
+		}
 	}
 };
 
@@ -231,6 +234,9 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		Hello *t = reinterpret_cast<Hello *>(state.stateData);
 		t->fun(state, pkt, funIface);
+		if (state.state == States::Terminate) {
+			delete (t);
+		}
 	}
 };
 
@@ -258,6 +264,9 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		Bye *t = reinterpret_cast<Bye *>(state.stateData);
 		t->fun(state, pkt, funIface);
+		if (state.state == States::Terminate) {
+			delete (t);
+		}
 	}
 };
 
@@ -284,6 +293,9 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		RecvBye *t = reinterpret_cast<RecvBye *>(state.stateData);
 		t->fun(state, pkt, funIface);
+		if (state.state == States::Terminate) {
+			delete (t);
+		}
 	}
 };
 }; // namespace Client
