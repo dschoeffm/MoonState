@@ -34,7 +34,8 @@ public:
 		};
 
 		bool operator<(const ConnectionID &c) const {
-			if (Hasher(this) < Hasher(c)) {
+			Hasher hasher;
+			if (hasher(*this) < hasher(c)) {
 				return true;
 			} else {
 				return false;
