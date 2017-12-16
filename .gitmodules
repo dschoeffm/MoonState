@@ -1,3 +1,6 @@
 [submodule "doc/doxygen-bootstrapped"]
 	path = doc/doxygen-bootstrapped
 	url = https://github.com/Velron/doxygen-bootstrapped.git
+[submodule "deps/concurrentqueue"]
+	path = deps/concurrentqueue
+	url = https://github.com/cameron314/concurrentqueue.git
