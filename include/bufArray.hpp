@@ -56,9 +56,7 @@ public:
 	 */
 	BufArray(Packet **pkts, uint32_t numPkts, bool fromLua = false) {
 		this->pkts = pkts;
-		if (fromLua) {
-			this->fromLua = fromLua;
-		}
+		this->fromLua = fromLua;
 
 		if (numPkts == 0) {
 			throw std::runtime_error(
