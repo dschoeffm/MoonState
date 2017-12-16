@@ -102,7 +102,8 @@ public:
 		State() : stateData(nullptr), state(StateIDInvalid), timeoutID(timeoutIDInvalid){};
 		State(StateID state, void *stateData)
 			: stateData(stateData), state(state), timeoutID(timeoutIDInvalid){};
-		State(const State &s) : stateData(s.stateData), state(s.state){};
+		State(const State &s)
+			: stateData(s.stateData), state(s.state), timeoutID(timeoutID){};
 
 		void set(const State &s) {
 			stateData = s.stateData;
@@ -476,7 +477,7 @@ private:
 				stateIt->second.timeoutID = timeoutIDInvalid;
 			}
 
-			// Try to retrieve a appropriate function
+			// Try to retrieve an appropriate function
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
 				D(std::cout << "StateMachine::runPkt() Didn't find a function for this state"
