@@ -103,7 +103,7 @@ public:
 		State(StateID state, void *stateData)
 			: stateData(stateData), state(state), timeoutID(timeoutIDInvalid){};
 		State(const State &s)
-			: stateData(s.stateData), state(s.state), timeoutID(timeoutID){};
+			: stateData(s.stateData), state(s.state), timeoutID(s.timeoutID){};
 
 		void set(const State &s) {
 			stateData = s.stateData;

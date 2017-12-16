@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
 	assert(server.getStateTableSize() == 0);
 
 	for (int i = 0; i < BATCH_SIZE; i++) {
-		free(spArrayInit[i]->getData());
 		delete (spArrayInit[i]);
 	}
 
