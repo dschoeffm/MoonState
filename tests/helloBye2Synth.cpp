@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 	server.registerFunction(Server::States::Hello, Server::Hello<Ident, Packet>::run);
 	server.registerFunction(Server::States::Bye, Server::Bye<Ident, Packet>::run);
 
-	HelloBye2ClientConfig::createInstance();
+	// HelloBye2ClientConfig::createInstance();
 
 	uint64_t counter = 0;
 

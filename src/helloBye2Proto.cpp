@@ -46,8 +46,19 @@ void Hello<Identifier, Packet>::fun(
 	D(std::cout << "HelloBye2::Server::Hello::fun() pkt: " << (void *)pkt->getData()
 				<< ", ident: " << msg->ident << std::endl;)
 
-	if ((msg->role != msg::ROLE_CLIENT) || (msg->msg != msg::MSG_HELLO)) {
-		std::cout << "HelloBye2::Server::Hello::fun() client hello wrong" << std::endl;
+	if (msg->role != 0) {
+		//		std::abort();
+		std::cout << "HelloBye2::Server::Hello::fun() client hello wrong - role not client"
+				  << std::endl;
+		funIface.transition(States::Terminate);
+		funIface.freePkt();
+		return;
+	}
+
+	if (msg->msg != 0) {
+		//		std::abort();
+		std::cout << "HelloBye2::Server::Hello::fun() client hello wrong - msg not hello"
+				  << std::endl;
 		funIface.transition(States::Terminate);
 		funIface.freePkt();
 		return;
@@ -108,6 +119,7 @@ void Bye<Identifier, Packet>::fun(
 	if ((msg->role != msg::ROLE_CLIENT) || (msg->msg != msg::MSG_BYE)) {
 		std::cout << "HelloBye2::Server::Bye::fun() msg fields wrong" << std::endl;
 		funIface.transition(States::Terminate);
+		funIface.freePkt();
 		return;
 	}
 
@@ -115,6 +127,7 @@ void Bye<Identifier, Packet>::fun(
 		std::cout << "HelloBye2::Server::Bye::fun() Client sent over wrong cookie"
 				  << std::endl;
 		funIface.transition(States::Terminate);
+		funIface.freePkt();
 		return;
 	}
 
@@ -168,7 +181,7 @@ void Hello<Identifier, Packet>::fun(
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
 
-	HelloBye2ClientConfig *config = HelloBye2ClientConfig::getInstance();
+	HelloBye2ClientConfig &config = HelloBye2ClientConfig::getInstance();
 
 	// Set the IP header stuff
 	// Leave the payload length alone for now...
@@ -177,7 +190,7 @@ void Hello<Identifier, Packet>::fun(
 	ipv4->ttl = 64;
 	ipv4->setLength(100 - 14);
 	ipv4->setDstIP(this->dstIp);
-	ipv4->setSrcIP(config->getSrcIP());
+	ipv4->setSrcIP(config.getSrcIP());
 	ipv4->setProtoUDP();
 	ipv4->checksum = 0;
 
@@ -194,7 +207,7 @@ void Hello<Identifier, Packet>::fun(
 
 	// Set UDP checksum to 0 and hope for the best
 	udp->checksum = 0;
-	udp->setDstPort(config->getDstPort());
+	udp->setDstPort(config.getDstPort());
 	udp->setSrcPort(this->srcPort);
 	udp->setPayloadLength(50);
 
@@ -231,6 +244,7 @@ void Bye<Identifier, Packet>::fun(
 	if ((msg->role != msg::ROLE_SERVER) || (msg->msg != msg::MSG_HELLO)) {
 		std::cout << "HelloBye2::Client::Bye::fun() msg fields wrong" << std::endl;
 		funIface.transition(States::Terminate);
+		funIface.freePkt();
 		return;
 	}
 
@@ -289,6 +303,7 @@ void RecvBye<Identifier, Packet>::fun(
 	if ((msg->role != msg::ROLE_SERVER) || (msg->msg != msg::MSG_BYE)) {
 		std::cout << "HelloBye2::Client::RecvBye::fun() msg fields wrong" << std::endl;
 		funIface.transition(States::Terminate);
+		funIface.freePkt();
 		return;
 	}
 
@@ -298,6 +313,7 @@ void RecvBye<Identifier, Packet>::fun(
 		std::cout << "Expected: " << static_cast<int>(this->clientCookie);
 		std::cout << ", Got: " << static_cast<int>(msg->cookie) << std::endl;
 		funIface.transition(States::Terminate);
+		funIface.freePkt();
 		return;
 	}
 

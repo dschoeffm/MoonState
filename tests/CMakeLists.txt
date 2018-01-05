@@ -1,7 +1,7 @@
 PROJECT(MoonState-test CXX)
 
-# Always compile as debug
-SET(CMAKE_BUILD_TYPE "DEBUG")
+## Always compile as debug
+#SET(CMAKE_BUILD_TYPE "DEBUG")
 
 FILE(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 LIST(REMOVE_ITEM SOURCES "${CMAKE_SOURCE_DIR}/src/main.cpp")

@@ -9,5 +9,5 @@
  *
  */
 
-HelloBye2::HelloBye2ClientConfig *HelloBye2::HelloBye2ClientConfig::instance = nullptr;
-std::mutex HelloBye2::HelloBye2ClientConfig::mtx;
+// HelloBye2::HelloBye2ClientConfig *HelloBye2::HelloBye2ClientConfig::instance = nullptr;
+// std::mutex HelloBye2::HelloBye2ClientConfig::mtx;

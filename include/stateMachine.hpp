@@ -236,14 +236,39 @@ public:
 
 	class ConnectionPool {
 	private:
-		static const unsigned int numBuckets = 8;
-		static const uint64_t bucketMask = 0b111;
+		const unsigned int numBuckets = 8;
+		const uint64_t bucketMask = 0b111;
 
-		std::unordered_map<ConnectionID, State, Hasher> newStates[numBuckets];
-		SpinLockCLSize newStatesLock[numBuckets];
+		std::unordered_map<ConnectionID, State, Hasher> **newStates;
+		SpinLockCLSize **newStatesLock;
 
 	public:
-		ConnectionPool(){};
+		ConnectionPool() {
+			newStates = reinterpret_cast<std::unordered_map<ConnectionID, State, Hasher> **>(
+				malloc(sizeof(void *) * numBuckets));
+			for (unsigned int i = 0; i < numBuckets; i++) {
+				newStates[i] = new std::unordered_map<ConnectionID, State, Hasher>();
+			}
+
+			newStatesLock =
+				reinterpret_cast<SpinLockCLSize **>(malloc(sizeof(void *) * numBuckets));
+			for (unsigned int i = 0; i < numBuckets; i++) {
+				newStatesLock[i] = new SpinLockCLSize();
+			}
+		};
+
+		~ConnectionPool() {
+			for (unsigned int i = 0; i < numBuckets; i++) {
+				delete (newStates[i]);
+			}
+			free(newStates);
+
+			for (unsigned int i = 0; i < numBuckets; i++) {
+				newStatesLock[i]->lock();
+				delete (newStatesLock[i]);
+			}
+			free(newStatesLock);
+		}
 
 		/*! Add connection and state to the connection pool
 		 *
@@ -254,8 +279,9 @@ public:
 			Hasher hasher;
 			uint64_t bucket = hasher(cID) & bucketMask;
 
-			std::lock_guard<SpinLockCLSize> lock(newStatesLock[bucket]);
-			newStates[bucket].insert({cID, st});
+			std::lock_guard<SpinLockCLSize> lock(*(newStatesLock[bucket]));
+			auto insPair = std::pair<ConnectionID, State>(cID, st);
+			newStates[bucket]->insert(insPair);
 		};
 
 		/*! Try to find a state for a given connection ID
@@ -268,21 +294,23 @@ public:
 		 * \param st Pointer to memory for the state
 		 * \return Found or not found
 		 */
-		bool find(ConnectionID &cID, State *st) {
+		bool findAndErase(ConnectionID &cID, State *st) {
 			Hasher hasher;
 			uint64_t bucket = hasher(cID) & bucketMask;
 
-			std::lock_guard<SpinLockCLSize> lock(newStatesLock[bucket]);
-			auto ret = newStates[bucket].find(cID);
+			std::lock_guard<SpinLockCLSize> lock(*(newStatesLock[bucket]));
+			auto ret = newStates[bucket]->find(cID);
 
-			if (ret != newStates[bucket].end()) {
+			if (ret != newStates[bucket]->end()) {
 				st->set(ret->second);
+				newStates[bucket]->erase(ret);
 				return true;
 			} else {
 				return false;
 			}
 		};
 
+			// TODO I should really do this sooner than later
 #if 0
 		// If this is needed later, I will add it later
 		/*! Erase a connection from the pool
@@ -413,7 +441,7 @@ private:
 			// Try to find state in the connection pool
 			{
 				State st;
-				if (connPool->find(id, &st)) {
+				if (connPool->findAndErase(id, &st)) {
 					D(std::cout << "StateMachine::findState() found state in connPool"
 								<< std::endl;)
 					stateTable.insert({id, st});
@@ -701,10 +729,12 @@ template <class Identifier, class Packet>
 typename StateMachine<Identifier, Packet>::ConnectionPool
 	StateMachine<Identifier, Packet>::connPoolStatic;
 
+/*
 template <class Identifier, class Packet>
 const uint64_t StateMachine<Identifier, Packet>::ConnectionPool::bucketMask;
 
 template <class Identifier, class Packet>
 const unsigned int StateMachine<Identifier, Packet>::ConnectionPool::numBuckets;
+*/
 
 #endif /* STATE_MACHINE_HPP */

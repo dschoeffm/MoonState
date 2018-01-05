@@ -14,7 +14,7 @@ public:
 
 	void lock() {
 		while (!trylock()) {
-			__asm__ ( "pause;" );
+			__asm__("pause;");
 		}
 	};
 
@@ -40,7 +40,7 @@ public:
 
 	void lock() {
 		while (!trylock()) {
-			__asm__ ( "pause;" );
+			__asm__("pause;");
 		}
 	};
 

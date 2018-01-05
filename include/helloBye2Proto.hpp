@@ -94,6 +94,7 @@ template <class Identifier, class Packet> class RecvBye;
  *
  */
 
+/*
 class HelloBye2ClientConfig {
 private:
 	uint32_t srcIp;
@@ -118,6 +119,29 @@ public:
 	}
 
 	static HelloBye2ClientConfig *getInstance() { return instance; }
+};
+*/
+
+class HelloBye2ClientConfig {
+private:
+	uint32_t srcIp;
+	uint16_t dstPort;
+
+public:
+	static HelloBye2ClientConfig &getInstance() {
+		static HelloBye2ClientConfig instance;
+		return instance;
+	}
+
+	HelloBye2ClientConfig(){};
+	HelloBye2ClientConfig(HelloBye2ClientConfig const &) = delete;
+	void operator=(HelloBye2ClientConfig const &) = delete;
+
+	auto getSrcIP() { return srcIp; }
+	auto getDstPort() { return dstPort; }
+
+	void setSrcIP(uint32_t newIP) { srcIp = newIP; }
+	void setDstPort(uint16_t newPort) { dstPort = newPort; }
 };
 
 /*
@@ -234,7 +258,12 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		Hello *t = reinterpret_cast<Hello *>(state.stateData);
 		t->fun(state, pkt, funIface);
-		if (state.state == States::Terminate) {
+
+		// Finish transision to other state
+		if (state.state == States::Bye) {
+			state.stateData = new Bye<Identifier, Packet>(t);
+			delete (t);
+		} else if (state.state == States::Terminate) {
 			delete (t);
 		}
 	}
@@ -264,7 +293,12 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		Bye *t = reinterpret_cast<Bye *>(state.stateData);
 		t->fun(state, pkt, funIface);
-		if (state.state == States::Terminate) {
+
+		// Finish transision to other state
+		if (state.state == States::RecvBye) {
+			state.stateData = new RecvBye<Identifier, Packet>(t);
+			delete (t);
+		} else if (state.state == States::Terminate) {
 			delete (t);
 		}
 	}
@@ -293,6 +327,7 @@ public:
 	static void run(typename SM::State &state, Packet *pkt, typename SM::FunIface &funIface) {
 		RecvBye *t = reinterpret_cast<RecvBye *>(state.stateData);
 		t->fun(state, pkt, funIface);
+
 		if (state.state == States::Terminate) {
 			delete (t);
 		}
@@ -301,7 +336,12 @@ public:
 }; // namespace Client
 }; // namespace HelloBye2
 
-#ifndef HELLOBYEP2ROTO_CPP
+/*
+ * YCM definition is a workaround for a libclang bug
+ * When compiling, YCM should never be set.
+ * Set YCM in a libclang based IDE in order to avoid errors
+ */
+#ifndef YCM
 #include "../src/helloBye2Proto.cpp"
 #endif
 

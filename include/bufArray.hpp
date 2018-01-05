@@ -59,6 +59,7 @@ public:
 		this->fromLua = fromLua;
 
 		if (numPkts == 0) {
+			std::abort();
 			throw std::runtime_error(
 				"BufArray::BufArray() Please use an array with at least one slot");
 		}

@@ -82,11 +82,10 @@ void *HelloBye2_Client_init() {
 
 void HelloBye2_Client_config(uint32_t srcIP, uint16_t dstPort) {
 
-	HelloBye2::HelloBye2ClientConfig::createInstance();
-	HelloBye2::HelloBye2ClientConfig *config =
+	HelloBye2::HelloBye2ClientConfig &config =
 		HelloBye2::HelloBye2ClientConfig::getInstance();
-	config->setSrcIP(srcIP);
-	config->setDstPort(dstPort);
+	config.setSrcIP(srcIP);
+	config.setDstPort(dstPort);
 };
 
 void *HelloBye2_Client_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,

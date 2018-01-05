@@ -15,10 +15,11 @@ if(LIBMOON_BUILD_LIBRARY)
 	SET(DPDK_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libmoon/deps/dpdk/x86_64-native-linuxapp-gcc/include")
 endif(LIBMOON_BUILD_LIBRARY)
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -g -O3 -fno-omit-frame-pointer")
+#SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -g -O0 -fno-omit-frame-pointer -stdlib=libc++ -fsanitize=address,undefined")
+SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -g -fno-omit-frame-pointer")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -DDEBUG -g3 -O0 -fno-optimize-sibling-calls -fno-inline")
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g3 -O0 -fno-optimize-sibling-calls -fno-inline")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -31,7 +32,7 @@ INCLUDE_DIRECTORIES(
 
 FILE(GLOB SOURCES src/*.cpp)
 
-SET(ALL_LIBS )
+SET(ALL_LIBS pthread)
 
 if(WITH_PCAP)
 	SET(ALL_LIBS

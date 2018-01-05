@@ -87,7 +87,7 @@ void server(int fd, struct sockaddr_in server) {
 	struct sockaddr_in client;
 	unsigned int clen = sizeof(client);
 
-	if (bind(fd, (struct sockaddr *)&server, sizeof(server)) < 0) {
+	if (::bind(fd, (struct sockaddr *)&server, sizeof(server)) < 0) {
 		cout << "server: bind() failed: " << std::strerror(errno) << endl;
 		abort();
 	}
