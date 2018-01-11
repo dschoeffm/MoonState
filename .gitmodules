@@ -4,6 +4,3 @@
 [submodule "deps/concurrentqueue"]
 	path = deps/concurrentqueue
 	url = https://github.com/cameron314/concurrentqueue.git
-[submodule "examples/dtls-examples"]
-	path = examples/DTLS-Examples
-	url = https://github.com/nplab/DTLS-Examples.git
