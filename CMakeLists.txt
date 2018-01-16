@@ -32,7 +32,19 @@ INCLUDE_DIRECTORIES(
 
 FILE(GLOB SOURCES src/*.cpp)
 
-SET(ALL_LIBS pthread)
+SET(OPENSSL_LIBS
+	-Wl,--whole-archive
+	libssl.a
+	-Wl,--whole-archive
+	libcrypto.a
+	-Wl,--no-whole-archive
+	dl
+)
+
+SET(ALL_LIBS
+	pthread
+	${OPENSSL_LIBS}
+)
 
 if(WITH_PCAP)
 	SET(ALL_LIBS
@@ -42,8 +54,26 @@ if(WITH_PCAP)
 	ADD_DEFINITIONS(-DWITH_PCAP)
 endif(WITH_PCAP)
 
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a
+	PRE_LINK
+	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/config"
+	COMMAND "make" "-j"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
+)
+
+add_custom_target(libssl DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a)
+add_custom_target(libcrypto DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
+
+LINK_DIRECTORIES(
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
+)
+
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
+
+add_dependencies(${PROJECT_NAME} libssl libcrypto)
+
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
