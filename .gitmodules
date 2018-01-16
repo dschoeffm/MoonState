@@ -4,7 +4,7 @@
 [submodule "deps/concurrentqueue"]
 	path = deps/concurrentqueue
 	url = https://github.com/cameron314/concurrentqueue.git
-[submodule "deps/opensl"]
+[submodule "deps/openssl"]
 	path = deps/openssl
 	url = https://github.com/dschoeffm/openssl.git
 	branch = moonstate
