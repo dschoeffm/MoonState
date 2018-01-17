@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(MoonState CXX)
+include(ProcessorCount)
+ProcessorCount(NUM_CORES)
 
 # Default build type is Release
 if(NOT CMAKE_BUILD_TYPE)
@@ -24,6 +26,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/concurrentqueue
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
 )
 
 INCLUDE_DIRECTORIES(
@@ -58,7 +61,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a
 	PRE_LINK
 	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/config"
-	COMMAND "make" "-j"
+	COMMAND "make" "-j${NUM_CORES}"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
 )
 
