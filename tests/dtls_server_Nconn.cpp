@@ -115,6 +115,10 @@ int dtls_InitContextFromKeystore(SSL_CTX **ctx, const char *keyname) {
 	result = SSL_CTX_use_certificate_file(*ctx, certfile, SSL_FILETYPE_PEM);
 	if (result != 1) {
 		printf("Error: cannot load certificate file.\n");
+		printf("IN CASE YOU DIDN'T CREATE ONE:\n");
+		printf("openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem "
+			   "-out server-cert.pem\n\n");
+
 		ERR_print_errors_fp(stderr);
 		return -4;
 	}
@@ -258,6 +262,7 @@ int main() {
 	conn_lockup:
 		auto conn_it = connections.find({src_addr.sin_addr.s_addr, src_addr.sin_port});
 		if (conn_it == connections.end()) {
+			cout << "Connection from new client" << endl;
 			connections.insert(
 				{{src_addr.sin_addr.s_addr, src_addr.sin_port}, createNewConn(ctx)});
 			goto conn_lockup;
