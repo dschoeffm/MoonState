@@ -1,6 +1,8 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
+
+#include <openssl/bio.h>
 #include <openssl/conf.h>
 #include <openssl/dh.h>
 #include <openssl/engine.h>
@@ -34,9 +36,8 @@ struct States {
 	static constexpr StateID DOWN = 0;
 	static constexpr StateID HANDSHAKE = 1;
 	static constexpr StateID ESTABLISHED = 2;
-	static constexpr StateID INIT_TEARDOWN = 3;
-	static constexpr StateID RUN_TEARDOWN = 4;
-	static constexpr StateID DELETED = 5;
+	static constexpr StateID RUN_TEARDOWN = 3;
+	static constexpr StateID DELETED = 4;
 };
 
 /*! Use this to create the SSL context for creaeteStateData()
@@ -44,6 +45,17 @@ struct States {
  * \return SSL context suitable to create a DTLS client
  */
 SSL_CTX *createCTX();
+
+/*! Configure the state machine
+ *
+ * This functon takes the state machine and configures it according to
+ * this implementation of a DTLS client.
+ * In pratice, this means, that it will set the functions to be executed
+ * within each state.
+ *
+ * \param sm The state machine to be configured
+ */
+void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm);
 
 /*! Create the state of the client
  *
@@ -73,9 +85,6 @@ void runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mb
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
 
 void sendData(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
-
-void startTeardown(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
 
 void runTeardown(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,

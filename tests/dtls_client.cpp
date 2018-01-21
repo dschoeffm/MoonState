@@ -158,7 +158,7 @@ void handlerThread(int fd, struct sockaddr_in server, conn *conn) {
 
 	while (!_ssl_is_down(conn->ssl)) {
 
-		// Write out all data the ssl engine want to write
+		// Write out all data the ssl engine wants to write
 		int readCount;
 		while ((readCount = BIO_read(conn->wbio, buf, bufLen)) > 0) {
 			cout << "DEBUG: sending data" << endl;
@@ -210,7 +210,7 @@ void handlerThread(int fd, struct sockaddr_in server, conn *conn) {
 			}
 		}
 
-		// Write out all data the ssl engine want to write
+		// Write out all data the ssl engine wants to write
 		while ((readCount = BIO_read(conn->wbio, buf, bufLen)) > 0) {
 			cout << "DEBUG sending data" << endl;
 			int sendBytes = sendto(fd, buf, readCount, 0, (struct sockaddr *)&server,
