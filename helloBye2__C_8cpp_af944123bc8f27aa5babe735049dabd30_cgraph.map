@@ -1,6 +1,5 @@
 <map id="HelloBye2_Client_config" name="HelloBye2_Client_config">
-<area shape="rect" id="node2" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#aedf4b2f7c999cff34d48a65ce44ea01c" title="HelloBye2::HelloBye2Client\lConfig::createInstance" alt="" coords="219,5,403,47"/>
-<area shape="rect" id="node3" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#a456bccf8c2a9880404d7527fef41ca64" title="HelloBye2::HelloBye2Client\lConfig::getInstance" alt="" coords="219,71,403,112"/>
-<area shape="rect" id="node4" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#a15e9127e10d8bcc0c5ec83171a1f789c" title="HelloBye2::HelloBye2Client\lConfig::setSrcIP" alt="" coords="219,136,403,177"/>
-<area shape="rect" id="node5" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#ae7a7d1039dbd6a227c8193f5d57b7a25" title="HelloBye2::HelloBye2Client\lConfig::setDstPort" alt="" coords="219,201,403,243"/>
+<area shape="rect" id="node2" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#a6b4dd49468ee84d6f07789f72df6d4d8" title="HelloBye2::HelloBye2Client\lConfig::getInstance" alt="" coords="219,5,403,47"/>
+<area shape="rect" id="node3" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#a15e9127e10d8bcc0c5ec83171a1f789c" title="HelloBye2::HelloBye2Client\lConfig::setSrcIP" alt="" coords="219,71,403,112"/>
+<area shape="rect" id="node4" href="$classHelloBye2_1_1HelloBye2ClientConfig.html#ae7a7d1039dbd6a227c8193f5d57b7a25" title="HelloBye2::HelloBye2Client\lConfig::setDstPort" alt="" coords="219,136,403,177"/>
 </map>

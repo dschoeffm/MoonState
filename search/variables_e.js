@@ -5,5 +5,5 @@ var searchData=
   ['tos',['tos',['../structHeaders_1_1IPv4.html#a3447495a811c9a3803148ca52bdd00e6',1,'Headers::IPv4']]],
   ['total_5flength',['total_length',['../structHeaders_1_1IPv4.html#a28f4cebf9922d89901eb3aa7802f5eed',1,'Headers::IPv4']]],
   ['ttl',['ttl',['../structHeaders_1_1IPv4.html#a74f744afc7addf997e7bbe9aa68cd381',1,'Headers::IPv4']]],
-  ['type',['type',['../structHeaders_1_1Icmp.html#a6c32ad42af13a0f511b84e20c91386f3',1,'Headers::Icmp']]]
+  ['type',['type',['../structDTLS_1_1Record_1_1Header.html#a251d5ab79ed9330399827416e0de45db',1,'DTLS::Record::Header::type()'],['../structHeaders_1_1Icmp.html#a6c32ad42af13a0f511b84e20c91386f3',1,'Headers::Icmp::type()']]]
 ];

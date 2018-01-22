@@ -1,6 +1,6 @@
 <map id="HelloByeClient_getPkts" name="HelloByeClient_getPkts">
-<area shape="rect" id="node2" href="$classBufArray.html#a615b6c144c343ca7337a6ef22abbea83" title="Get all the packets which are to be sent. " alt="" coords="417,5,573,32"/>
-<area shape="rect" id="node4" href="$classBufArray.html#aa29b07f7f2d34072da0fafb38e0ccfa5" title="Get all the packets which are to be freed. " alt="" coords="215,56,367,83"/>
-<area shape="rect" id="node3" href="$classBufArray.html#a7570e31b14ed3d44f5b60b3a9e8afee5" title="Get the number of packets currently marked as send. " alt="" coords="623,31,787,57"/>
-<area shape="rect" id="node5" href="$classBufArray.html#a5b533f3c7add88f873d41e841fc55136" title="Get the number of packets currently marked as free. " alt="" coords="415,56,575,83"/>
+<area shape="rect" id="node2" href="$classBufArray.html#a65ec6fb832e58b88b2be695c4d30a437" title="Get all the packets which are to be sent. " alt="" coords="417,5,573,32"/>
+<area shape="rect" id="node4" href="$classBufArray.html#a81ad0c7cdb324569ecfb42e735e653c9" title="Get all the packets which are to be freed. " alt="" coords="215,56,367,83"/>
+<area shape="rect" id="node3" href="$classBufArray.html#a1d52cd9f63feaa98f800bcae8277e675" title="Get the number of packets currently marked as send. " alt="" coords="623,31,787,57"/>
+<area shape="rect" id="node5" href="$classBufArray.html#a77223130b4dca30992a335dbff4b4781" title="Get the number of packets currently marked as free. " alt="" coords="415,56,575,83"/>
 </map>

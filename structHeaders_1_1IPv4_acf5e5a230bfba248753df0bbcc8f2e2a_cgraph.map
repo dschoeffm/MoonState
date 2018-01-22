@@ -1,3 +1,3 @@
 <map id="Headers::IPv4::getSrcAddr" name="Headers::IPv4::getSrcAddr">
-<area shape="rect" id="node2" href="$structHeaders_1_1Ethernet.html#a96d88b1df43a518b0aa8144c82b33466" title="Headers::Ethernet::\laddrToStr" alt="" coords="232,5,368,47"/>
+<area shape="rect" id="node2" href="$structHeaders_1_1IPv4.html#a0d48707840f83de5b6fbc9849461989c" title="Headers::IPv4::addrToStr" alt="" coords="232,5,403,32"/>
 </map>

@@ -1,17 +1,23 @@
 var searchData=
 [
+  ['rbio',['rbio',['../structDTLS__Client_1_1dtlsClient.html#a032c33944b311cff6cf3cf77ddfaaad2',1,'DTLS_Client::dtlsClient']]],
   ['readme_2emd',['README.md',['../README_8md.html',1,'']]],
-  ['recvbye',['RecvBye',['../classHelloBye2_1_1Client_1_1RecvBye.html',1,'HelloBye2::Client']]],
-  ['recvbye',['RecvBye',['../structHelloBye2_1_1Client_1_1States.html#a233864c3aa242cef07fa8a0d01fabb2e',1,'HelloBye2::Client::States::RecvBye()'],['../structHelloBye_1_1HelloByeClient.html#a2803a65b373b5c16678a909834edd29e',1,'HelloBye::HelloByeClient::RecvBye()'],['../classHelloBye2_1_1Client_1_1RecvBye.html#a863518ef49fa108b0554b9c6b6aab425',1,'HelloBye2::Client::RecvBye::RecvBye()']]],
+  ['recvbye',['RecvBye',['../classHelloBye2_1_1Client_1_1RecvBye.html',1,'HelloBye2::Client::RecvBye&lt; Identifier, Packet &gt;'],['../structHelloBye2_1_1Client_1_1States.html#a233864c3aa242cef07fa8a0d01fabb2e',1,'HelloBye2::Client::States::RecvBye()'],['../structHelloBye_1_1HelloByeClient.html#a2803a65b373b5c16678a909834edd29e',1,'HelloBye::HelloByeClient::RecvBye()'],['../classHelloBye2_1_1Client_1_1RecvBye.html#a863518ef49fa108b0554b9c6b6aab425',1,'HelloBye2::Client::RecvBye::RecvBye()']]],
   ['recvbye_3c_20identifier_2c_20packet_20_3e',['RecvBye&lt; Identifier, Packet &gt;',['../classHelloBye2_1_1Client_1_1Bye.html#ad2c321c138eb7cba2c43189bb03e6028',1,'HelloBye2::Client::Bye']]],
   ['registerendstateid',['registerEndStateID',['../classStateMachine.html#aba6a2449f587018f1169f83394cae1ad',1,'StateMachine']]],
   ['registerfunction',['registerFunction',['../classStateMachine.html#a11bb31f0c090bfa191432fab2fd37275',1,'StateMachine']]],
   ['registergetpktcb',['registerGetPktCB',['../classStateMachine.html#a9084c760d691a68490303316b0172aba',1,'StateMachine']]],
   ['registerstartstateid',['registerStartStateID',['../classStateMachine.html#af4f6e41b1b733c88c5f47633a14196a4',1,'StateMachine']]],
+  ['remoteip',['remoteIP',['../structDTLS__Client_1_1dtlsClient.html#accf28a8e8a74b17ed1367ae7e6737939',1,'DTLS_Client::dtlsClient']]],
+  ['remotemac',['remoteMac',['../structDTLS__Client_1_1dtlsClient.html#a6902a609a438c4728d78b4f639dde528',1,'DTLS_Client::dtlsClient']]],
+  ['remoteport',['remotePort',['../structDTLS__Client_1_1dtlsClient.html#a474cddbb48e2f3148bc9c268b4d94432',1,'DTLS_Client::dtlsClient']]],
   ['removestate',['removeState',['../classStateMachine.html#acb32e2ad53518611b1fded8dfe2f45f5',1,'StateMachine']]],
   ['role',['role',['../structHelloBye2_1_1msg.html#aca86ab1acb3384440d0e170b831d5a42',1,'HelloBye2::msg']]],
   ['role_5fclient',['ROLE_CLIENT',['../structHelloBye2_1_1msg.html#a703b5641ac2cf8c910acaec158042e89',1,'HelloBye2::msg']]],
   ['role_5fserver',['ROLE_SERVER',['../structHelloBye2_1_1msg.html#ae1fc76e025756bac1524f26347458c82',1,'HelloBye2::msg']]],
   ['run',['run',['../classHelloBye2_1_1Server_1_1Hello.html#aad4028cf03206f40b91f0efbdd4fc14c',1,'HelloBye2::Server::Hello::run()'],['../classHelloBye2_1_1Server_1_1Bye.html#a94c14eb60827cf204acd042b59507e3f',1,'HelloBye2::Server::Bye::run()'],['../classHelloBye2_1_1Client_1_1Hello.html#a07b5bbd17c3761cbf429bc7800c5986e',1,'HelloBye2::Client::Hello::run()'],['../classHelloBye2_1_1Client_1_1Bye.html#ae513c5a3b8e5f11353dc6aa256e1aa57',1,'HelloBye2::Client::Bye::run()'],['../classHelloBye2_1_1Client_1_1RecvBye.html#af7da6508b67bccdc715464620cde82b6',1,'HelloBye2::Client::RecvBye::run()'],['../classHelloBye_1_1HelloByeServerHello.html#a47154bad970b9e87e785fba3d65b1a83',1,'HelloBye::HelloByeServerHello::run()'],['../classHelloBye_1_1HelloByeServerBye.html#a86374c56fdecd4c9c4d235a255def719',1,'HelloBye::HelloByeServerBye::run()'],['../classHelloBye_1_1HelloByeClientHello.html#aa4516b4d31cbbf4b2334f211e78f42e5',1,'HelloBye::HelloByeClientHello::run()'],['../classHelloBye_1_1HelloByeClientBye.html#a7eb5011ed39804f654708898c12c6451',1,'HelloBye::HelloByeClientBye::run()'],['../classHelloBye_1_1HelloByeClientRecvBye.html#a4243fc8d8954256b740310268266fb87',1,'HelloBye::HelloByeClientRecvBye::run()']]],
-  ['runpktbatch',['runPktBatch',['../classStateMachine.html#aa1eae1413acf399a997e587c905e14aa',1,'StateMachine']]]
+  ['run_5fteardown',['RUN_TEARDOWN',['../structDTLS__Client_1_1States.html#a2c41265826e00e6b2db115af0e7976b2',1,'DTLS_Client::States']]],
+  ['runhandshake',['runHandshake',['../namespaceDTLS__Client.html#a5acef1583c146dc9d7b475d7dce96613',1,'DTLS_Client::runHandshake(StateMachine&lt; IPv4_5TupleL2Ident&lt; mbuf &gt;, mbuf &gt;::State &amp;state, mbuf *, StateMachine&lt; IPv4_5TupleL2Ident&lt; mbuf &gt;, mbuf &gt;::FunIface &amp;funIface)'],['../namespaceDTLS__Client.html#a2f3d8ea4bf3d3b8df99135ec5e110d9b',1,'DTLS_Client::runHandshake(SM::State &amp;state, mbuf *pkt, SM::FunIface &amp;funIface)']]],
+  ['runpktbatch',['runPktBatch',['../classStateMachine.html#aa1eae1413acf399a997e587c905e14aa',1,'StateMachine']]],
+  ['runteardown',['runTeardown',['../namespaceDTLS__Client.html#a67f33652e7bd809595c76aeb30f0c6cb',1,'DTLS_Client::runTeardown(StateMachine&lt; IPv4_5TupleL2Ident&lt; mbuf &gt;, mbuf &gt;::State &amp;state, mbuf *, StateMachine&lt; IPv4_5TupleL2Ident&lt; mbuf &gt;, mbuf &gt;::FunIface &amp;funIface)'],['../namespaceDTLS__Client.html#adf42f02271131dec52f833ff9ca188c2',1,'DTLS_Client::runTeardown(SM::State &amp;state, mbuf *pkt, SM::FunIface &amp;funIface)']]]
 ];

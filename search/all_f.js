@@ -10,5 +10,5 @@ var searchData=
   ['transitionnow',['transitionNow',['../classStateMachine_1_1FunIface.html#abb328af4a65bf341434ebf5401160d0b',1,'StateMachine::FunIface']]],
   ['trylock',['trylock',['../classSpinLock.html#a83fea079a17c22fb7a3af12a457e70ba',1,'SpinLock::trylock()'],['../classSpinLockCLSize.html#a4d4fb86c94bc817d51f07c4ad0725776',1,'SpinLockCLSize::trylock()']]],
   ['ttl',['ttl',['../structHeaders_1_1IPv4.html#a74f744afc7addf997e7bbe9aa68cd381',1,'Headers::IPv4']]],
-  ['type',['type',['../structHeaders_1_1Icmp.html#a6c32ad42af13a0f511b84e20c91386f3',1,'Headers::Icmp']]]
+  ['type',['type',['../structDTLS_1_1Record_1_1Header.html#a251d5ab79ed9330399827416e0de45db',1,'DTLS::Record::Header::type()'],['../structHeaders_1_1Icmp.html#a6c32ad42af13a0f511b84e20c91386f3',1,'Headers::Icmp::type()']]]
 ];
