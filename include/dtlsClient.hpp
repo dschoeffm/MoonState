@@ -69,7 +69,7 @@ void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm);
  *
  * \return The complete state to kick of a client connection
  */
-StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State *createStateData(SSL_CTX *ctx,
+StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(SSL_CTX *ctx,
 	uint32_t localIP, uint32_t remoteIP, uint16_t localPort, uint16_t remotePort,
 	std::array<uint8_t, 6> localMac, std::array<uint8_t, 6> remoteMac);
 

@@ -52,15 +52,14 @@ void configStateMachine(SM &sm) {
 	sm.registerEndStateID(States::DELETED);
 };
 
-SM::State *createStateData(SSL_CTX *ctx, uint32_t localIP, uint32_t remoteIP,
+SM::State createStateData(SSL_CTX *ctx, uint32_t localIP, uint32_t remoteIP,
 	uint16_t localPort, uint16_t remotePort, std::array<uint8_t, 6> localMac,
 	std::array<uint8_t, 6> remoteMac) {
 
 	// Create necessary structures
 	dtlsClient *client = new dtlsClient();
 	memset(client, 0, sizeof(dtlsClient));
-	SM::State *state =
-		new SM::State(DTLS_Client::States::DOWN, reinterpret_cast<void *>(client));
+	SM::State state(DTLS_Client::States::DOWN, reinterpret_cast<void *>(client));
 
 	// Set the trivial stuff
 	client->counter = 0;
@@ -288,3 +287,129 @@ void runTeardown(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 };
 
 }; // namespace DTLS_Client
+
+extern "C" {
+
+// The user should never look at this...
+struct Dtls_C_config {
+	uint32_t dstIP;
+	uint16_t dstPort;
+	std::array<uint8_t, 6> srcMac;
+	std::array<uint8_t, 6> dstMac;
+	SSL_CTX *ctx;
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *sm;
+};
+
+/*! Initialize a DTLS client
+ *
+ * \param dstIP IP of the DTLS test server
+ * \param dstPort Port of the DTLS test server
+ * \param srcMac MAC address of the local NIC
+ * \param dstMac MAC address of the remote NIC
+ *
+ * \return An opaque object which should be fed into DtlsClient_connect
+ */
+void *DtlsClient_init(
+	uint32_t dstIP, uint16_t dstPort, uint8_t srcMac[6], uint8_t dstMac[6]) {
+	auto *obj = new StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>();
+
+	DTLS_Client::configStateMachine(*obj);
+
+	struct Dtls_C_config *ret = new Dtls_C_config();
+	ret->dstIP = htonl(dstIP);
+	ret->dstPort = htons(dstPort);
+	memcpy(ret->srcMac.data(), srcMac, 6);
+	memcpy(ret->dstMac.data(), dstMac, 6);
+	ret->ctx = DTLS_Client::createCTX();
+	ret->sm = obj;
+
+	return ret;
+};
+
+/*! Add one connection to the State Machine
+ *
+ * \param obj The void* returned from DtlsClient_init()
+ * \param inPkts mbufs from MoonGen
+ * \param inCount Number of buffers in inPkts (should be 1)
+ * \param sendCount This will be set to the number of packets to be sent
+ * \param freeCount This will be set to the number of packets to be freed
+ * \param srcIP IP which should be used as the source
+ * \param srcPort Port which should be used as the source
+ *
+ * \return Opaque object to be fed into DtlsClient_getPkts
+ */
+void *DtlsClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort) {
+
+	auto config = reinterpret_cast<Dtls_C_config *>(obj);
+
+	BufArray<mbuf> *inPktsBA =
+		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
+
+	IPv4_5TupleL2Ident<mbuf>::ConnectionID cID;
+	cID.dstIP = htonl(srcIP);
+	cID.srcIP = config->dstIP;
+	cID.dstPort = htons(srcPort);
+	cID.srcPort = config->dstPort;
+	cID.proto = Headers::IPv4::PROTO_UDP;
+
+	auto state = DTLS_Client::createStateData(config->ctx, htonl(srcIP), config->dstIP,
+		htons(srcPort), config->dstPort, config->srcMac, config->dstMac);
+
+	config->sm->addState(cID, state, *inPktsBA);
+
+	*sendCount = inPktsBA->getSendCount();
+	*freeCount = inPktsBA->getFreeCount();
+
+	return inPktsBA;
+};
+
+/*! Get the packets from an opaque structure
+ *
+ * \param obj Return value of DtlsClient_connect() or DtlsClient_process()
+ * \param sendPkts Array of packet buffers to be sent
+ * \param freePkts Array of packet buffers to be freed
+ */
+void DtlsClient_getPkts(void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts) {
+	BufArray<mbuf> *inPktsBA = reinterpret_cast<BufArray<mbuf> *>(obj);
+
+	inPktsBA->getSendBufs(reinterpret_cast<mbuf **>(sendPkts));
+	inPktsBA->getFreeBufs(reinterpret_cast<mbuf **>(freePkts));
+
+	delete (inPktsBA);
+};
+
+/*! Process incoming packets
+ *
+ * \param obj Structure returned from DtlsClient_init()
+ * \param inPkts The newly arrived packets
+ * \param inCount Number of incoming packets
+ * \param sendCount Will be set to the number of packets to be sent
+ * \param freeCount Will be set to the number of packets to be freed
+ */
+void *DtlsClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	unsigned int *sendCount, unsigned int *freeCount) {
+	BufArray<mbuf> *inPktsBA =
+		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
+
+	auto config = reinterpret_cast<Dtls_C_config *>(obj);
+
+	config->sm->runPktBatch(*inPktsBA);
+	*sendCount = inPktsBA->getSendCount();
+	*freeCount = inPktsBA->getFreeCount();
+
+	return inPktsBA;
+};
+
+/*! Free recources used by the state machine
+ *
+ * \param obj object returned by DtlsClient_init()
+ */
+void DtlsClient_free(void *obj) {
+	auto config = reinterpret_cast<Dtls_C_config *>(obj);
+
+	delete (config->sm);
+	OPENSSL_free(config->ctx);
+	delete (config);
+};
+};
