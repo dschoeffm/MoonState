@@ -1,0 +1,5 @@
+<map id="DTLS::Record::Header" name="DTLS::Record::Header">
+<area shape="rect" id="node2" href="$structDTLS_1_1Record_1_1ProtocolVersion.html" title="DTLS::Record::ProtocolVersion" alt="" coords="5,5,209,32"/>
+<area shape="rect" id="node3" href="$structuint48.html" title="This is a 48 bit variable. " alt="" coords="233,5,291,32"/>
+<area shape="rect" id="node4" href="$structDTLS_1_1Record_1_1ContentType.html" title="DTLS::Record::ContentType" alt="" coords="315,5,502,32"/>
+</map>

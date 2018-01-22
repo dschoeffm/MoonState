@@ -1,0 +1,4 @@
+<map id="DTLS::Handshake::Header" name="DTLS::Handshake::Header">
+<area shape="rect" id="node2" href="$structDTLS_1_1Handshake_1_1HandshakeType.html" title="DTLS::Handshake::HandshakeType" alt="" coords="5,5,236,32"/>
+<area shape="rect" id="node3" href="$structuint24.html" title="This is a 24 bit variable. " alt="" coords="260,5,317,32"/>
+</map>

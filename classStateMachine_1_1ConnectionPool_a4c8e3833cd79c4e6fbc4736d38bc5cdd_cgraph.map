@@ -1,0 +1,4 @@
+<map id="StateMachine::ConnectionPool::~ConnectionPool" name="StateMachine::ConnectionPool::~ConnectionPool">
+<area shape="rect" id="node2" href="$classSpinLockCLSize.html#aca0e5a42d856bde7c6c85e13293e1b98" title="SpinLockCLSize::lock" alt="" coords="229,13,380,39"/>
+<area shape="rect" id="node3" href="$classSpinLockCLSize.html#a4d4fb86c94bc817d51f07c4ad0725776" title="SpinLockCLSize::trylock" alt="" coords="428,13,595,39"/>
+</map>

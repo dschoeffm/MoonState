@@ -1,0 +1,5 @@
+<map id="DtlsClient_connect" name="DtlsClient_connect">
+<area shape="rect" id="node2" href="$namespaceDTLS__Client.html#ab06ed37ed603b190705ce91aac81e75c" title="Create the state of the client. " alt="" coords="187,5,385,32"/>
+<area shape="rect" id="node3" href="$classBufArray.html#a1d52cd9f63feaa98f800bcae8277e675" title="Get the number of packets currently marked as send. " alt="" coords="433,81,597,108"/>
+<area shape="rect" id="node4" href="$classBufArray.html#a77223130b4dca30992a335dbff4b4781" title="Get the number of packets currently marked as free. " alt="" coords="206,107,366,133"/>
+</map>
