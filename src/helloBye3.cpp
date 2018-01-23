@@ -382,7 +382,7 @@ void *HelloBye3_Client_connect(void *obj, struct rte_mbuf **inPkts, unsigned int
 	return inPktsBA;
 };
 
-void HelloBye3_Client_get_mPkts(
+void HelloBye3_Client_get_Pkts(
 	void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts) {
 	BufArray<mbuf> *inPktsBA = reinterpret_cast<BufArray<mbuf> *>(obj);
 
