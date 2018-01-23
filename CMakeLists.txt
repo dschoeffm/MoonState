@@ -1,7 +1,5 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.9)
 PROJECT(MoonState CXX)
-include(ProcessorCount)
-ProcessorCount(NUM_CORES)
 
 # Default build type is Release
 if(NOT CMAKE_BUILD_TYPE)
@@ -61,12 +59,13 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a
 	PRE_LINK
 	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/config"
-	COMMAND "make" "-j${NUM_CORES}"
+	COMMAND $(MAKE) "build_libs"
+	COMMENT "Building OpenSSL - This may take a while"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
 )
 
-add_custom_target(libssl DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a)
-add_custom_target(libcrypto DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
+add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
 
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
@@ -75,7 +74,7 @@ LINK_DIRECTORIES(
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} libssl libcrypto)
+add_dependencies(${PROJECT_NAME} opensslBuild)
 
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
