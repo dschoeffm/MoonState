@@ -224,7 +224,7 @@ void handlerThread(int fd, struct sockaddr_in server, conn *conn) {
 };
 
 void usage(string name) {
-	cout << "Usage: " << name << "<server IP> <server port>" << endl;
+	cout << "Usage: " << name << " <server IP> <server port>" << endl;
 	exit(0);
 }
 
