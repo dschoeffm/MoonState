@@ -37,8 +37,8 @@ void runHello(StateMachine<Identifier<mbuf>, mbuf>::State &state, mbuf *pkt,
 
 	struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 
-	D(std::cout << "HelloBye3::Server::runHello() pkt: " << (void *)pkt->getData()
-				<< ", ident: " << msg->ident << std::endl;)
+	DEBUG_ENABLED(std::cout << "HelloBye3::Server::runHello() pkt: " << (void *)pkt->getData()
+							<< ", ident: " << msg->ident << std::endl;)
 
 	if (msg->role != 0) {
 		//		std::abort();
@@ -62,8 +62,8 @@ void runHello(StateMachine<Identifier<mbuf>, mbuf>::State &state, mbuf *pkt,
 
 	// Get client cookie
 	s->clientCookie = msg->cookie;
-	D(std::cout << "HelloBye3::Server::runHello() clientCookie: "
-				<< static_cast<int>(s->clientCookie) << std::endl;)
+	DEBUG_ENABLED(std::cout << "HelloBye3::Server::runHello() clientCookie: "
+							<< static_cast<int>(s->clientCookie) << std::endl;)
 
 	msg->role = msg::ROLE_SERVER;
 	msg->msg = msg::MSG_HELLO;
@@ -213,8 +213,8 @@ void runBye(StateMachine<Identifier<mbuf>, mbuf>::State &state, mbuf *pkt,
 
 	struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 
-	D(std::cout << "HelloBye3::Client::runBye() function called, ident:" << msg->ident
-				<< std::endl;)
+	DEBUG_ENABLED(std::cout << "HelloBye3::Client::runBye() function called, ident:"
+							<< msg->ident << std::endl;)
 
 	if ((msg->role != msg::ROLE_SERVER) || (msg->msg != msg::MSG_HELLO)) {
 		std::cout << "HelloBye3::Client::runBye() msg fields wrong" << std::endl;
@@ -245,8 +245,9 @@ void runBye(StateMachine<Identifier<mbuf>, mbuf>::State &state, mbuf *pkt,
 	udp->dstPort = udp->srcPort;
 	udp->srcPort = tmp16;
 
-	D(std::cout << "HelloBye3::Client::runBye() Dump of outgoing packet" << std::endl;)
-	D(hexdump(pkt->getData(), 64);)
+	DEBUG_ENABLED(
+		std::cout << "HelloBye3::Client::runBye() Dump of outgoing packet" << std::endl;)
+	DEBUG_ENABLED(hexdump(pkt->getData(), 64);)
 
 	// We need to wait for the server reply
 	funIface.transition(States::RecvBye);

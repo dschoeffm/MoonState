@@ -5,9 +5,9 @@
 #include <cassert>
 
 #ifdef DEBUG
-#define D(x) x
+#define DEBUG_ENABLED(x) x
 #else
-#define D(x)
+#define DEBUG_ENABLED(x)
 #endif
 
 #ifdef DEBUG

@@ -159,7 +159,7 @@ public:
 					// found");
 				}
 
-				D(std::cout << "Running Function" << std::endl;)
+				DEBUG_ENABLED(std::cout << "Running Function" << std::endl;)
 				(sfIt->second)(state, pktsBA[pktIdx], *this);
 				*/
 
@@ -167,11 +167,12 @@ public:
 				auto fun = sm->functions[state.state];
 				assert(fun != nullptr);
 
-				D(std::cout << "Running Function" << std::endl;)
+				DEBUG_ENABLED(std::cout << "Running Function" << std::endl;)
 				fun(state, pktsBA[pktIdx], *this);
 
 				if (state.state == sm->endStateID) {
-					D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+					DEBUG_ENABLED(
+						std::cout << "Reached endStateID - deleting connection" << std::endl;)
 					sm->removeState(cID);
 				}
 			}
@@ -441,8 +442,9 @@ private:
 			{
 				State st;
 				if (connPool->findAndErase(id, &st)) {
-					D(std::cout << "StateMachine::findState() found state in connPool"
-								<< std::endl;)
+					DEBUG_ENABLED(std::cout
+									  << "StateMachine::findState() found state in connPool"
+									  << std::endl;)
 					stateTable.insert({id, st});
 
 					stat_statesAdded++;
@@ -454,8 +456,9 @@ private:
 			// Maybe accept the new connection
 			if (listenToConnections) {
 				// Add new state
-				D(std::cout << "Adding new state" << std::endl;)
-				D(std::cout << "ConnectionID: " << static_cast<std::string>(id) << std::endl;)
+				DEBUG_ENABLED(std::cout << "Adding new state" << std::endl;)
+				DEBUG_ENABLED(std::cout << "ConnectionID: " << static_cast<std::string>(id)
+										<< std::endl;)
 
 				// Create startState data object
 				void *stateData = nullptr;
@@ -472,13 +475,13 @@ private:
 			}
 
 		} else {
-			D(std::cout << "State found" << std::endl;)
+			DEBUG_ENABLED(std::cout << "State found" << std::endl;)
 		}
 		return stateIt;
 	};
 
 	void runPkt(BufArray<Packet> &pktsIn, unsigned int cur) {
-		D(std::cout << std::endl << "StateMachine::runPkt() called" << std::endl;)
+		DEBUG_ENABLED(std::cout << std::endl << "StateMachine::runPkt() called" << std::endl;)
 
 		try {
 			// Retrieve the current packet
@@ -492,9 +495,10 @@ private:
 
 			if (stateIt == stateTable.end()) {
 				// We don't want this packet
-				D(std::cout << "StateMachine::runPkt() discarding packet" << std::endl;)
-				D(std::cout << "ident of packet: " << static_cast<std::string>(identity)
-							<< std::endl;)
+				DEBUG_ENABLED(
+					std::cout << "StateMachine::runPkt() discarding packet" << std::endl;)
+				DEBUG_ENABLED(std::cout << "ident of packet: "
+										<< static_cast<std::string>(identity) << std::endl;)
 				return;
 			}
 
@@ -508,7 +512,8 @@ private:
 			/*
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
-				D(std::cout << "StateMachine::runPkt() Didn't find a function for this state"
+				DEBUG_ENABLED(std::cout << "StateMachine::runPkt() Didn't find a function for
+			this state"
 							<< std::endl;)
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
@@ -521,17 +526,20 @@ private:
 			FunIface funIface(this, cur, pktsIn, identity, stateIt->second);
 
 			// Run the function
-			D(std::cout << "StateMachine::runPkt() Running Function" << std::endl;)
-			D(std::cout << "StateMachine::runPkt() identity: "
-						<< static_cast<std::string>(identity) << std::endl;)
-			D(std::cout << "StateMachine::runPkt() hexdump of packet: " << std::endl;)
-			D(hexdump(pktIn->getData(), pktIn->getDataLen());)
+			DEBUG_ENABLED(
+				std::cout << "StateMachine::runPkt() Running Function" << std::endl;)
+			DEBUG_ENABLED(std::cout << "StateMachine::runPkt() identity: "
+									<< static_cast<std::string>(identity) << std::endl;)
+			DEBUG_ENABLED(
+				std::cout << "StateMachine::runPkt() hexdump of packet: " << std::endl;)
+			DEBUG_ENABLED(hexdump(pktIn->getData(), pktIn->getDataLen());)
 			//(sfIt->second)(stateIt->second, pktIn, funIface);
 			fun(stateIt->second, pktIn, funIface);
 
 			// Check if the endstate is reached
 			if (stateIt->second.state == endStateID) {
-				D(std::cout
+				DEBUG_ENABLED(
+					std::cout
 						<< "StateMachine::runPkt() Reached endStateID - deleting connection"
 						<< std::endl;)
 				removeState(identity);
@@ -545,8 +553,8 @@ private:
 			// (or at least give it a hard thought)
 
 		} catch (PacketNotIdentified *e) {
-			D(std::cout << "StateMachine::runPkt() Packet could not be identified"
-						<< std::endl;);
+			DEBUG_ENABLED(std::cout << "StateMachine::runPkt() Packet could not be identified"
+									<< std::endl;);
 			pktsIn.markDropPkt(cur);
 		}
 	}
@@ -664,20 +672,22 @@ public:
 
 		FunIface funIface(this, 0, pktsIn, id, st);
 
-		D(std::cout << "StateMachine::addState() Running Function" << std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		//(sfIt->second)(st, pktsIn[0], funIface);
 		fun(st, pktsIn[0], funIface);
 
 		if (st.state == endStateID) {
-			D(std::cout << "StateMachine::addState() Reached endStateID - deleting connection"
-						<< std::endl;)
+			DEBUG_ENABLED(
+				std::cout
+					<< "StateMachine::addState() Reached endStateID - deleting connection"
+					<< std::endl;)
 			return;
 		}
 
-		D(std::cout << "StateMachine::addState() adding connection to newStates"
-					<< std::endl;)
-		D(std::cout << "StateMachine::addState() identity: " << static_cast<std::string>(id)
-					<< std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() adding connection to newStates"
+								<< std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() identity: "
+								<< static_cast<std::string>(id) << std::endl;)
 		connPool->add(id, st);
 	}
 
@@ -692,9 +702,10 @@ public:
 	void runPktBatch(BufArray<Packet> &pktsIn) {
 		uint32_t inCount = pktsIn.getTotalCount();
 
-		D(std::cout << std::endl
-					<< "StateMachine::runPktBatch() running incoming batch now, #Pkts: "
-					<< inCount << std::endl;)
+		DEBUG_ENABLED(
+			std::cout << std::endl
+					  << "StateMachine::runPktBatch() running incoming batch now, #Pkts: "
+					  << inCount << std::endl;)
 
 		// This loop handles the timeouts
 		// It breaks, if there are no usable timeouts anymore
@@ -734,7 +745,8 @@ public:
 
 			// Check if we reached the end state
 			if (stateIt->second.state == endStateID) {
-				D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
+				DEBUG_ENABLED(
+					std::cout << "Reached endStateID - deleting connection" << std::endl;)
 				removeState(timeoutData->id);
 			}
 
