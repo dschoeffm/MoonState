@@ -147,6 +147,7 @@ public:
 			// We are not in the endstate - checked by runPkt
 
 			if (immediateTransition) {
+				/*
 				auto sfIt = sm->functions.find(state.state);
 				if (sfIt == sm->functions.end()) {
 					D(
@@ -160,6 +161,14 @@ public:
 
 				D(std::cout << "Running Function" << std::endl;)
 				(sfIt->second)(state, pktsBA[pktIdx], *this);
+				*/
+
+				assert((sm->functions.size() - 1) >= state.state);
+				auto fun = sm->functions[state.state];
+				assert(fun != nullptr);
+
+				D(std::cout << "Running Function" << std::endl;)
+				fun(state, pktsBA[pktIdx], *this);
 
 				if (state.state == sm->endStateID) {
 					D(std::cout << "Reached endStateID - deleting connection" << std::endl;)
@@ -334,7 +343,7 @@ private:
 
 	// This table specifies which function should be called for a packet
 	// belonging to a connection in a specific state
-	std::unordered_map<StateID, stateFun> functions;
+	std::vector<stateFun> functions;
 
 	// TODO: Since the identifier should not track anything, maybe we don't
 	// even need a member -> all static functions
@@ -506,12 +515,17 @@ private:
 			}
 
 			// Try to retrieve an appropriate function
+			/*
 			auto sfIt = functions.find(stateIt->second.state);
 			if (sfIt == functions.end()) {
 				D(std::cout << "StateMachine::runPkt() Didn't find a function for this state"
 							<< std::endl;)
 				throw std::runtime_error("StateMachine::runPkt() No such function found");
 			}
+			*/
+			assert((functions.size() - 1) >= stateIt->second.state);
+			auto fun = functions[stateIt->second.state];
+			assert(fun != nullptr);
 
 			// Create the custom function interface
 			FunIface funIface(this, cur, pktsIn, identity, stateIt->second);
@@ -522,7 +536,8 @@ private:
 						<< static_cast<std::string>(identity) << std::endl;)
 			D(std::cout << "StateMachine::runPkt() hexdump of packet: " << std::endl;)
 			D(hexdump(pktIn->getData(), pktIn->getDataLen());)
-			(sfIt->second)(stateIt->second, pktIn, funIface);
+			//(sfIt->second)(stateIt->second, pktIn, funIface);
+			fun(stateIt->second, pktIn, funIface);
 
 			// Check if the endstate is reached
 			if (stateIt->second.state == endStateID) {
@@ -579,7 +594,13 @@ public:
 	 * \param function This function will be called, when a connection is in
 	 * 		state id, and gets a packet
 	 */
-	void registerFunction(StateID id, stateFun function) { functions.insert({id, function}); }
+	void registerFunction(StateID id, stateFun function) {
+		// functions.insert({id, function});
+		if ((static_cast<int>(functions.size()) - 1) < static_cast<int>(id)) {
+			functions.resize(id + 1);
+		}
+		functions[id] = function;
+	}
 
 	/*! This registers an end state
 	 * If a connections reaches this id, it will be destroyed
@@ -630,15 +651,22 @@ public:
 	 */
 	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn) {
 
+		/*
 		auto sfIt = functions.find(st.state);
 		if (sfIt == functions.end()) {
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
+		*/
+
+		assert((functions.size() - 1) >= st.state);
+		auto fun = functions[st.state];
+		assert(fun != nullptr);
 
 		FunIface funIface(this, 0, pktsIn, id, st);
 
 		D(std::cout << "StateMachine::addState() Running Function" << std::endl;)
-		(sfIt->second)(st, pktsIn[0], funIface);
+		//(sfIt->second)(st, pktsIn[0], funIface);
+		fun(st, pktsIn[0], funIface);
 
 		if (st.state == endStateID) {
 			D(std::cout << "StateMachine::addState() Reached endStateID - deleting connection"
