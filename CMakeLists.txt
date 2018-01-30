@@ -13,6 +13,7 @@ endif(NOT DPDK_INCLUDE_DIR)
 
 if(LIBMOON_BUILD_LIBRARY)
 	SET(DPDK_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libmoon/deps/dpdk/x86_64-native-linuxapp-gcc/include")
+	SET(DPDK_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libmoon/deps/dpdk/x86_64-native-linuxapp-gcc/lib")
 endif(LIBMOON_BUILD_LIBRARY)
 
 #SET(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -march=native -g -O0 -fno-omit-frame-pointer -stdlib=libc++ -fsanitize=address,undefined")
@@ -45,6 +46,7 @@ SET(OPENSSL_LIBS
 SET(ALL_LIBS
 	pthread
 	${OPENSSL_LIBS}
+	rte_mempool
 )
 
 if(WITH_PCAP)
@@ -69,6 +71,7 @@ add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
 
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
+	${DPDK_LIB_DIR}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
