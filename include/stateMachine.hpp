@@ -14,6 +14,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <tbb/concurrent_hash_map.h>
+
 #include "bufArray.hpp"
 #include "common.hpp"
 #include "exceptions.hpp"
@@ -150,7 +152,7 @@ public:
 				/*
 				auto sfIt = sm->functions.find(state.state);
 				if (sfIt == sm->functions.end()) {
-					D(
+					DEBUG_ENABLED(
 						std::cout
 							<< "FunIface::~FunIface() Didn't find a function for this state"
 							<< std::endl;)
@@ -246,53 +248,28 @@ public:
 
 	class ConnectionPool {
 	private:
-		const unsigned int numBuckets = 8;
-		const uint64_t bucketMask = 0b111;
-
-		std::unordered_map<ConnectionID, State, Hasher> **newStates;
-		SpinLockCLSize **newStatesLock;
-
-	public:
-		ConnectionPool() {
-			newStates = reinterpret_cast<std::unordered_map<ConnectionID, State, Hasher> **>(
-				malloc(sizeof(void *) * numBuckets));
-			for (unsigned int i = 0; i < numBuckets; i++) {
-				newStates[i] = new std::unordered_map<ConnectionID, State, Hasher>();
+		struct TBBHasher {
+			static std::size_t hash(const ConnectionID &x) {
+				Hasher h;
+				return h(x);
 			}
 
-			newStatesLock =
-				reinterpret_cast<SpinLockCLSize **>(malloc(sizeof(void *) * numBuckets));
-			for (unsigned int i = 0; i < numBuckets; i++) {
-				newStatesLock[i] = new SpinLockCLSize();
-			}
+			static bool equal(const ConnectionID &x, const ConnectionID &y) { return x == y; }
 		};
 
-		~ConnectionPool() {
-			for (unsigned int i = 0; i < numBuckets; i++) {
-				delete (newStates[i]);
-			}
-			free(newStates);
+		tbb::concurrent_hash_map<ConnectionID, State, TBBHasher> newStates;
 
-			for (unsigned int i = 0; i < numBuckets; i++) {
-				newStatesLock[i]->lock();
-				delete (newStatesLock[i]);
-			}
-			free(newStatesLock);
-		}
+	public:
+		ConnectionPool(){};
+
+		~ConnectionPool(){};
 
 		/*! Add connection and state to the connection pool
 		 *
 		 * \param cID ID of the connection
 		 * \param st State for the connection
 		 */
-		void add(ConnectionID &cID, State &st) {
-			Hasher hasher;
-			uint64_t bucket = hasher(cID) & bucketMask;
-
-			std::lock_guard<SpinLockCLSize> lock(*(newStatesLock[bucket]));
-			auto insPair = std::pair<ConnectionID, State>(cID, st);
-			newStates[bucket]->insert(insPair);
-		};
+		void add(ConnectionID &cID, State &st) { newStates.insert({cID, st}); };
 
 		/*! Try to find a state for a given connection ID
 		 *
@@ -305,19 +282,14 @@ public:
 		 * \return Found or not found
 		 */
 		bool findAndErase(ConnectionID &cID, State *st) {
-			Hasher hasher;
-			uint64_t bucket = hasher(cID) & bucketMask;
-
-			std::lock_guard<SpinLockCLSize> lock(*(newStatesLock[bucket]));
-			auto ret = newStates[bucket]->find(cID);
-
-			if (ret != newStates[bucket]->end()) {
-				st->set(ret->second);
-				newStates[bucket]->erase(ret);
+			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
+			if (newStates.find(it, cID)) {
+				st->set(it->second);
 				return true;
 			} else {
 				return false;
 			}
+			return false;
 		};
 	};
 

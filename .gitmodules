@@ -8,3 +8,6 @@
 	path = deps/openssl
 	url = https://github.com/dschoeffm/openssl.git
 	branch = moonstate
+[submodule "deps/tbb"]
+	path = deps/tbb
+	url = https://github.com/dschoeffm/tbb.git

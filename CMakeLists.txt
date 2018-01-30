@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/concurrentqueue
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
 )
 
 INCLUDE_DIRECTORIES(
@@ -53,6 +54,7 @@ SET(ALL_LIBS
 	numa
 	${OPENSSL_LIBS}
 	${DPDK_LIBS}
+	libtbb.a
 )
 
 if(WITH_PCAP)
@@ -71,19 +73,27 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
 	COMMENT "Building OpenSSL - This may take a while"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
 )
-
 add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
 
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a
+	PRE_LINK
+	COMMAND $(MAKE) "extra_inc=big_iron.inc"
+	COMMENT "Building TBB"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/
+)
+add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a)
+
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb
 	${DPDK_LIB_DIR}
 )
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} opensslBuild)
+add_dependencies(${PROJECT_NAME} opensslBuild TBB)
 
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
