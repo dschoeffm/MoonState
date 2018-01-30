@@ -10,8 +10,8 @@ var searchData=
   ['messageseq',['messageSeq',['../structDTLS_1_1Handshake_1_1Header.html#a9562b0d69d5a729d8dc2480eb9edc972',1,'DTLS::Handshake::Header']]],
   ['minor',['minor',['../structDTLS_1_1Record_1_1ProtocolVersion.html#a1eaad333e7e20547733eb80ef595f10f',1,'DTLS::Record::ProtocolVersion']]],
   ['minor12',['minor12',['../structDTLS_1_1Record_1_1ProtocolVersion.html#aa811815c7ea1f2e7a888a4c3f29eef43',1,'DTLS::Record::ProtocolVersion']]],
-  ['msg',['msg',['../structHelloBye2_1_1msg.html',1,'HelloBye2::msg'],['../structHelloBye2_1_1msg.html#a4176b99eaac8fa68d5e44531ad8eaba0',1,'HelloBye2::msg::msg()']]],
-  ['msg_5fbye',['MSG_BYE',['../structHelloBye2_1_1msg.html#abb17a51f6d0a08bec4c784f120ea6b50',1,'HelloBye2::msg']]],
-  ['msg_5fhello',['MSG_HELLO',['../structHelloBye2_1_1msg.html#a7d02918b586802e975aa5baa009bdfd8',1,'HelloBye2::msg']]],
+  ['msg',['msg',['../structHelloBye3_1_1msg.html',1,'HelloBye3::msg'],['../structHelloBye2_1_1msg.html',1,'HelloBye2::msg'],['../structHelloBye2_1_1msg.html#a4176b99eaac8fa68d5e44531ad8eaba0',1,'HelloBye2::msg::msg()'],['../structHelloBye3_1_1msg.html#a3b93043c60ca836029a396cabf4d4982',1,'HelloBye3::msg::msg()']]],
+  ['msg_5fbye',['MSG_BYE',['../structHelloBye2_1_1msg.html#abb17a51f6d0a08bec4c784f120ea6b50',1,'HelloBye2::msg::MSG_BYE()'],['../structHelloBye3_1_1msg.html#af4f7aa3d0d9cdf79ce8e3e667d5b5e0f',1,'HelloBye3::msg::MSG_BYE()']]],
+  ['msg_5fhello',['MSG_HELLO',['../structHelloBye2_1_1msg.html#a7d02918b586802e975aa5baa009bdfd8',1,'HelloBye2::msg::MSG_HELLO()'],['../structHelloBye3_1_1msg.html#ab6dafee5a16dc2476df9e5a402868c5b',1,'HelloBye3::msg::MSG_HELLO()']]],
   ['msgtype',['msgType',['../structDTLS_1_1Handshake_1_1Header.html#aa42007946ab0302f59da77e31780199a',1,'DTLS::Handshake::Header']]]
 ];

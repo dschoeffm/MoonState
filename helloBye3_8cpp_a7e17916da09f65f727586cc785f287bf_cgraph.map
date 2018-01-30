@@ -1,0 +1,6 @@
+<map id="HelloBye3_Client_getPkts" name="HelloBye3_Client_getPkts">
+<area shape="rect" id="node2" href="$classBufArray.html#a65ec6fb832e58b88b2be695c4d30a437" title="Get all the packets which are to be sent. " alt="" coords="430,5,586,32"/>
+<area shape="rect" id="node4" href="$classBufArray.html#a81ad0c7cdb324569ecfb42e735e653c9" title="Get all the packets which are to be freed. " alt="" coords="228,56,380,83"/>
+<area shape="rect" id="node3" href="$classBufArray.html#a1d52cd9f63feaa98f800bcae8277e675" title="Get the number of packets currently marked as send. " alt="" coords="636,31,800,57"/>
+<area shape="rect" id="node5" href="$classBufArray.html#a77223130b4dca30992a335dbff4b4781" title="Get the number of packets currently marked as free. " alt="" coords="428,56,588,83"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="HelloBye3_Server_init" name="HelloBye3_Server_init">
+<area shape="rect" id="node2" href="$namespaceHelloBye3_1_1Server.html#a0637bd260684c226f4f04d8177666cc9" title="HelloBye3::Server::\lfactory" alt="" coords="204,10,340,51"/>
+<area shape="rect" id="node3" href="$namespaceHelloBye3_1_1Server.html#ad3f0238bf7f0df92690d1c9addd8ede0" title="HelloBye3::Server::\lrunHello" alt="" coords="204,141,340,182"/>
+<area shape="rect" id="node10" href="$namespaceHelloBye3_1_1Server.html#a10dc03b910acb6a1ad2d457b75a75408" title="HelloBye3::Server::\lrunBye" alt="" coords="204,75,340,117"/>
+<area shape="rect" id="node4" href="$structmbuf.html#a822d13c96f003279f7691d7778e75c3c" title="mbuf::getData" alt="" coords="425,56,530,83"/>
+<area shape="rect" id="node5" href="$structHeaders_1_1Ethernet.html#ad59e9fe1ec95b8e2ed11f97b44a20650" title="Get the SDU. " alt="" coords="409,107,545,149"/>
+<area shape="rect" id="node6" href="$structHeaders_1_1IPv4.html#acc4a8033c5da9c2ce147ee10e15d2a49" title="Get the SDU. " alt="" coords="388,173,567,200"/>
+<area shape="rect" id="node8" href="$structHeaders_1_1Udp.html#a531f2e8247abf7807c50d806208b7cb1" title="Get the SDU. " alt="" coords="389,224,565,251"/>
+<area shape="rect" id="node9" href="$structHelloBye3_1_1msg.html#a3b93043c60ca836029a396cabf4d4982" title="HelloBye3::msg::msg" alt="" coords="403,5,551,32"/>
+<area shape="rect" id="node7" href="$structHeaders_1_1IPv4.html#ac6c5485ffca9cffaded18d2ad8d5985a" title="Headers::IPv4::ihl" alt="" coords="615,173,741,200"/>
+</map>
