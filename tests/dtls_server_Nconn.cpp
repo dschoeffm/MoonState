@@ -236,7 +236,7 @@ int main() {
 	SSL_CTX *ctx;
 
 	if (dtls_InitContextFromKeystore(&ctx, "server") < 0) {
-		exit(EXIT_FAILURE);
+		exit(0);
 	}
 
 	// Create the server UDP listener socket
