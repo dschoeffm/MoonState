@@ -91,3 +91,56 @@ void runTeardown(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbu
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
 
 }; // namespace DTLS_Client
+
+extern "C" {
+/*! Initialize a DTLS client
+ *
+ * \param dstIP IP of the DTLS test server
+ * \param dstPort Port of the DTLS test server
+ * \param srcMac MAC address of the local NIC
+ * \param dstMac MAC address of the remote NIC
+ *
+ * \return An opaque object which should be fed into DtlsClient_connect
+ */
+void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort, uint8_t srcMac[6], uint8_t dstMac[6]);
+
+/*! Add one connection to the State Machine
+ *
+ * \param obj The void* returned from DtlsClient_init()
+ * \param inPkts mbufs from MoonGen
+ * \param inCount Number of buffers in inPkts (should be 1)
+ * \param sendCount This will be set to the number of packets to be sent
+ * \param freeCount This will be set to the number of packets to be freed
+ * \param srcIP IP which should be used as the source
+ * \param srcPort Port which should be used as the source
+ *
+ * \return Opaque object to be fed into DtlsClient_getPkts
+ */
+void *DtlsClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort);
+
+/*! Get the packets from an opaque structure
+ *
+ * \param obj Return value of DtlsClient_connect() or DtlsClient_process()
+ * \param sendPkts Array of packet buffers to be sent
+ * \param freePkts Array of packet buffers to be freed
+ */
+void DtlsClient_getPkts(void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts);
+
+/*! Process incoming packets
+ *
+ * \param obj Structure returned from DtlsClient_init()
+ * \param inPkts The newly arrived packets
+ * \param inCount Number of incoming packets
+ * \param sendCount Will be set to the number of packets to be sent
+ * \param freeCount Will be set to the number of packets to be freed
+ */
+void *DtlsClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	unsigned int *sendCount, unsigned int *freeCount);
+
+/*! Free recources used by the state machine
+ *
+ * \param obj object returned by DtlsClient_init()
+ */
+void DtlsClient_free(void *obj);
+}
