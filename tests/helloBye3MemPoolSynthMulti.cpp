@@ -4,7 +4,7 @@
 #include <thread>
 
 #include "bufArray.hpp"
-#include "helloBye2_C.hpp"
+#include "helloBye3MemPool.hpp"
 #include "mbuf.hpp"
 #include "spinlock.hpp"
 #include "stateMachine.hpp"
@@ -13,60 +13,20 @@
 #undef unlikely
 
 using Packet = mbuf;
-using Ident = HelloBye2::Identifier<Packet>;
+using Ident = HelloBye3MemPool::Identifier<Packet>;
 using SM = StateMachine<Ident, Packet>;
 
-using namespace HelloBye2;
+using namespace HelloBye3MemPool;
 using namespace std;
-
-#if 1
 
 #include "blockingconcurrentqueue.h"
 using namespace moodycamel;
-
-#else
-
-template <typename T> class BlockingConcurrentQueue {
-private:
-	// std::mutex mtx;
-	SpinLockCLSize mtx;
-	std::queue<T> q;
-
-public:
-	BlockingConcurrentQueue(){};
-	BlockingConcurrentQueue(int i) { (void)i; };
-
-	void enqueue_bulk(T *ins, unsigned int insCount) {
-		// std::lock_guard<std::mutex> lock(mtx);
-		std::lock_guard<SpinLockCLSize> lock(mtx);
-
-		for (unsigned int i = 0; i < insCount; i++) {
-			q.push(ins[i]);
-		}
-	};
-	size_t try_dequeue_bulk(T *outs, unsigned int outsCount) {
-		// std::lock_guard<std::mutex> lock(mtx);
-		std::lock_guard<SpinLockCLSize> lock(mtx);
-
-		size_t retCount = 0;
-		while (retCount < outsCount) {
-			if (!q.empty()) {
-				outs[retCount] = q.front();
-				q.pop();
-			} else {
-				return retCount;
-			}
-		}
-		return retCount;
-	};
-};
-#endif
 
 #define BATCH_SIZE 64
 
 void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	SM::ConnectionPool *connPool) {
-	void *obj = HelloBye2_Client_init();
+	void *obj = HelloBye3MemPool_Client_init();
 	SM *obj_sm = reinterpret_cast<SM *>(obj);
 
 	obj_sm->setConnectionPool(connPool);
@@ -92,13 +52,13 @@ void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		unsigned int sbcTotal = 0;
 
 		for (int i = 0; i < BATCH_SIZE; i++) {
-			void *ba_v = HelloBye2_Client_connect(
-				obj, &(pkts[i]), 1, &sbc, &fbc, 0x0, 0x1337, ident + i);
+			void *ba_v = HelloBye3MemPool_Client_connect(
+				obj, &(pkts[i]), 1, &sbc, &fbc, 0x0, 0x0, 0x1336, 0x1337, ident + i);
 
 			struct rte_mbuf **freeBufs =
 				reinterpret_cast<struct rte_mbuf **>(malloc(sizeof(mbuf *) * fbc));
 
-			HelloBye2_Client_getPkts(ba_v, &sendBufsAll[i], freeBufs);
+			HelloBye3MemPool_Client_getPkts(ba_v, &sendBufsAll[i], freeBufs);
 
 			sbcTotal += sbc;
 
@@ -117,12 +77,12 @@ void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 	}
 	free(pkts);
 
-	HelloBye2_Client_free(obj);
+	HelloBye3MemPool_Client_free(obj);
 };
 
 void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	BlockingConcurrentQueue<rte_mbuf *> *pipeSC, SM::ConnectionPool *connPool) {
-	void *obj = HelloBye2_Client_init();
+	void *obj = HelloBye3MemPool_Client_init();
 	SM *obj_sm = reinterpret_cast<SM *>(obj);
 
 	obj_sm->setConnectionPool(connPool);
@@ -142,7 +102,7 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		size_t inCount = pipeSC->try_dequeue_bulk(pkts, BATCH_SIZE * 2);
 
 		if (inCount > 0) {
-			void *ba = HelloBye2_Client_process(obj, pkts, inCount, &sbc, &fbc);
+			void *ba = HelloBye3MemPool_Client_process(obj, pkts, inCount, &sbc, &fbc);
 
 			if (sbc > sbufsS) {
 				free(sbufs);
@@ -158,7 +118,7 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 				fbufsS = fbc;
 			}
 
-			HelloBye2_Client_getPkts(ba, sbufs, fbufs);
+			HelloBye3MemPool_Client_getPkts(ba, sbufs, fbufs);
 
 			for (unsigned int i = 0; i < fbc; i++) {
 				free(fbufs[i]->buf_addr);
@@ -174,12 +134,12 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 
 	free(pkts);
 
-	HelloBye2_Client_free(obj);
+	HelloBye3MemPool_Client_free(obj);
 };
 
 void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	BlockingConcurrentQueue<rte_mbuf *> *pipeSC) {
-	void *obj = HelloBye2_Server_init();
+	void *obj = HelloBye3MemPool_Server_init();
 
 	struct rte_mbuf **pkts = reinterpret_cast<struct rte_mbuf **>(
 		malloc(sizeof(struct rte_mbuf *) * BATCH_SIZE * 2));
@@ -197,7 +157,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		size_t inCount = pipeCS->try_dequeue_bulk(pkts, BATCH_SIZE * 2);
 
 		if (inCount > 0) {
-			void *ba = HelloBye2_Server_process(obj, pkts, inCount, &sbc, &fbc);
+			void *ba = HelloBye3MemPool_Server_process(obj, pkts, inCount, &sbc, &fbc);
 
 			if (sbc > sbufsS) {
 				free(sbufs);
@@ -213,7 +173,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 				fbufsS = fbc;
 			}
 
-			HelloBye2_Server_getPkts(ba, sbufs, fbufs);
+			HelloBye3MemPool_Server_getPkts(ba, sbufs, fbufs);
 
 			for (unsigned int i = 0; i < fbc; i++) {
 				free(fbufs[i]->buf_addr);
@@ -229,7 +189,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 
 	free(pkts);
 
-	HelloBye2_Server_free(obj);
+	HelloBye3MemPool_Server_free(obj);
 };
 
 void usage(string str) { cout << "Usage: " << str << " (time)" << endl; }
@@ -238,6 +198,24 @@ int main(int argc, char **argv) {
 	int time = 3;
 	if (argc > 1) {
 		time = atoi(argv[1]);
+	}
+
+	int ret = rte_eal_init(argc, argv);
+	if (ret < 0) {
+		rte_exit(EXIT_FAILURE, "Cannot init EAL\n");
+	}
+
+	std::cout << "Hugepages: " << rte_eal_has_hugepages() << std::endl;
+
+	auto mempool =
+		rte_mempool_create("test MemPool", 512, sizeof(HelloBye3MemPool::Client::client), 128,
+			0, NULL, NULL, NULL, NULL, SOCKET_ID_ANY, 0);
+
+	if (mempool == nullptr) {
+		std::cout << "mempool is nullptr" << std::endl;
+		std::abort();
+	} else {
+		std::cout << "mempool is not nullptr" << std::endl;
 	}
 
 	SM::ConnectionPool cp;
@@ -252,8 +230,6 @@ int main(int argc, char **argv) {
 
 	BlockingConcurrentQueue<struct rte_mbuf *> pipeCS(100000);
 	BlockingConcurrentQueue<struct rte_mbuf *> pipeSC(100000);
-
-	HelloBye2_Client_config(1, 1338);
 
 	std::cout << "--- Starting threads ---" << std::endl;
 

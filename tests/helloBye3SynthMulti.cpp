@@ -4,7 +4,7 @@
 #include <thread>
 
 #include "bufArray.hpp"
-#include "helloBye2_C.hpp"
+#include "helloBye3.hpp"
 #include "mbuf.hpp"
 #include "spinlock.hpp"
 #include "stateMachine.hpp"
@@ -13,10 +13,10 @@
 #undef unlikely
 
 using Packet = mbuf;
-using Ident = HelloBye2::Identifier<Packet>;
+using Ident = HelloBye3::Identifier<Packet>;
 using SM = StateMachine<Ident, Packet>;
 
-using namespace HelloBye2;
+using namespace HelloBye3;
 using namespace std;
 
 #if 1
@@ -66,7 +66,7 @@ public:
 
 void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	SM::ConnectionPool *connPool) {
-	void *obj = HelloBye2_Client_init();
+	void *obj = HelloBye3_Client_init();
 	SM *obj_sm = reinterpret_cast<SM *>(obj);
 
 	obj_sm->setConnectionPool(connPool);
@@ -92,13 +92,13 @@ void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		unsigned int sbcTotal = 0;
 
 		for (int i = 0; i < BATCH_SIZE; i++) {
-			void *ba_v = HelloBye2_Client_connect(
-				obj, &(pkts[i]), 1, &sbc, &fbc, 0x0, 0x1337, ident + i);
+			void *ba_v = HelloBye3_Client_connect(
+				obj, &(pkts[i]), 1, &sbc, &fbc, 0x0, 0x0, 0x1336, 0x1337, ident + i);
 
 			struct rte_mbuf **freeBufs =
 				reinterpret_cast<struct rte_mbuf **>(malloc(sizeof(mbuf *) * fbc));
 
-			HelloBye2_Client_getPkts(ba_v, &sendBufsAll[i], freeBufs);
+			HelloBye3_Client_getPkts(ba_v, &sendBufsAll[i], freeBufs);
 
 			sbcTotal += sbc;
 
@@ -117,12 +117,12 @@ void clientConnector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 	}
 	free(pkts);
 
-	HelloBye2_Client_free(obj);
+	HelloBye3_Client_free(obj);
 };
 
 void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	BlockingConcurrentQueue<rte_mbuf *> *pipeSC, SM::ConnectionPool *connPool) {
-	void *obj = HelloBye2_Client_init();
+	void *obj = HelloBye3_Client_init();
 	SM *obj_sm = reinterpret_cast<SM *>(obj);
 
 	obj_sm->setConnectionPool(connPool);
@@ -142,7 +142,7 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		size_t inCount = pipeSC->try_dequeue_bulk(pkts, BATCH_SIZE * 2);
 
 		if (inCount > 0) {
-			void *ba = HelloBye2_Client_process(obj, pkts, inCount, &sbc, &fbc);
+			void *ba = HelloBye3_Client_process(obj, pkts, inCount, &sbc, &fbc);
 
 			if (sbc > sbufsS) {
 				free(sbufs);
@@ -158,7 +158,7 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 				fbufsS = fbc;
 			}
 
-			HelloBye2_Client_getPkts(ba, sbufs, fbufs);
+			HelloBye3_Client_getPkts(ba, sbufs, fbufs);
 
 			for (unsigned int i = 0; i < fbc; i++) {
 				free(fbufs[i]->buf_addr);
@@ -174,12 +174,12 @@ void clientReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 
 	free(pkts);
 
-	HelloBye2_Client_free(obj);
+	HelloBye3_Client_free(obj);
 };
 
 void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pipeCS,
 	BlockingConcurrentQueue<rte_mbuf *> *pipeSC) {
-	void *obj = HelloBye2_Server_init();
+	void *obj = HelloBye3_Server_init();
 
 	struct rte_mbuf **pkts = reinterpret_cast<struct rte_mbuf **>(
 		malloc(sizeof(struct rte_mbuf *) * BATCH_SIZE * 2));
@@ -197,7 +197,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 		size_t inCount = pipeCS->try_dequeue_bulk(pkts, BATCH_SIZE * 2);
 
 		if (inCount > 0) {
-			void *ba = HelloBye2_Server_process(obj, pkts, inCount, &sbc, &fbc);
+			void *ba = HelloBye3_Server_process(obj, pkts, inCount, &sbc, &fbc);
 
 			if (sbc > sbufsS) {
 				free(sbufs);
@@ -213,7 +213,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 				fbufsS = fbc;
 			}
 
-			HelloBye2_Server_getPkts(ba, sbufs, fbufs);
+			HelloBye3_Server_getPkts(ba, sbufs, fbufs);
 
 			for (unsigned int i = 0; i < fbc; i++) {
 				free(fbufs[i]->buf_addr);
@@ -229,7 +229,7 @@ void serverReflector(atomic<bool> *run, BlockingConcurrentQueue<rte_mbuf *> *pip
 
 	free(pkts);
 
-	HelloBye2_Server_free(obj);
+	HelloBye3_Server_free(obj);
 };
 
 void usage(string str) { cout << "Usage: " << str << " (time)" << endl; }
@@ -252,8 +252,6 @@ int main(int argc, char **argv) {
 
 	BlockingConcurrentQueue<struct rte_mbuf *> pipeCS(100000);
 	BlockingConcurrentQueue<struct rte_mbuf *> pipeSC(100000);
-
-	HelloBye2_Client_config(1, 1338);
 
 	std::cout << "--- Starting threads ---" << std::endl;
 

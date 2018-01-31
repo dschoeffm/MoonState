@@ -43,10 +43,16 @@ SET(OPENSSL_LIBS
 	dl
 )
 
+SET(DPDK_LIBS
+	rte_mempool
+	dpdk
+)
+
 SET(ALL_LIBS
 	pthread
+	numa
 	${OPENSSL_LIBS}
-	rte_mempool
+	${DPDK_LIBS}
 )
 
 if(WITH_PCAP)
