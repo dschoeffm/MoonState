@@ -1,0 +1,4 @@
+<map id="HelloBye3MemPool_Server_process" name="HelloBye3MemPool_Server_process">
+<area shape="rect" id="node2" href="$classBufArray.html#a1d52cd9f63feaa98f800bcae8277e675" title="Get the number of packets currently marked as send. " alt="" coords="444,13,608,39"/>
+<area shape="rect" id="node3" href="$classBufArray.html#a77223130b4dca30992a335dbff4b4781" title="Get the number of packets currently marked as free. " alt="" coords="236,38,396,65"/>
+</map>

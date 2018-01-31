@@ -74,8 +74,16 @@ $(function() {
 <div class="contents">
 <div class="textblock"><p>This should (at some point) be a high-performance <a class="el" href="namespaceDTLS.html">DTLS</a> state-machine.</p>
 <h2>Build Instructions</h2>
+<p>In order to build MoonState you need the following programs and libraries:</p><ul>
+<li>cmake</li>
+<li>make</li>
+<li>gcc / clang</li>
+<li>g++ / clang++</li>
+<li>dpdk (see cmake options)</li>
+<li>libnuma</li>
+</ul>
 <p>MoonState uses CMake as a build system.</p>
-<p>The most simple build command is the following: </p><div class="fragment"><div class="line">mkdir build</div><div class="line">cd build</div><div class="line">cmake ..</div><div class="line">make -j</div></div><!-- fragment --><p>You may want to give cmake more options: </p><div class="fragment"><div class="line">DPDK_INCLUDE_DIR=&lt;path-to-DPDK-headers&gt;</div><div class="line">WITH_PCAP=x // If this is defined, pcap is needed</div></div><!-- fragment --> </div></div><!-- contents -->
+<p>The most simple build command is the following: </p><div class="fragment"><div class="line">mkdir build</div><div class="line">cd build</div><div class="line">cmake ..</div><div class="line">make -j</div></div><!-- fragment --><p>You may want or need to give cmake more options: </p><div class="fragment"><div class="line">DPDK_INCLUDE_DIR=&lt;path-to-DPDK-headers&gt;</div><div class="line">DPDK_LIB_DIR=&lt;path-to-DPDK-libs&gt;</div><div class="line">WITH_PCAP=x // If this is defined, pcap is needed</div></div><!-- fragment --> </div></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->
 <!-- start footer part -->
 </div>
