@@ -318,16 +318,6 @@ public:
 				return false;
 			}
 		};
-
-			// TODO I should really do this sooner than later
-#if 0
-		// If this is needed later, I will add it later
-		/*! Erase a connection from the pool
-		 *
-		 * \param cID Connection ID to erase
-		 */
-		void erase(ConnectionID &cID);
-#endif
 	};
 
 private:
@@ -631,6 +621,16 @@ public:
 	 */
 	void registerGetPktCB(std::function<Packet *()> fun) { getPktCB = fun; }
 
+	/*! Set the ConnectionPool
+	 *
+	 * This is useful, if you want to open connections using one state machine,
+	 * but then further process incoming packets using another instance.
+	 *
+	 * If you never call this function, a statically allocated ConnectionPool
+	 * will be used across every compatible state machine instance.
+	 *
+	 * \param cp ConnectionPool to use for this state machine
+	 */
 	void setConnectionPool(ConnectionPool *cp) { connPool = cp; }
 
 	/*! Remove a connection
@@ -756,13 +756,5 @@ public:
 template <class Identifier, class Packet>
 typename StateMachine<Identifier, Packet>::ConnectionPool
 	StateMachine<Identifier, Packet>::connPoolStatic;
-
-/*
-template <class Identifier, class Packet>
-const uint64_t StateMachine<Identifier, Packet>::ConnectionPool::bucketMask;
-
-template <class Identifier, class Packet>
-const unsigned int StateMachine<Identifier, Packet>::ConnectionPool::numBuckets;
-*/
 
 #endif /* STATE_MACHINE_HPP */
