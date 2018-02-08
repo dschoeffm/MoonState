@@ -24,8 +24,6 @@ struct dtlsClient {
 	uint16_t localPort;
 	uint16_t remotePort;
 	uint16_t counter;
-	std::array<uint8_t, 6> localMac;
-	std::array<uint8_t, 6> remoteMac;
 };
 
 /*! The state of the DTLS client
@@ -64,14 +62,11 @@ void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm);
  * \param remoteIP IP of the peer (server)
  * \param localPort Source port of this client
  * \param remotePort Destination port of the server
- * \param localMac MAC address of the client NIC
- * \param remoteMac MAC address of the next hop
  *
  * \return The complete state to kick of a client connection
  */
 StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(SSL_CTX *ctx,
-	uint32_t localIP, uint32_t remoteIP, uint16_t localPort, uint16_t remotePort,
-	std::array<uint8_t, 6> localMac, std::array<uint8_t, 6> remoteMac);
+	uint32_t localIP, uint32_t remoteIP, uint16_t localPort, uint16_t remotePort);
 
 /*
  * The following functions are the state functions, as they should be registered
@@ -97,12 +92,10 @@ extern "C" {
  *
  * \param dstIP IP of the DTLS test server
  * \param dstPort Port of the DTLS test server
- * \param srcMac MAC address of the local NIC
- * \param dstMac MAC address of the remote NIC
  *
  * \return An opaque object which should be fed into DtlsClient_connect
  */
-void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort, uint8_t srcMac[6], uint8_t dstMac[6]);
+void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort);
 
 /*! Add one connection to the State Machine
  *

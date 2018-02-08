@@ -53,8 +53,7 @@ void configStateMachine(SM &sm) {
 };
 
 SM::State createStateData(SSL_CTX *ctx, uint32_t localIP, uint32_t remoteIP,
-	uint16_t localPort, uint16_t remotePort, std::array<uint8_t, 6> localMac,
-	std::array<uint8_t, 6> remoteMac) {
+	uint16_t localPort, uint16_t remotePort) {
 
 	// Create necessary structures
 	dtlsClient *client = new dtlsClient();
@@ -67,8 +66,6 @@ SM::State createStateData(SSL_CTX *ctx, uint32_t localIP, uint32_t remoteIP,
 	client->remoteIP = remoteIP;
 	client->localPort = localPort;
 	client->remotePort = remotePort;
-	client->localMac = localMac;
-	client->remoteMac = remoteMac;
 
 	// Create SSL and memQ BIOs
 	client->ssl = SSL_new(ctx);
@@ -113,8 +110,6 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 
 		// Set the whole Header stuff
 		ethernet->setEthertype(Headers::Ethernet::ETHERTYPE_IPv4);
-		ethernet->setDstAddr(client->remoteMac);
-		ethernet->setSrcAddr(client->localMac);
 
 		ipv4->setVersion();
 		ipv4->setIHL(5);
@@ -150,8 +145,6 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 
 		// Set the whole Header stuff
 		ethernet->setEthertype(Headers::Ethernet::ETHERTYPE_IPv4);
-		ethernet->setDstAddr(client->remoteMac);
-		ethernet->setSrcAddr(client->localMac);
 
 		ipv4->setVersion();
 		ipv4->setIHL(5);
@@ -220,8 +213,6 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 
 		// Set the whole Header stuff
 		ethernet->setEthertype(Headers::Ethernet::ETHERTYPE_IPv4);
-		ethernet->setDstAddr(client->remoteMac);
-		ethernet->setSrcAddr(client->localMac);
 
 		ipv4->setVersion();
 		ipv4->setIHL(5);
@@ -300,8 +291,7 @@ struct Dtls_C_config {
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *sm;
 };
 
-void *DtlsClient_init(
-	uint32_t dstIP, uint16_t dstPort, uint8_t srcMac[6], uint8_t dstMac[6]) {
+void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort) {
 	auto *obj = new StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>();
 
 	DTLS_Client::configStateMachine(*obj);
@@ -309,8 +299,6 @@ void *DtlsClient_init(
 	struct Dtls_C_config *ret = new Dtls_C_config();
 	ret->dstIP = htonl(dstIP);
 	ret->dstPort = htons(dstPort);
-	memcpy(ret->srcMac.data(), srcMac, 6);
-	memcpy(ret->dstMac.data(), dstMac, 6);
 	ret->ctx = DTLS_Client::createCTX();
 	ret->sm = obj;
 
@@ -332,8 +320,8 @@ void *DtlsClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCou
 	cID.srcPort = config->dstPort;
 	cID.proto = Headers::IPv4::PROTO_UDP;
 
-	auto state = DTLS_Client::createStateData(config->ctx, htonl(srcIP), config->dstIP,
-		htons(srcPort), config->dstPort, config->srcMac, config->dstMac);
+	auto state = DTLS_Client::createStateData(
+		config->ctx, htonl(srcIP), config->dstIP, htons(srcPort), config->dstPort);
 
 	config->sm->addState(cID, state, *inPktsBA);
 
