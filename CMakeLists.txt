@@ -44,10 +44,12 @@ SET(OPENSSL_LIBS
 	dl
 )
 
+if(NOT LIBMOON_BUILD_LIBRARY)
 SET(DPDK_LIBS
 	rte_mempool
 	dpdk
 )
+endif(NOT LIBMOON_BUILD_LIBRARY)
 
 SET(ALL_LIBS
 	pthread
