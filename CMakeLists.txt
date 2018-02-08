@@ -29,6 +29,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/concurrentqueue
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/include
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/
 )
 
 INCLUDE_DIRECTORIES(

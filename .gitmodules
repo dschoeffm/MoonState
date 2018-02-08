@@ -11,3 +11,6 @@
 	path = deps/libsodium
 	url = https://github.com/jedisct1/libsodium.git
 	branch = stable
+[submodule "deps/sparsehash"]
+	path = deps/sparsehash
+	url = https://github.com/sparsehash/sparsehash.git
