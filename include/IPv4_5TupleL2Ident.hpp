@@ -137,7 +137,17 @@ public:
 		id.srcIP = 0;
 		id.dstPort = 0;
 		id.srcPort = 0;
-		id.proto = 0;
+		id.proto = 253;
+		return id;
+	};
+
+	static ConnectionID getEmptyKey() {
+		ConnectionID id;
+		id.dstIP = 0;
+		id.srcIP = 0;
+		id.dstPort = 0;
+		id.srcPort = 0;
+		id.proto = 254;
 		return id;
 	};
 };

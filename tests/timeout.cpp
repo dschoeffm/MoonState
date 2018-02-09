@@ -43,7 +43,13 @@ public:
 		ConnectionID id;
 		id.val = std::numeric_limits<uint64_t>::max();
 		return id;
-	}
+	};
+
+	static ConnectionID getEmptyKey() {
+		ConnectionID id;
+		id.val = std::numeric_limits<uint64_t>::max() - 1;
+		return id;
+	};
 };
 
 // This just mallocs one SamplePacket

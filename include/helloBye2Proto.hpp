@@ -72,7 +72,13 @@ public:
 		ConnectionID id;
 		id.ident = std::numeric_limits<uint64_t>::max();
 		return id;
-	}
+	};
+
+	static ConnectionID getEmptyKey() {
+		ConnectionID id;
+		id.ident = std::numeric_limits<uint64_t>::max() - 1;
+		return id;
+	};
 };
 
 /*
