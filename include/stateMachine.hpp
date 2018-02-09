@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <sparsehash/sparse_hash_map>
 #include <tbb/concurrent_hash_map.h>
 
 #include "bufArray.hpp"
@@ -306,7 +307,7 @@ private:
 
 	// This is the heart of the state tracking
 	// stateTable holds the link between connections and states
-	std::unordered_map<ConnectionID, State, Hasher> stateTable;
+	google::sparse_hash_map<ConnectionID, State, Hasher> stateTable;
 
 	// This table specifies which function should be called for a packet
 	// belonging to a connection in a specific state
@@ -547,7 +548,9 @@ public:
 
 	StateMachine()
 		: startStateID(0), endStateID(StateIDInvalid), listenToConnections(false),
-		  curTimeoutID(0), connPool(&connPoolStatic){};
+		  curTimeoutID(0), connPool(&connPoolStatic) {
+		stateTable.set_deleted_key(Identifier::getDelKey());
+	};
 
 	~StateMachine() {
 		DEBUG_ENABLED(std::cout << "StateMachine stats:" << std::endl;

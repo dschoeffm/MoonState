@@ -130,6 +130,16 @@ public:
 
 		return id;
 	};
+
+	static ConnectionID getDelKey() {
+		ConnectionID id;
+		id.dstIP = 0;
+		id.srcIP = 0;
+		id.dstPort = 0;
+		id.srcPort = 0;
+		id.proto = 0;
+		return id;
+	};
 };
 
 #endif /* IPV4_5TUPLEL2IDENT_HPP */

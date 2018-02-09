@@ -82,6 +82,15 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib
 )
 add_custom_target(libsodium DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib/libsodium.a)
 
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h
+	PRE_LINK
+	COMMAND "./configure"
+	COMMAND $(MAKE)
+	COMMENT "Building Google sparsehash"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash
+)
+add_custom_target(sparsehash DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h)
+
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib
@@ -91,7 +100,7 @@ LINK_DIRECTORIES(
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} TBB libsodium)
+add_dependencies(${PROJECT_NAME} TBB libsodium sparsehash)
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})

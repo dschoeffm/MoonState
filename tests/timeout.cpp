@@ -1,4 +1,3 @@
-
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -39,6 +38,12 @@ public:
 		id.val = (uint64_t)pkt->getData();
 		return id;
 	};
+
+	static ConnectionID getDelKey() {
+		ConnectionID id;
+		id.val = std::numeric_limits<uint64_t>::max();
+		return id;
+	}
 };
 
 // This just mallocs one SamplePacket

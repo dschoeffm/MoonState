@@ -69,6 +69,12 @@ public:
 		struct msg *msg = reinterpret_cast<struct msg *>(udp->getPayload());
 		return msg->ident;
 	};
+
+	static ConnectionID getDelKey() {
+		ConnectionID id;
+		id.ident = std::numeric_limits<uint64_t>::max();
+		return id;
+	}
 };
 
 /*

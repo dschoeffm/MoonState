@@ -13,4 +13,4 @@
 	branch = stable
 [submodule "deps/sparsehash"]
 	path = deps/sparsehash
-	url = https://github.com/sparsehash/sparsehash.git
+	url = https://github.com/dschoeffm/sparsehash.git
