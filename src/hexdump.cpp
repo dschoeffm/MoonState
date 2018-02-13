@@ -1,4 +1,3 @@
-
 #include <cassert>
 #include <iomanip>
 #include <iostream>
@@ -24,7 +23,7 @@ void hexdump(const void *data, int dataLen) {
 		stringstream ascii;
 		stringstream hexDump;
 
-		ascii << setfill('0') << setw(2) << hex << it << " : ";
+		ascii << "0x" << setfill('0') << setw(4) << hex << it << " : ";
 
 		for (unsigned int i = 0; i < lineLength; i++) {
 			char c = static_cast<char>(line[i]);
