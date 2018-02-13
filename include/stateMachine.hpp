@@ -406,6 +406,8 @@ private:
 	 */
 
 	auto findState(ConnectionID id) {
+		DEBUG_ENABLED(std::cout << "StateMachine::findState() Searching for ConnectionID: "
+								<< static_cast<std::string>(id) << std::endl;)
 	findStateLoop:
 		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
@@ -637,6 +639,9 @@ public:
 			throw std::runtime_error("StateMachine::addState() No such function found");
 		}
 		*/
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() Adding ConnectionID: "
+								<< static_cast<std::string>(id) << std::endl;)
 
 		assert((functions.size() - 1) >= st.state);
 		auto fun = functions[st.state];

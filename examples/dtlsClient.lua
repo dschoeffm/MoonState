@@ -4,13 +4,14 @@ local memory = require "memory"
 local device = require "device"
 local stats  = require "stats"
 local lacp   = require "proto.lacp"
-local dtls   = require "DtlsClient"
+local dtls   = require "dtlsClient"
 local arp    = require "proto.arp"
 local utils  = require "utils"
+local log    = require "log"
 
 -- IP of this host
---local RX_IP		= "192.168.0.1"
-local dstMacStr		= "3C:FD:FE:9E:D6:B8"
+local RX_IP		= "192.168.0.1"
+local dstMacStr		= "3c:fd:fe:9e:d7:40"
 local srcMacStr		= "68:05:CA:32:44:D8"
 
 function configure(parser)
@@ -49,7 +50,7 @@ function master(args)
 		arp.startArpTask{
 			-- run ARP on both ports
 			{ rxQueue = dev:getRxQueue(args.threads), txQueue = dev:getTxQueue(args.threads+1),
-				ips = RX_IP }
+				ips = {"192.168.0.1", "192.168.0.2","192.168.0.3","192.168.0.4","192.168.0.5","192.168.0.6","192.168.0.7","192.168.0.8","192.168.0.9","192.168.0.10"} }
 		}
 	end
 
@@ -68,11 +69,16 @@ function connector(txQ)
 	-- TODO why doesn't this work?
 	--local dstIP = utils.parseIP4Address("192.168.0.2")
 	local dstIP = 0xc0a80002
-	local srcIP = 0xc1000000
+
+	-- This needs to be in net byte order...
+	--local dstIP = 0x0200a8c0
+
+	local srcIP = 0xc0a80001
+	--local srcIP = 0x000000c1
 
 	local state = dtls.init(dstIP, 4433)
 
-	local bSize = 128
+	local bSize = 1
 
 	local dstMac = parseMacAddress(dstMacStr, true)
 	local srcMac = parseMacAddress(srcMacStr, true)
@@ -85,9 +91,9 @@ function connector(txQ)
 		local curPkts = dtls.connect(mempool, state, srcIP, 1025, bSize)
 
 		-- this is 64bit large -> should not wrap around
-		srcIP = srcIP +1
-		if srcIP >= 0xc2000000 then
-			srcIP = 0xc1000000
+		srcIP = srcIP + 1
+		if srcIP >= 0xc1a80000 then
+			srcIP = 0xc0a80001
 		end
 
 		-- extract packets from output
@@ -107,9 +113,13 @@ function connector(txQ)
 		sendBufs:offloadUdpChecksums(true)
 		-- send out all packets and frees old bufs that have been sent
 
+		if sendBufsCount > 0 then
+			log:info("connector is sending packets: " .. sendBufsCount)
+		end
+
 		txQ:sendN(sendBufs, sendBufsCount)
 
-		--lm.sleepMicros(10)
+		lm.sleepMicros(10000000)
 	end
 
 	dtls.free(state)
@@ -119,6 +129,8 @@ function reflector(rxQ, txQ)
 	local bufs = memory.bufArray()
 
 	-- setup state machine for dtls
+	local dstIP = 0xc0a80002
+
 	local state = dtls.init(dstIP, 4433)
 
 	while lm.running() do
@@ -145,7 +157,11 @@ function reflector(rxQ, txQ)
 		end
 
 		if sendBufsCount > 0 then
-			sendBufs:offloadIPChecksums(true, 14,20,1)
+			log:info("reflector is sending packets: " .. sendBufsCount)
+		end
+
+		if sendBufsCount > 0 then
+			sendBufs:offloadIPChecksums(true)
 			sendBufs:offloadUdpChecksums(true)
 
 			txQ:sendN(sendBufs, sendBufsCount)

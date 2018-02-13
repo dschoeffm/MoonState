@@ -69,7 +69,7 @@ SM::State createStateData(SSL_CTX *ctx, uint32_t localIP, uint32_t remoteIP,
 
 	// Create SSL and memQ BIOs
 	client->ssl = SSL_new(ctx);
-	assert(client->ssl == NULL);
+	assert(client->ssl != NULL);
 
 	client->wbio = BIO_new(BIO_s_memQ());
 	assert(client->wbio != NULL);
@@ -97,6 +97,8 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 	// Is there data to write? (There should be)
 	if (BIO_eof(client->wbio) == false) {
 
+		DEBUG_ENABLED(std::cout << "DTLS_Client::writeAllDataAvailable() sending packet" << std::endl;)
+
 		Headers::Ethernet *ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 		Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ethernet->getPayload());
 		Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
@@ -117,16 +119,23 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 		ipv4->setProtoUDP();
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
+		ipv4->checksum = 0;
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
 		udp->setPayloadLength(dataLen);
 
 		ret++;
+	} else {
+		funIface.freePkt();
 	}
 
 	// Maybe there is more data to send, therefore request extra packets if need be
 	while (BIO_eof(client->wbio) == false) {
+
+		DEBUG_ENABLED(std::cout << "DTLS_Client::writeAllDataAvailable() sending extra packet" << std::endl;)
+
+
 		// Try to get an extra packet
 		mbuf *xtraPkt = funIface.getPkt();
 		assert(xtraPkt != NULL);
@@ -152,6 +161,7 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 		ipv4->setProtoUDP();
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
+		ipv4->checksum = 0;
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
@@ -164,6 +174,7 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 }
 
 void initHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
+	DEBUG_ENABLED(std::cout << "DTLS_Client::initHandshake() is called" << std::endl;)
 	dtlsClient *client = reinterpret_cast<dtlsClient *>(state.stateData);
 
 	SSL_connect(client->ssl);
@@ -174,6 +185,8 @@ void initHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 };
 
 void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
+	DEBUG_ENABLED(std::cout << "DTLS_Client::runHandshake() is called" << std::endl;)
+
 	dtlsClient *client = reinterpret_cast<dtlsClient *>(state.stateData);
 
 	Headers::Ethernet *ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
@@ -191,6 +204,7 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 	// Check if the handshake is finished
 	if (SSL_is_init_finished(client->ssl)) {
 		funIface.transition(States::ESTABLISHED);
+		DEBUG_ENABLED(std::cout << "DTLS_Client::runHandshake() Connection established" << std::endl;)
 
 		int allHeaderLength =
 			sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Udp);
@@ -220,6 +234,7 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 		ipv4->setProtoUDP();
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
+		ipv4->checksum = 0;
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
@@ -255,6 +270,8 @@ void sendData(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 };
 
 void runTeardown(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
+	DEBUG_ENABLED(std::cout << "DTLS_Client::runTeardown() is called" << std::endl;)
+
 	dtlsClient *client = reinterpret_cast<dtlsClient *>(state.stateData);
 
 	Headers::Ethernet *ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
@@ -297,8 +314,8 @@ void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort) {
 	DTLS_Client::configStateMachine(*obj);
 
 	struct Dtls_C_config *ret = new Dtls_C_config();
-	ret->dstIP = htonl(dstIP);
-	ret->dstPort = htons(dstPort);
+	ret->dstIP = dstIP;
+	ret->dstPort = dstPort;
 	ret->ctx = DTLS_Client::createCTX();
 	ret->sm = obj;
 
@@ -315,13 +332,13 @@ void *DtlsClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCou
 
 	IPv4_5TupleL2Ident<mbuf>::ConnectionID cID;
 	cID.dstIP = htonl(srcIP);
-	cID.srcIP = config->dstIP;
+	cID.srcIP = htonl(config->dstIP);
 	cID.dstPort = htons(srcPort);
-	cID.srcPort = config->dstPort;
+	cID.srcPort = htons(config->dstPort);
 	cID.proto = Headers::IPv4::PROTO_UDP;
 
 	auto state = DTLS_Client::createStateData(
-		config->ctx, htonl(srcIP), config->dstIP, htons(srcPort), config->dstPort);
+		config->ctx, srcIP, config->dstIP, srcPort, config->dstPort);
 
 	config->sm->addState(cID, state, *inPktsBA);
 
