@@ -185,10 +185,13 @@ public:
 
 		/*! Get an additional packet buffer
 		 *
-		 * \return The new packet buffer
+		 * \return The new packet buffer, this buffer will be sent
 		 */
 		Packet *getPkt() {
-			throw new std::runtime_error("StateMachine::FunIface::getPkt() not implemented");
+			assert(sm->getPktCB != nullptr);
+			Packet *ret = sm->getPktCB();
+			pktsBA.addPkt(ret);
+			return ret;
 		}
 
 		/*! Transition to another state

@@ -3,9 +3,12 @@
 
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
+
+#include "common.hpp"
 
 /*! Wrapper around MoonGen bufarrays
  *
@@ -118,8 +121,11 @@ public:
 	 * \param pkt Packe to add
 	 */
 	void addPkt(Packet *pkt) {
+		DEBUG_ENABLED(std::cout << "BufArray::addPkt() Adding packet to array" << std::endl;)
 		// Do we need to grow?
 		if (numBufs == numSlots) {
+			DEBUG_ENABLED(std::cout << "BufArray::addPkt() growing array" << std::endl;)
+
 			// The +1 is for empty BufArrays
 			Packet **newPkts =
 				reinterpret_cast<Packet **>(malloc((sizeof(Packet *) * numSlots * 2)));
@@ -139,7 +145,11 @@ public:
 
 			// Now we allocated our own memory
 			fromLua = false;
+		} else {
+			DEBUG_ENABLED(
+				std::cout << "BufArray::addPkt() no need to grow the array" << std::endl;)
 		}
+
 		sendMask[numBufs] = true;
 		pkts[numBufs++] = pkt;
 	};
