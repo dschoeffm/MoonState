@@ -1,5 +1,9 @@
 #include <cstring>
 #include <functional>
+#include <sstream>
+#include <string>
+
+#include <rte_errno.h>
 
 #include "dtlsClient.hpp"
 #include "headers.hpp"
@@ -43,11 +47,19 @@ SSL_CTX *createCTX() {
 	return ctx;
 };
 
-void configStateMachine(SM &sm) {
+void configStateMachine(SM &sm, rte_mempool *mp) {
 	sm.registerFunction(States::DOWN, initHandshake);
 	sm.registerFunction(States::HANDSHAKE, runHandshake);
 	sm.registerFunction(States::ESTABLISHED, sendData);
 	sm.registerFunction(States::RUN_TEARDOWN, runTeardown);
+
+	assert(mp != nullptr);
+	sm.registerGetPktCB([=]() {
+		mbuf *buf = reinterpret_cast<mbuf *>(rte_pktmbuf_alloc(mp));
+		assert(buf != nullptr);
+		assert(buf->buf_addr != nullptr);
+		return buf;
+	});
 
 	sm.registerEndStateID(States::DELETED);
 };
@@ -121,6 +133,7 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
 		ipv4->checksum = 0;
+		ipv4->ttl = 64;
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
@@ -163,6 +176,7 @@ static int writeAllDataAvailable(dtlsClient *client, mbuf *pkt, SM::FunIface &fu
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
 		ipv4->checksum = 0;
+		ipv4->ttl = 64;
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
@@ -218,25 +232,33 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 		Headers::Ethernet *ethernet =
 			reinterpret_cast<Headers::Ethernet *>(xtraPkt->getData());
 		Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ethernet->getPayload());
-		Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
-
-		// Set some payload, and hope the buffer is not tiny...
-		char payload[] = "FIRST PACKET";
-		strcpy(reinterpret_cast<char *>(udp->getPayload()), payload);
-		int dataLen = strlen(reinterpret_cast<char *>(udp->getPayload())) + 1;
-		assert(dataLen > 0);
-		xtraPkt->setDataLen(dataLen + allHeaderLength);
 
 		// Set the whole Header stuff
 		ethernet->setEthertype(Headers::Ethernet::ETHERTYPE_IPv4);
 
 		ipv4->setVersion();
 		ipv4->setIHL(5);
-		ipv4->setPayloadLength(dataLen + sizeof(Headers::Udp));
 		ipv4->setProtoUDP();
 		ipv4->setSrcIP(client->localIP);
 		ipv4->setDstIP(client->remoteIP);
 		ipv4->checksum = 0;
+		ipv4->ttl = 64;
+
+		Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
+
+		// Set some payload, and hope the buffer is not tiny...
+		char payload[] = "FIRST PACKET";
+		if (SSL_write(client->ssl, payload, strlen(payload) + 1) !=
+			static_cast<int>((strlen(payload) + 1))) {
+			throw new std::runtime_error("DTLS_Client::runHandshake() SSL_write() failed");
+		}
+		// strcpy(reinterpret_cast<char *>(udp->getPayload()), payload);
+		int dataLen = BIO_read(client->wbio, udp->getPayload(), 1280);
+		// int dataLen = strlen(reinterpret_cast<char *>(udp->getPayload())) + 1;
+		assert(dataLen > 0);
+		xtraPkt->setDataLen(dataLen + allHeaderLength);
+
+		ipv4->setPayloadLength(dataLen + sizeof(Headers::Udp));
 
 		udp->setDstPort(client->remotePort);
 		udp->setSrcPort(client->localPort);
@@ -308,19 +330,40 @@ struct Dtls_C_config {
 	std::array<uint8_t, 6> dstMac;
 	SSL_CTX *ctx;
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> *sm;
+	struct rte_mempool *mp;
 };
 
 void *DtlsClient_init(uint32_t dstIP, uint16_t dstPort) {
 	try {
 		auto *obj = new StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>();
 
-		DTLS_Client::configStateMachine(*obj);
-
 		struct Dtls_C_config *ret = new Dtls_C_config();
 		ret->dstIP = dstIP;
 		ret->dstPort = dstPort;
 		ret->ctx = DTLS_Client::createCTX();
 		ret->sm = obj;
+
+		std::stringstream poolname;
+		poolname << "client pool: ";
+		poolname << rte_lcore_id();
+
+		/*
+		rte_mempool *memp = rte_pktmbuf_pool_create(
+			poolname.str().c_str(), 2048, 0, 0, 2048 + RTE_PKTMBUF_HEADROOM, rte_lcore_id());
+		*/
+		rte_mempool *memp = rte_pktmbuf_pool_create(
+			poolname.str().c_str(), 1024, 0, 0, 2048 + RTE_PKTMBUF_HEADROOM, rte_socket_id());
+
+		if (memp == nullptr) {
+			std::cout << "DtlsClient_init() MemPool creation failed:" << std::endl;
+			std::cout << rte_strerror(rte_errno) << std::endl;
+			std::abort();
+		}
+
+		assert(memp != nullptr);
+		ret->mp = memp;
+
+		DTLS_Client::configStateMachine(*obj, memp);
 
 		return ret;
 	} catch (std::exception *e) {
@@ -407,6 +450,7 @@ void DtlsClient_free(void *obj) {
 		delete (config->sm);
 		OPENSSL_free(config->ctx);
 		delete (config);
+		rte_mempool_free(config->mp);
 
 	} catch (std::exception *e) {
 		std::cout << "DtlsClient_free() caught exception:" << std::endl

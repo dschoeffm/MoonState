@@ -9,6 +9,8 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
+#include <rte_mempool.h>
+
 #include "IPv4_5TupleL2Ident.hpp"
 #include "mbuf.hpp"
 #include "stateMachine.hpp"
@@ -52,8 +54,9 @@ SSL_CTX *createCTX();
  * within each state.
  *
  * \param sm The state machine to be configured
+ * \param mp MemPool to allocate extra mbufs from
  */
-void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm);
+void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm, rte_mempool *mp);
 
 /*! Create the state of the client
  *

@@ -128,6 +128,9 @@ end
 function reflector(rxQ, txQ)
 	local bufs = memory.bufArray()
 
+	local dstMac = parseMacAddress(dstMacStr, true)
+	local srcMac = parseMacAddress(srcMacStr, true)
+
 	-- setup state machine for dtls
 	local dstIP = 0xc0a80002
 
@@ -147,9 +150,9 @@ function reflector(rxQ, txQ)
 		for i = 1, curPkts.sendCount do
 			-- swap MAC addresses
 			local pkt = sendBufs[i]:getEthernetPacket()
-			local tmp = pkt.eth:getDst()
-			pkt.eth:setDst(pkt.eth:getSrc())
-			pkt.eth:setSrc(tmp)
+			--local tmp = pkt.eth:getDst()
+			pkt.eth:setDst(dstMac)
+			pkt.eth:setSrc(srcMac)
 			local vlan = bufs[i]:getVlan()
 			if vlan then
 				bufs[i]:setVlan(vlan)
