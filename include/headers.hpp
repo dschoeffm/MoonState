@@ -254,9 +254,21 @@ struct Udp {
 
 /*! Representation of the ICMP header */
 struct Icmp {
-	uint8_t type;	  //!< Type
+	uint8_t type; //!< Type
+
+	static constexpr uint8_t TYPE_ECHO_REPLY = 0;
+	static constexpr uint8_t TYPE_ECHO = 8;
+
 	uint8_t code;	  //!< Code
 	uint16_t checksum; //!< Checksum
+
+	union {
+		struct {
+			uint16_t identifier;
+			uint16_t seqNumber;
+		} echo;
+	} payload;
+
 } __attribute__((packed));
 
 } // namespace Headers
