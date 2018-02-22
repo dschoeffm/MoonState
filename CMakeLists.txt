@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.9)
 PROJECT(MoonState CXX)
 
+SET(MoonState_Build_lib "YES")
+
 # Default build type is Release
 if(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "Release")
@@ -27,6 +29,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/concurrentqueue
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/include
 )
 
 INCLUDE_DIRECTORIES(
@@ -57,6 +60,7 @@ SET(ALL_LIBS
 	${OPENSSL_LIBS}
 	${DPDK_LIBS}
 	libtbb.a
+	Astraeus
 )
 
 if(WITH_PCAP)
@@ -89,8 +93,11 @@ add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a)
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/lib
 	${DPDK_LIB_DIR}
 )
+
+ADD_SUBDIRECTORY(deps/AstraeusVPN)
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})

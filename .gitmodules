@@ -11,3 +11,6 @@
 [submodule "deps/tbb"]
 	path = deps/tbb
 	url = https://github.com/dschoeffm/tbb.git
+[submodule "deps/AstraeusVPN"]
+	path = deps/AstraeusVPN
+	url = https://github.com/dschoeffm/AstraeusVPN.git
