@@ -51,9 +51,75 @@ struct Header {
 	uint24 fragmentLength;
 };
 
-namespace Hello {};
-namespace Certificate {};
-namespace KeyExchange {};
+class ClientHello {
+public:
+	struct ClientHelloData {
+		uint16_t client_version;
+		uint8_t random[32];
+		uint8_t sessionID[32];
+		uint8_t sessionIDLength;
+		uint8_t cookie[32];
+		uint8_t cookieLength;
+
+		struct CipherSuite {
+			uint16_t data;
+		};
+
+		CipherSuite cipherSuites[128];
+		uint8_t CipherSuiteNum;
+
+		uint8_t compressionMethods[128];
+		uint8_t compressionMethodsNum;
+	};
+
+	/*! Parses a Client hello message
+	 *
+	 * \param data payload to parse
+	 * \param dataLen Length of the data field
+	 * \param result struct to write the parsed data to
+	 * \return Length of the ClientHello message
+	 */
+	static int parse(uint8_t *data, unsigned int dataLen, ClientHelloData &result);
+};
+
+class ServerHello {
+public:
+	struct ClientHelloData {
+		uint16_t client_version;
+		uint8_t random[32];
+		uint8_t sessionID[32];
+		uint8_t sessionIDLength;
+
+		struct CipherSuite {
+			uint16_t data;
+		};
+
+		CipherSuite cipherSuites;
+
+		uint8_t compressionMethods;
+	};
+
+	/*! Parses a Client hello message
+	 *
+	 * \param data payload to parse
+	 * \param dataLen Length of the data field
+	 * \param result struct to write the parsed data to
+	 * \return Length of the ClientHello message
+	 */
+	static int parse(uint8_t *data, unsigned int dataLen, ClientHelloData &result);
+};
+
+struct Certificate {
+	uint8_t data[2048];
+	uint16_t dataLen;
+};
+
+struct ServerKeyExchange {
+	uint8_t Algorithm;
+	uint8_t dh_p[512];
+	uint8_t dh_g[512];
+	uint8_t dh_Ys[512];
+};
 namespace Finished {};
 
 }; // namespace Handshake
