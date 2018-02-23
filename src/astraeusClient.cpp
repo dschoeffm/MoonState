@@ -17,7 +17,8 @@ identityHandle *Astraeus_Client::createIdentity() {
 	return ident;
 };
 
-void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm, rte_mempool *mp) {
+void Astraeus_Client::configStateMachine(
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm, rte_mempool *mp) {
 	sm.registerFunction(States::DOWN, initHandshake);
 	sm.registerFunction(States::HANDSHAKE, runHandshake);
 	sm.registerFunction(States::ESTABLISHED, sendData);
@@ -37,7 +38,7 @@ void configStateMachine(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf> &sm, rte_me
 	memset(nonce, 0, sizeof(nonce));
 };
 
-StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(
+StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State Astraeus_Client::createStateData(
 	AstraeusProto::identityHandle *ident, uint32_t localIP, uint32_t remoteIP,
 	uint16_t localPort, uint16_t remotePort) {
 
@@ -63,7 +64,8 @@ StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(
  * in the StateMachine<>
  */
 
-void initHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt,
+void Astraeus_Client::initHandshake(
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt,
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
 
 	astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
@@ -77,8 +79,8 @@ void initHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, m
 	funIface.transition(States::HANDSHAKE);
 };
 
-void runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt,
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
+void Astraeus_Client::runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state,
+	mbuf *pkt, StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
 
 	astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
 	int sendCount;
@@ -96,14 +98,14 @@ void runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mb
 	}
 };
 
-void sendData(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
+void Astraeus_Client::sendData(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state,
+	mbuf *, StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
 	(void)state;
 	funIface.transition(States::DELETED);
 };
 
-void runTeardown(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
+void Astraeus_Client::runTeardown(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state,
+	mbuf *, StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
 	(void)state;
 	funIface.transition(States::DELETED);
 };
