@@ -30,6 +30,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/include
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/include
 )
 
 INCLUDE_DIRECTORIES(
