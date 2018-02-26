@@ -263,7 +263,7 @@ public:
 		tbb::concurrent_hash_map<ConnectionID, State, TBBHasher> newStates;
 
 	public:
-		ConnectionPool(){};
+		ConnectionPool() : newStates(10){};
 
 		~ConnectionPool(){};
 

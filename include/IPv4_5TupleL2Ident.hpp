@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "sodium.h"
+
 #include "common.hpp"
 #include "headers.hpp"
 
@@ -60,11 +62,17 @@ public:
 	struct Hasher {
 		// In the future, maybe we find something more random...
 		uint64_t operator()(const ConnectionID &c) const {
-			uint64_t res = c.dstPort;
-			res |= c.srcPort << 16;
-			res ^= c.dstIP;
+			uint64_t res = 0;
+			/*res += c.dstPort;
+			res += c.srcPort;
+			res += c.dstIP;
 			res += c.srcIP;
 			res += c.proto;
+			*/
+			assert(crypto_shorthash_BYTES == 8);
+			uint8_t key[crypto_shorthash_KEYBYTES];
+			memset(key, 0, crypto_shorthash_KEYBYTES);
+			crypto_shorthash(reinterpret_cast<uint8_t*>(&res), reinterpret_cast<const uint8_t*>(&c), sizeof(ConnectionID), key);
 			return res;
 		}
 	};

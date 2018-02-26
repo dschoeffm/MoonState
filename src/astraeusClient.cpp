@@ -70,11 +70,28 @@ void Astraeus_Client::initHandshake(
 
 	astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
 
-	int sendLen = AstraeusProto::generateInitGivenHandleAndNonce(
-		client->handle, reinterpret_cast<uint8_t *>(pkt->getData()), nonce);
+	int sendLen = AstraeusProto::generateInitGivenHandleAndNonce(client->handle,
+		reinterpret_cast<uint8_t *>(pkt->getData()) + sizeof(Headers::Ethernet) +
+			sizeof(Headers::IPv4) + sizeof(Headers::Udp),
+		nonce);
 	sodium_increment(nonce, sizeof(nonce));
 
-	pkt->setDataLen(sendLen);
+	pkt->setDataLen(
+		sendLen + +sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Udp));
+
+	auto ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	auto ipv4 = reinterpret_cast<Headers::IPv4 *>(ethernet->getPayload());
+	auto udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
+
+	ipv4->checksum = 0;
+	ipv4->setDstIP(client->remoteIP);
+	ipv4->setSrcIP(client->localIP);
+	ipv4->setPayloadLength(sizeof(Headers::Udp) + sendLen);
+
+	udp->checksum = 0;
+	udp->setDstPort(client->remotePort);
+	udp->setSrcPort(client->localPort);
+	udp->setPayloadLength(sendLen);
 
 	funIface.transition(States::HANDSHAKE);
 };
@@ -83,10 +100,30 @@ void Astraeus_Client::runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>:
 	mbuf *pkt, StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
 
 	astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
-	int sendCount;
-	handleHandshakeClient(
-		client->handle, reinterpret_cast<uint8_t *>(pkt->getData()), sendCount);
-	if (sendCount <= 0) {
+	int sendLen;
+	handleHandshakeClient(client->handle,
+		reinterpret_cast<uint8_t *>(pkt->getData()) + sizeof(Headers::Ethernet) +
+			sizeof(Headers::IPv4) + sizeof(Headers::Udp),
+		sendLen);
+
+	pkt->setDataLen(
+		sendLen + +sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Udp));
+
+	auto ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+	auto ipv4 = reinterpret_cast<Headers::IPv4 *>(ethernet->getPayload());
+	auto udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
+
+	ipv4->checksum = 0;
+	ipv4->setDstIP(client->remoteIP);
+	ipv4->setSrcIP(client->localIP);
+	ipv4->setPayloadLength(sizeof(Headers::Udp) + sendLen);
+
+	udp->checksum = 0;
+	udp->setDstPort(client->remotePort);
+	udp->setSrcPort(client->localPort);
+	udp->setPayloadLength(sendLen);
+
+	if (sendLen <= 0) {
 		funIface.freePkt();
 	}
 

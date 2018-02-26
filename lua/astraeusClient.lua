@@ -6,7 +6,7 @@ local utils = require "utils"
 ffi.cdef[[
 void *AstraeusClient_init(uint32_t dstIP, uint16_t dstPort);
 
-void *Astraeus_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+void *AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort);
 
 void AstraeusClient_getPkts(void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts);

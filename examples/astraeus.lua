@@ -83,6 +83,9 @@ function connector(txQ)
 	local dstMac = parseMacAddress(dstMacStr, true)
 	local srcMac = parseMacAddress(srcMacStr, true)
 
+	require("jit.p").start("l")
+	require("jit.dump").on()
+
 	-- a bufArray is just a list of buffers from a mempool that is processed as a single batch
 	while lm.running() do -- check if Ctrl+c was pressed
 		-- this actually allocates some buffers from the mempool the array is associated with
@@ -113,14 +116,15 @@ function connector(txQ)
 		sendBufs:offloadUdpChecksums(true)
 		-- send out all packets and frees old bufs that have been sent
 
-		if sendBufsCount > 0 then
-			log:info("connector is sending packets: " .. sendBufsCount)
-		end
+--		if sendBufsCount > 0 then
+--			log:info("connector is sending packets: " .. sendBufsCount)
+--		end
 
 		txQ:sendN(sendBufs, sendBufsCount)
 
-		lm.sleepMicros(10000000)
+--		lm.sleepMicros(1000)
 	end
+	require("jit.p").stop()
 
 	astraeus.free(state)
 end
@@ -134,7 +138,7 @@ function reflector(rxQ, txQ)
 	-- setup state machine for astraeus
 	local dstIP = 0xc0a80002
 
-	local state = dtls.init(dstIP, 4433)
+	local state = astraeus.init(dstIP, 4433)
 
 	while lm.running() do
 		-- receive some packets

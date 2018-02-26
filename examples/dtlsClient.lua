@@ -113,13 +113,13 @@ function connector(txQ)
 		sendBufs:offloadUdpChecksums(true)
 		-- send out all packets and frees old bufs that have been sent
 
-		if sendBufsCount > 0 then
-			log:info("connector is sending packets: " .. sendBufsCount)
-		end
+--		if sendBufsCount > 0 then
+--			log:info("connector is sending packets: " .. sendBufsCount)
+--		end
 
 		txQ:sendN(sendBufs, sendBufsCount)
 
-		lm.sleepMicros(10000000)
+--		lm.sleepMicros(10000000)
 	end
 
 	dtls.free(state)
