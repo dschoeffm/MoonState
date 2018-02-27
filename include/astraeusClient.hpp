@@ -72,6 +72,9 @@ StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(
  * in the StateMachine<>
  */
 
+void initHandshakeNoTransition(
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *);
+
 void initHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
 	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
 

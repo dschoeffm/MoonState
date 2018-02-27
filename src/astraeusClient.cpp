@@ -24,13 +24,14 @@ void Astraeus_Client::configStateMachine(
 	sm.registerFunction(States::ESTABLISHED, sendData);
 	sm.registerFunction(States::RUN_TEARDOWN, runTeardown);
 
-	assert(mp != nullptr);
-	sm.registerGetPktCB([=]() {
-		mbuf *buf = reinterpret_cast<mbuf *>(rte_pktmbuf_alloc(mp));
-		assert(buf != nullptr);
-		assert(buf->buf_addr != nullptr);
-		return buf;
-	});
+	if (mp != nullptr) {
+		sm.registerGetPktCB([=]() {
+			mbuf *buf = reinterpret_cast<mbuf *>(rte_pktmbuf_alloc(mp));
+			assert(buf != nullptr);
+			assert(buf->buf_addr != nullptr);
+			return buf;
+		});
+	}
 
 	sm.registerEndStateID(States::DELETED);
 
@@ -64,9 +65,8 @@ StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State Astraeus_Client::createState
  * in the StateMachine<>
  */
 
-void Astraeus_Client::initHandshake(
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt,
-	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
+void Astraeus_Client::initHandshakeNoTransition(
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt) {
 
 	astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
 
@@ -92,6 +92,13 @@ void Astraeus_Client::initHandshake(
 	udp->setDstPort(client->remotePort);
 	udp->setSrcPort(client->localPort);
 	udp->setPayloadLength(sendLen);
+};
+
+void Astraeus_Client::initHandshake(
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *pkt,
+	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface) {
+
+	Astraeus_Client::initHandshakeNoTransition(state, pkt);
 
 	funIface.transition(States::HANDSHAKE);
 };
