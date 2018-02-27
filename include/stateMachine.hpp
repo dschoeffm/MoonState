@@ -629,6 +629,7 @@ public:
 	/*! Open an outgoing connection
 	 *
 	 * This is the function you want to call, if you want to connect to a server.
+	 * It calls the function for the start state
 	 *
 	 * \param id The connection id this connection will use
 	 * \param st The state data
@@ -655,6 +656,34 @@ public:
 		DEBUG_ENABLED(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		//(sfIt->second)(st, pktsIn[0], funIface);
 		fun(st, pktsIn[0], funIface);
+
+		if (st.state == endStateID) {
+			DEBUG_ENABLED(
+				std::cout
+					<< "StateMachine::addState() Reached endStateID - deleting connection"
+					<< std::endl;)
+			return;
+		}
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() adding connection to newStates"
+								<< std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() identity: "
+								<< static_cast<std::string>(id) << std::endl;)
+		connPool->add(id, st);
+	}
+
+	/*! Open an outgoing connection without running the state function
+	 *
+	 * This is the function you want to call, if you want to connect to a server.
+	 * It does not call any state function.
+	 *
+	 * \param id The connection id this connection will use
+	 * \param st The state data
+	 */
+	void addStateNoFun(ConnectionID id, State st) {
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() Adding ConnectionID: "
+								<< static_cast<std::string>(id) << std::endl;)
 
 		if (st.state == endStateID) {
 			DEBUG_ENABLED(
