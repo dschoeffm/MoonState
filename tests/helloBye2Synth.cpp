@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 		SM::State state(Client::States::Hello, hello);
 		Ident::ConnectionID cID(counter);
 
-		client.addState(cID, state, clientBA);
+		client.addState(cID, state, &clientBA);
 		assert(clientBA.getSendCount() == 1);
 		assert(clientBA.getFreeCount() == 0);
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 	cout << "-----------------------------------" << endl;
 
 	// Work the batch in the server
-	server.runPktBatch(bufArray);
+	server.runPktBatch(&bufArray);
 	assert(bufArray.getSendCount() == BATCH_SIZE);
 	assert(bufArray.getFreeCount() == 0);
 	assert(client.getStateTableSize() == 0);
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	cout << "-----------------------------------" << endl;
 
 	// Work the batch in the client
-	client.runPktBatch(bufArray);
+	client.runPktBatch(&bufArray);
 	assert(bufArray.getSendCount() == BATCH_SIZE);
 	assert(bufArray.getFreeCount() == 0);
 	assert(client.getStateTableSize() == BATCH_SIZE);
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 	cout << "-----------------------------------" << endl;
 
 	// Work the batch in the server
-	server.runPktBatch(bufArray);
+	server.runPktBatch(&bufArray);
 	assert(bufArray.getSendCount() == BATCH_SIZE);
 	assert(bufArray.getFreeCount() == 0);
 	assert(client.getStateTableSize() == BATCH_SIZE);
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
 	cout << "-----------------------------------" << endl;
 
 	// Work the batch in the client
-	client.runPktBatch(bufArray);
+	client.runPktBatch(&bufArray);
 	assert(bufArray.getSendCount() == 0);
 	assert(bufArray.getFreeCount() == BATCH_SIZE);
 	assert(client.getStateTableSize() == 0);

@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		BufArray<SamplePacket> *pktsIn = pcap.recvBatch();
 
-		sm.runPktBatch(*pktsIn);
+		sm.runPktBatch(pktsIn);
 		pcap.sendBatch(*pktsIn);
 		pcap.freeBatch(*pktsIn);
 

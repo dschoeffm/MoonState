@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
 
 		// Run the packet through the state machine
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 
 		// Check if the function misbehaved
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
 		// One function call, this should check for timeouts
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 
 		// Check if the state table is empty now
 		assert(sm.getStateTableSize() == 1);

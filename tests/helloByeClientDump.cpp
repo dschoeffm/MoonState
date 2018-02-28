@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 			cout << "Dump of packet input" << endl;
 			hexdump(sps1.getData(), sps1.getDataLen());
 
-			sm.runPktBatch(pktsIn);
+			sm.runPktBatch(&pktsIn);
 			assert(pktsIn.getSendCount() == 1);
 			assert(pktsIn.getFreeCount() == 0);
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 			cout << "Dump of packet input" << endl;
 			hexdump(sps2.getData(), sps2.getDataLen());
 
-			sm.runPktBatch(pktsIn);
+			sm.runPktBatch(&pktsIn);
 			assert(pktsIn.getSendCount() == 0);
 			assert(pktsIn.getFreeCount() == 1);
 		}

@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 0;
 
 		// Run the packet through the state machine
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 
 		// Check if the function misbehaved
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 10);
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 
 		// Same as above
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 12);
 		assert(sm.getStateTableSize() == 1);
 		assert(pktsIn.getSendCount() == 1);
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 
 		// Same as above
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 2;
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 24);
 		assert(sm.getStateTableSize() == 1);
 		assert(pktsIn.getSendCount() == 1);
@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 
 		// Same as above - This time the endstate is reached
 		*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) = 3;
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 		assert(*(reinterpret_cast<uint32_t *>(pktsIn[0]->getData())) == 23);
 		assert(sm.getStateTableSize() == 0);
 		assert(pktsIn.getSendCount() == 1);

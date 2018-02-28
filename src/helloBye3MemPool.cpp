@@ -360,7 +360,7 @@ void *HelloBye3MemPool_Server_process(void *obj, struct rte_mbuf **inPkts,
 
 	auto *sm =
 		reinterpret_cast<StateMachine<HelloBye3MemPool::Identifier<mbuf>, mbuf> *>(obj);
-	sm->runPktBatch(*inPktsBA);
+	sm->runPktBatch(inPktsBA);
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
 
@@ -433,7 +433,7 @@ void *HelloBye3MemPool_Client_connect(void *obj, struct rte_mbuf **inPkts,
 
 	auto state = HelloBye3MemPool::Client::createHello(srcIP, dstIP, srcPort, dstPort, ident);
 
-	sm->addState(cID, state, *inPktsBA);
+	sm->addState(cID, state, inPktsBA);
 
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
@@ -458,7 +458,7 @@ void *HelloBye3MemPool_Client_process(void *obj, struct rte_mbuf **inPkts,
 
 	auto *sm =
 		reinterpret_cast<StateMachine<HelloBye3MemPool::Identifier<mbuf>, mbuf> *>(obj);
-	sm->runPktBatch(*inPktsBA);
+	sm->runPktBatch(inPktsBA);
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
 

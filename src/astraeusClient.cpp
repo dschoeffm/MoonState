@@ -262,7 +262,7 @@ void *AstraeusClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int i
 
 		auto config = reinterpret_cast<astraeus_C_config *>(obj);
 
-		config->sm->runPktBatch(*inPktsBA);
+		config->sm->runPktBatch(inPktsBA);
 		*sendCount = inPktsBA->getSendCount();
 		*freeCount = inPktsBA->getFreeCount();
 

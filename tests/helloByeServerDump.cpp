@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 		clientCookie = reinterpret_cast<uint8_t *>(spc1.getData())[0x37];
 		cout << "clientCookie: 0x" << hex << static_cast<int>(clientCookie) << endl;
 
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 		assert(pktsIn.getSendCount() == 1);
 		assert(pktsIn.getFreeCount() == 0);
 		cout << "Dump of packet output" << endl;
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 		cout << "Dump of packet input" << endl;
 		hexdump(spc2.getData(), spc2.getDataLen());
 
-		sm.runPktBatch(pktsIn);
+		sm.runPktBatch(&pktsIn);
 		assert(pktsIn.getSendCount() == 1);
 		assert(pktsIn.getFreeCount() == 0);
 

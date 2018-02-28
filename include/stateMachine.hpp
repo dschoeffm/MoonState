@@ -170,7 +170,7 @@ public:
 				assert(fun != nullptr);
 
 				DEBUG_ENABLED(std::cout << "Running Function" << std::endl;)
-				fun(state, pktsBA[pktIdx], *this);
+				fun(state, (*pktsBA)[pktIdx], *this);
 
 				if (state.state == sm->endStateID) {
 					DEBUG_ENABLED(
@@ -461,12 +461,12 @@ private:
 		return stateIt;
 	};
 
-	void runPkt(BufArray<Packet> &pktsIn, unsigned int cur) {
+	void runPkt(BufArray<Packet> *pktsIn, unsigned int cur) {
 		DEBUG_ENABLED(std::cout << std::endl << "StateMachine::runPkt() called" << std::endl;)
 
 		try {
 			// Retrieve the current packet
-			Packet *pktIn = pktsIn[cur];
+			Packet *pktIn = (*pktsIn)[cur];
 
 			// Try to identify the inbound packet
 			ConnectionID identity = identifier.identify(pktIn);
@@ -536,7 +536,7 @@ private:
 		} catch (PacketNotIdentified *e) {
 			DEBUG_ENABLED(std::cout << "StateMachine::runPkt() Packet could not be identified"
 									<< std::endl;);
-			pktsIn.markDropPkt(cur);
+			pktsIn->markDropPkt(cur);
 		}
 	}
 
@@ -639,7 +639,7 @@ public:
 	 * \param st The state data
 	 * \param pktsIn Packet buffer for the state to work with (only one packet)
 	 */
-	void addState(ConnectionID id, State st, BufArray<Packet> &pktsIn) {
+	void addState(ConnectionID id, State st, BufArray<Packet> *pktsIn) {
 
 		/*
 		auto sfIt = functions.find(st.state);
@@ -655,11 +655,11 @@ public:
 		auto fun = functions[st.state];
 		assert(fun != nullptr);
 
-		FunIface funIface(this, 0, &pktsIn, id, st);
+		FunIface funIface(this, 0, pktsIn, id, st);
 
 		DEBUG_ENABLED(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		//(sfIt->second)(st, pktsIn[0], funIface);
-		fun(st, pktsIn[0], funIface);
+		fun(st, (*pktsIn)[0], funIface);
 
 		if (st.state == endStateID) {
 			DEBUG_ENABLED(
@@ -760,8 +760,8 @@ public:
 	 *
 	 * \param pktsIn Incoming packets
 	 */
-	void runPktBatch(BufArray<Packet> &pktsIn) {
-		uint32_t inCount = pktsIn.getTotalCount();
+	void runPktBatch(BufArray<Packet> *pktsIn) {
+		uint32_t inCount = pktsIn->getTotalCount();
 
 		DEBUG_ENABLED(
 			std::cout << std::endl
@@ -795,7 +795,7 @@ public:
 				std::move(timeoutDataIt->second);
 			auto stateIt = findState(timeoutData->id);
 			assert(stateIt != stateTable.end());
-			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), &pktsIn,
+			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), pktsIn,
 				timeoutData->id, stateIt->second);
 
 			// Clear the timeoutID from the state

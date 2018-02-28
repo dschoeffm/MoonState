@@ -392,7 +392,7 @@ void *DtlsClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCou
 		auto state = DTLS_Client::createStateData(
 			config->ctx, srcIP, config->dstIP, srcPort, config->dstPort);
 
-		config->sm->addState(cID, state, *inPktsBA);
+		config->sm->addState(cID, state, inPktsBA);
 
 		*sendCount = inPktsBA->getSendCount();
 		*freeCount = inPktsBA->getFreeCount();
@@ -430,7 +430,7 @@ void *DtlsClient_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCou
 
 		auto config = reinterpret_cast<Dtls_C_config *>(obj);
 
-		config->sm->runPktBatch(*inPktsBA);
+		config->sm->runPktBatch(inPktsBA);
 		*sendCount = inPktsBA->getSendCount();
 		*freeCount = inPktsBA->getFreeCount();
 

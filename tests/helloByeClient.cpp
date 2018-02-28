@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 		// vector<Packet*> vecIn, vecSend, vecFree;
 		BufArray<SamplePacket> *pktsIn = pcap.recvBatch();
 
-		sm.runPktBatch(*pktsIn);
+		sm.runPktBatch(pktsIn);
 		pcap.sendBatch(*pktsIn);
 		pcap.freeBatch(*pktsIn);
 

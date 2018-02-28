@@ -37,7 +37,7 @@ void *HelloBye2_Server_process(void *obj, struct rte_mbuf **inPkts, unsigned int
 		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
 
 	auto *sm = reinterpret_cast<StateMachine<HelloBye2::Identifier<mbuf>, mbuf> *>(obj);
-	sm->runPktBatch(*inPktsBA);
+	sm->runPktBatch(inPktsBA);
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
 
@@ -106,7 +106,7 @@ void *HelloBye2_Client_connect(void *obj, struct rte_mbuf **inPkts, unsigned int
 	StateMachine<HelloBye2::Identifier<mbuf>, mbuf>::State state(
 		HelloBye2::Client::States::Hello, hello);
 
-	sm->addState(cID, state, *inPktsBA);
+	sm->addState(cID, state, inPktsBA);
 
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
@@ -130,7 +130,7 @@ void *HelloBye2_Client_process(void *obj, struct rte_mbuf **inPkts, unsigned int
 		new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
 
 	auto *sm = reinterpret_cast<StateMachine<HelloBye2::Identifier<mbuf>, mbuf> *>(obj);
-	sm->runPktBatch(*inPktsBA);
+	sm->runPktBatch(inPktsBA);
 	*sendCount = inPktsBA->getSendCount();
 	*freeCount = inPktsBA->getFreeCount();
 
