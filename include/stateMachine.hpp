@@ -687,7 +687,7 @@ public:
 	 * \param st The state data
 	 * \param pkt Packet buffer for the state to work with
 	 */
-	void addState(ConnectionID id, State st, Packet *pkt) {
+	void addStateSinglePacket(ConnectionID id, State st, Packet *pkt) {
 
 		/*
 		auto sfIt = functions.find(st.state);

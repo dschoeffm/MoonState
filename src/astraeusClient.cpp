@@ -228,7 +228,7 @@ void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int in
 			auto state = Astraeus_Client::createStateData(
 				config->ident, srcIP, config->dstIP, srcPort, config->dstPort);
 
-			config->sm->addState(cID, state, reinterpret_cast<mbuf *>(inPkts[i]));
+			config->sm->addStateSinglePacket(cID, state, reinterpret_cast<mbuf *>(inPkts[i]));
 		}
 	} catch (std::exception *e) {
 		std::cout << "AstraeusClient_connect() caught exception:" << std::endl
