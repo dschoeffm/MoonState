@@ -294,11 +294,28 @@ public:
 			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
 			if (newStates.find(it, cID)) {
 				st->set(it->second);
+				newStates.erase(it);
 				return true;
 			} else {
 				return false;
 			}
-			return false;
+		};
+
+		/*! Try to erase a state for a given connection ID
+		 *
+		 * This function tries to erase the state for a given connection ID.
+		 *
+		 * \param cID Connection ID to look for
+		 * \return Found or not found
+		 */
+		bool erase(ConnectionID &cID) {
+			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
+			if (newStates.find(it, cID)) {
+				newStates.erase(it);
+				return true;
+			} else {
+				return false;
+			}
 		};
 	};
 
@@ -631,7 +648,11 @@ public:
 	 *
 	 * \param id The connection id of the connection to remove
 	 */
-	void removeState(ConnectionID id) { stateTable.erase(id); }
+	void removeState(ConnectionID id) {
+		if (stateTable.erase(id) == 0) {
+			connPool->erase(id);
+		}
+	}
 
 	/*! Open an outgoing connection
 	 *
