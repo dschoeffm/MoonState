@@ -128,7 +128,7 @@ public:
 
 		StateMachine<Identifier, Packet> *sm;
 		uint32_t pktIdx;
-		BufArray<Packet> &pktsBA;
+		BufArray<Packet> *pktsBA;
 		ConnectionID &cID;
 		State &state;
 		bool sendPkt;
@@ -136,14 +136,14 @@ public:
 
 		// Private -> nobody can misuse any FunIface objects
 		FunIface(StateMachine<Identifier, Packet> *sm, uint32_t pktIdx,
-			BufArray<Packet> &pktsBA, ConnectionID &cID, State &state)
+			BufArray<Packet> *pktsBA, ConnectionID &cID, State &state)
 			: sm(sm), pktIdx(pktIdx), pktsBA(pktsBA), cID(cID), state(state), sendPkt(true),
 			  immediateTransition(false){};
 
 	public:
 		~FunIface() {
 			if (!sendPkt) {
-				pktsBA.markDropPkt(pktIdx);
+				pktsBA->markDropPkt(pktIdx);
 			}
 
 			// We are not in the endstate - checked by runPkt
@@ -181,16 +181,20 @@ public:
 		}
 
 		/*! Free the packet after the batch is processed, do not send it */
-		void freePkt() { sendPkt = false; }
+		void freePkt() {
+			assert(pktsBA != nullptr);
+			sendPkt = false;
+		}
 
 		/*! Get an additional packet buffer
 		 *
 		 * \return The new packet buffer, this buffer will be sent
 		 */
 		Packet *getPkt() {
+			assert(pktsBA != nullptr);
 			assert(sm->getPktCB != nullptr);
 			Packet *ret = sm->getPktCB();
-			pktsBA.addPkt(ret);
+			pktsBA->addPkt(ret);
 			return ret;
 		}
 
@@ -651,11 +655,59 @@ public:
 		auto fun = functions[st.state];
 		assert(fun != nullptr);
 
-		FunIface funIface(this, 0, pktsIn, id, st);
+		FunIface funIface(this, 0, &pktsIn, id, st);
 
 		DEBUG_ENABLED(std::cout << "StateMachine::addState() Running Function" << std::endl;)
 		//(sfIt->second)(st, pktsIn[0], funIface);
 		fun(st, pktsIn[0], funIface);
+
+		if (st.state == endStateID) {
+			DEBUG_ENABLED(
+				std::cout
+					<< "StateMachine::addState() Reached endStateID - deleting connection"
+					<< std::endl;)
+			return;
+		}
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() adding connection to newStates"
+								<< std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() identity: "
+								<< static_cast<std::string>(id) << std::endl;)
+		connPool->add(id, st);
+	}
+
+	/*! Open an outgoing connection
+	 *
+	 * This is the function you want to call, if you want to connect to a server.
+	 * It calls the function for the start state.
+	 * The start state functionmay not free the given packet, or request new ones
+	 * from the FunIface.
+	 *
+	 * \param id The connection id this connection will use
+	 * \param st The state data
+	 * \param pkt Packet buffer for the state to work with
+	 */
+	void addState(ConnectionID id, State st, Packet *pkt) {
+
+		/*
+		auto sfIt = functions.find(st.state);
+		if (sfIt == functions.end()) {
+			throw std::runtime_error("StateMachine::addState() No such function found");
+		}
+		*/
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() Adding ConnectionID: "
+								<< static_cast<std::string>(id) << std::endl;)
+
+		assert((functions.size() - 1) >= st.state);
+		auto fun = functions[st.state];
+		assert(fun != nullptr);
+
+		FunIface funIface(this, 0, nullptr, id, st);
+
+		DEBUG_ENABLED(std::cout << "StateMachine::addState() Running Function" << std::endl;)
+		//(sfIt->second)(st, pktsIn[0], funIface);
+		fun(st, pkt, funIface);
 
 		if (st.state == endStateID) {
 			DEBUG_ENABLED(
@@ -682,20 +734,20 @@ public:
 	 */
 	void addStateNoFun(ConnectionID id, State st) {
 
-		DEBUG_ENABLED(std::cout << "StateMachine::addState() Adding ConnectionID: "
+		DEBUG_ENABLED(std::cout << "StateMachine::addStateNoFun() Adding ConnectionID: "
 								<< static_cast<std::string>(id) << std::endl;)
 
 		if (st.state == endStateID) {
-			DEBUG_ENABLED(
-				std::cout
-					<< "StateMachine::addState() Reached endStateID - deleting connection"
-					<< std::endl;)
+			DEBUG_ENABLED(std::cout << "StateMachine::addStateNoFun() Reached endStateID - "
+									   "deleting connection"
+									<< std::endl;)
 			return;
 		}
 
-		DEBUG_ENABLED(std::cout << "StateMachine::addState() adding connection to newStates"
-								<< std::endl;)
-		DEBUG_ENABLED(std::cout << "StateMachine::addState() identity: "
+		DEBUG_ENABLED(
+			std::cout << "StateMachine::addStateNoFun() adding connection to newStates"
+					  << std::endl;)
+		DEBUG_ENABLED(std::cout << "StateMachine::addStateNoFun() identity: "
 								<< static_cast<std::string>(id) << std::endl;)
 		connPool->add(id, st);
 	}
@@ -743,7 +795,7 @@ public:
 				std::move(timeoutDataIt->second);
 			auto stateIt = findState(timeoutData->id);
 			assert(stateIt != stateTable.end());
-			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), pktsIn,
+			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), &pktsIn,
 				timeoutData->id, stateIt->second);
 
 			// Clear the timeoutID from the state

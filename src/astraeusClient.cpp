@@ -100,6 +100,13 @@ void Astraeus_Client::initHandshake(
 
 	Astraeus_Client::initHandshakeNoTransition(state, pkt);
 
+	funIface.setTimeout(
+		std::chrono::milliseconds(5), [](SM::State &state, SM::FunIface &funIface) {
+			funIface.transition(States::DELETED);
+			astraeusClient *client = reinterpret_cast<astraeusClient *>(state.stateData);
+			delete (client);
+		});
+
 	funIface.transition(States::HANDSHAKE);
 };
 
@@ -220,10 +227,8 @@ void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int in
 
 			auto state = Astraeus_Client::createStateData(
 				config->ident, srcIP, config->dstIP, srcPort, config->dstPort);
-			state.state = Astraeus_Client::States::HANDSHAKE;
-			Astraeus_Client::initHandshakeNoTransition(state, static_cast<mbuf *>(inPkts[i]));
 
-			config->sm->addStateNoFun(cID, state);
+			config->sm->addState(cID, state, reinterpret_cast<mbuf *>(inPkts[i]));
 		}
 	} catch (std::exception *e) {
 		std::cout << "AstraeusClient_connect() caught exception:" << std::endl
