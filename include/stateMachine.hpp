@@ -271,6 +271,8 @@ public:
 
 		~ConnectionPool(){};
 
+		uint64_t size() { return newStates.size(); }
+
 		/*! Add connection and state to the connection pool
 		 *
 		 * \param cID ID of the connection
@@ -554,6 +556,7 @@ public:
 	~StateMachine() {
 		std::cout << "StateMachine stats:" << std::endl;
 		std::cout << "stateTable.size() = " << stateTable.size() << std::endl;
+		std::cout << "ConnectionPool size = " << connPool->size() << std::endl;
 		std::cout << "statesAdded  = " << stat_statesAdded << std::endl;
 		std::cout << "statesClosed = " << stat_statesClosed << std::endl;
 	}
