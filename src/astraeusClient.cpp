@@ -204,32 +204,27 @@ void *AstraeusClient_init(uint32_t dstIP, uint16_t dstPort) {
 	}
 };
 
-void *AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
-	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort) {
+void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	uint32_t srcIP, uint16_t srcPort) {
 
 	try {
 		auto config = reinterpret_cast<astraeus_C_config *>(obj);
 
-		BufArray<mbuf> *inPktsBA =
-			new BufArray<mbuf>(reinterpret_cast<mbuf **>(inPkts), inCount, true);
+		for (unsigned int i = 0; i < inCount; i++) {
+			IPv4_5TupleL2Ident<mbuf>::ConnectionID cID;
+			cID.dstIP = htonl(srcIP);
+			cID.srcIP = htonl(config->dstIP);
+			cID.dstPort = htons(srcPort + i);
+			cID.srcPort = htons(config->dstPort);
+			cID.proto = Headers::IPv4::PROTO_UDP;
 
-		IPv4_5TupleL2Ident<mbuf>::ConnectionID cID;
-		cID.dstIP = htonl(srcIP);
-		cID.srcIP = htonl(config->dstIP);
-		cID.dstPort = htons(srcPort);
-		cID.srcPort = htons(config->dstPort);
-		cID.proto = Headers::IPv4::PROTO_UDP;
+			auto state = Astraeus_Client::createStateData(
+				config->ident, srcIP, config->dstIP, srcPort, config->dstPort);
+			state.state = Astraeus_Client::States::HANDSHAKE;
+			Astraeus_Client::initHandshakeNoTransition(state, static_cast<mbuf *>(inPkts[i]));
 
-		auto state = Astraeus_Client::createStateData(
-			config->ident, srcIP, config->dstIP, srcPort, config->dstPort);
-
-		config->sm->addState(cID, state, *inPktsBA);
-
-		*sendCount = inPktsBA->getSendCount();
-		*freeCount = inPktsBA->getFreeCount();
-
-		return inPktsBA;
-
+			config->sm->addStateNoFun(cID, state);
+		}
 	} catch (std::exception *e) {
 		std::cout << "AstraeusClient_connect() caught exception:" << std::endl
 				  << e->what() << std::endl;

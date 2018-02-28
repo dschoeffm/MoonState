@@ -6,8 +6,8 @@ local utils = require "utils"
 ffi.cdef[[
 void *AstraeusClient_init(uint32_t dstIP, uint16_t dstPort);
 
-void *AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
-	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort);
+void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	uint32_t srcIP, uint16_t srcPort);
 
 void AstraeusClient_getPkts(void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts);
 
@@ -68,24 +68,11 @@ function mod.connect(mempool, obj, srcIP, srcPort, bSize)
 	local bufArray = mempool:bufArray(bSize)
 	bufArray:alloc(100)
 
-	local sendBufsAll = memory.bufArray(bSize)
-
-	for i = 1,bSize do
-
-		local bAC = ffi.C.AstraeusClient_connect(obj.obj, bufArray.array + (i-1), 1, obj.sbc,
-		obj.fbc, srcIP, srcPort+i)
-
-		local freeBufs = memory.bufArray(obj.fbc[0])
-
-		ffi.C.AstraeusClient_getPkts(bAC, sendBufsAll.array + (i-1), freeBufs.array)
-
-	end
-
-	sendBufsAll.size = bSize
+	local bAC = ffi.C.AstraeusClient_connect(obj.obj, bufArray.array, bSize, srcIP, srcPort)
 
 	ret = {}
 
-	ret.send = sendBufsAll
+	ret.send = bufArray
 	ret.sendCount = bSize
 
 	return ret

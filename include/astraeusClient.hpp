@@ -103,16 +103,14 @@ void *AstraeusClient_init(uint32_t dstIP, uint16_t dstPort);
  *
  * \param obj The void* returned from AstraeusClient_init()
  * \param inPkts mbufs from MoonGen
- * \param inCount Number of buffers in inPkts (should be 1)
- * \param sendCount This will be set to the number of packets to be sent
- * \param freeCount This will be set to the number of packets to be freed
+ * \param inCount Number of buffers in inPkts
  * \param srcIP IP which should be used as the source
- * \param srcPort Port which should be used as the source
+ * \param srcPort Port which should be used as the source (incremented per packet)
  *
  * \return Opaque object to be fed into AstraeusClient_getPkts
  */
-void *AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
-	unsigned int *sendCount, unsigned int *freeCount, uint32_t srcIP, uint16_t srcPort);
+void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+	uint32_t srcIP, uint16_t srcPort);
 
 /*! Get the packets from an opaque structure
  *
