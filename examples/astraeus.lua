@@ -78,7 +78,7 @@ function connector(txQ)
 
 	local state = astraeus.init(dstIP, 4433)
 
-	local bSize = 1
+	local bSize = 63
 
 	local dstMac = parseMacAddress(dstMacStr, true)
 	local srcMac = parseMacAddress(srcMacStr, true)
