@@ -75,18 +75,24 @@ function reflector(rxQ, txQ)
 		for i = 1, curPkts.sendCount do
 			-- swap MAC addresses
 			local pkt = sendBufs[i]:getEthernetPacket()
-			--local tmp = pkt.eth:getDst()
-			pkt.eth:setDst(dstMac)
-			pkt.eth:setSrc(srcMac)
+			local tmp = pkt.eth:getDst()
+			pkt.eth:setDst(pkt.eth:getSrc())
+			pkt.eth:setSrc(tmp)
 			local vlan = bufs[i]:getVlan()
 			if vlan then
 				bufs[i]:setVlan(vlan)
 			end
 		end
 
+--[[
 		if sendBufsCount > 0 then
 			log:info("reflector is sending packets: " .. sendBufsCount)
+			for i = 1, rx do
+				local buf = sendBufs[i]
+				buf:dump()
+			end
 		end
+--]]
 
 		if sendBufsCount > 0 then
 			sendBufs:offloadIPChecksums(true)

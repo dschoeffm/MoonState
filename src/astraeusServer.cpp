@@ -18,15 +18,15 @@ identityHandle *Astraeus_Server::createIdentity() {
 	return ident;
 };
 
-void *factory(IPv4_5TupleL2Ident<mbuf>::ConnectionID id) {
+void *Astraeus_Server::factory(IPv4_5TupleL2Ident<mbuf>::ConnectionID id) {
 	astraeusClient *client = new astraeusClient();
 	memset(client, 0, sizeof(astraeusClient));
 
 	// Set the trivial stuff
-	client->localIP = id.dstIP;
-	client->remoteIP = id.srcIP;
-	client->localPort = id.dstPort;
-	client->remotePort = id.srcPort;
+	client->localIP = ntohl(id.dstIP);
+	client->remoteIP = ntohl(id.srcIP);
+	client->localPort = ntohs(id.dstPort);
+	client->remotePort = ntohs(id.srcPort);
 
 	// Generate a handle
 	generateHandleGivenKey(*ident, client->handle, ecdhPub, ecdhSec);
@@ -50,6 +50,7 @@ void Astraeus_Server::configStateMachine(
 	}
 
 	sm.registerEndStateID(States::DELETED);
+	sm.registerStartStateID(States::HANDSHAKE, factory);
 
 	crypto_kx_keypair(ecdhPub, ecdhSec);
 	memset(nonce, 0, sizeof(nonce));

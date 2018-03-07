@@ -11,8 +11,8 @@ local log    = require "log"
 
 -- IP of this host
 local RX_IP		= "192.168.0.1"
-local dstMacStr		= "3c:fd:fe:9e:d7:40"
-local srcMacStr		= "68:05:CA:32:44:D8"
+local dstMacStr		= "3c:fd:fe:9e:d6:b9"
+local srcMacStr		= "68:05:CA:32:44:D9"
 
 function configure(parser)
 	parser:argument("dev", "Devices to use."):args("+"):convert(tonumber)
@@ -78,13 +78,13 @@ function connector(txQ)
 
 	local state = astraeus.init(dstIP, 4433)
 
-	local bSize = 63
+	local bSize = 128
 
 	local dstMac = parseMacAddress(dstMacStr, true)
 	local srcMac = parseMacAddress(srcMacStr, true)
 
-	require("jit.p").start("l")
-	require("jit.dump").on()
+--	require("jit.p").start("l")
+--	require("jit.dump").on()
 
 	-- a bufArray is just a list of buffers from a mempool that is processed as a single batch
 	while lm.running() do -- check if Ctrl+c was pressed
@@ -116,15 +116,22 @@ function connector(txQ)
 		sendBufs:offloadUdpChecksums(true)
 		-- send out all packets and frees old bufs that have been sent
 
---		if sendBufsCount > 0 then
---			log:info("connector is sending packets: " .. sendBufsCount)
---		end
+		--[[
+		if sendBufsCount > 0 then
+			log:info("connector is sending packets: " .. sendBufsCount)
+			for i = 1, sendBufsCount do
+				local buf = sendBufs[i]
+				buf:dump()
+			end
+		end
+		--]]
+
 
 		txQ:sendN(sendBufs, sendBufsCount)
 
---		lm.sleepMicros(1000)
+--		lm.sleepMicros(1000000)
 	end
-	require("jit.p").stop()
+--	require("jit.p").stop()
 
 	astraeus.free(state)
 end
@@ -143,6 +150,10 @@ function reflector(rxQ, txQ)
 	while lm.running() do
 		-- receive some packets
 		local rx = rxQ:tryRecv(bufs, 1000)
+
+--		if rx > 0 then
+--			log:info("reflector received packets: " .. rx)
+--		end
 
 		-- run packets through the state machine
 		local curPkts = astraeus.process(state, bufs.array, rx)
@@ -163,9 +174,15 @@ function reflector(rxQ, txQ)
 			end
 		end
 
+		--[[
 		if sendBufsCount > 0 then
 			log:info("reflector is sending packets: " .. sendBufsCount)
+			for i = 1, sendBufsCount do
+				local buf = sendBufs[i]
+				buf:dump()
+			end
 		end
+		--]]
 
 		if sendBufsCount > 0 then
 			sendBufs:offloadIPChecksums(true)

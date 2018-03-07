@@ -35,7 +35,7 @@ function mod.process(obj, inPkts, inCount)
 	ret = {}
 
 	if 0 < inCount then
-		log:info("helloBye.process() called (>0 packets)")
+--		log:info("helloBye.process() called (>0 packets)")
 
 		local ba = ffi.C.AstraeusClient_process(obj.obj, inPkts, inCount, obj.sbc,
 		obj.fbc)

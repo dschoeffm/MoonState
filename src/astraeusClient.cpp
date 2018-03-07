@@ -219,7 +219,7 @@ void AstraeusClient_connect(void *obj, struct rte_mbuf **inPkts, unsigned int in
 			cID.proto = Headers::IPv4::PROTO_UDP;
 
 			auto state = Astraeus_Client::createStateData(
-				config->ident, srcIP, config->dstIP, srcPort, config->dstPort);
+				config->ident, srcIP, config->dstIP, srcPort + i, config->dstPort);
 			state.state = Astraeus_Client::States::HANDSHAKE;
 			Astraeus_Client::initHandshakeNoTransition(state, static_cast<mbuf *>(inPkts[i]));
 

@@ -63,16 +63,39 @@ public:
 		// In the future, maybe we find something more random...
 		uint64_t operator()(const ConnectionID &c) const {
 			uint64_t res = 0;
-			/*res += c.dstPort;
+
+			/*
+			res += c.dstPort;
 			res += c.srcPort;
 			res += c.dstIP;
 			res += c.srcIP;
 			res += c.proto;
 			*/
+
+			struct __attribute__((packed)) {
+				uint32_t srcIP;
+				uint32_t dstIP;
+				uint16_t srcPort;
+				uint16_t dstPort;
+				uint8_t proto;
+			} hashContent;
+
+			hashContent.srcIP = c.srcIP;
+			hashContent.dstIP = c.dstIP;
+			hashContent.srcPort = c.srcPort;
+			hashContent.dstPort = c.dstPort;
+			hashContent.proto = c.proto;
+
+			if (sizeof(hashContent) != 13) {
+				throw std::runtime_error("sizeof(hashContent) != 13");
+			}
+
 			assert(crypto_shorthash_BYTES == 8);
 			uint8_t key[crypto_shorthash_KEYBYTES];
 			memset(key, 0, crypto_shorthash_KEYBYTES);
-			crypto_shorthash(reinterpret_cast<uint8_t*>(&res), reinterpret_cast<const uint8_t*>(&c), sizeof(ConnectionID), key);
+			crypto_shorthash(reinterpret_cast<uint8_t *>(&res),
+				reinterpret_cast<const uint8_t *>(&hashContent), sizeof(hashContent), key);
+
 			return res;
 		}
 	};

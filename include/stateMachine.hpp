@@ -288,6 +288,7 @@ public:
 			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
 			if (newStates.find(it, cID)) {
 				st->set(it->second);
+				newStates.erase(it);
 				return true;
 			} else {
 				return false;
@@ -476,6 +477,7 @@ private:
 					std::cout << "StateMachine::runPkt() discarding packet" << std::endl;)
 				DEBUG_ENABLED(std::cout << "ident of packet: "
 										<< static_cast<std::string>(identity) << std::endl;)
+				pktsIn.markDropPkt(cur);
 				return;
 			}
 

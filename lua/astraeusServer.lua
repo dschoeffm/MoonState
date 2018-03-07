@@ -18,7 +18,7 @@ local mod = {}
 
 function mod.init()
 	ret = {}
-	ret.obj = ffi.C.AstraeusClient_init()
+	ret.obj = ffi.C.AstraeusServer_init()
 	ret.sbc = ffi.new("unsigned int[1]")
 	ret.fbc = ffi.new("unsigned int[1]")
 	ret.fbufs = memory.bufArray(128)
@@ -32,7 +32,7 @@ function mod.process(obj, inPkts, inCount)
 	ret = {}
 
 	if 0 < inCount then
-		log:info("astraeusServer.process() called (>0 packets)")
+--		log:info("astraeusServer.process() called (>0 packets)")
 
 		local ba = ffi.C.AstraeusServer_process(obj.obj, inPkts, inCount, obj.sbc,
 		obj.fbc)
