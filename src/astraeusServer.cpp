@@ -29,7 +29,7 @@ void *Astraeus_Server::factory(IPv4_5TupleL2Ident<mbuf>::ConnectionID id) {
 	client->remotePort = ntohs(id.srcPort);
 
 	// Generate a handle
-	generateHandleGivenKey(*ident, client->handle, ecdhPub, ecdhSec);
+	generateHandleGivenKeyAndNonce(*ident, client->handle, ecdhPub, ecdhSec, nonce);
 
 	return client;
 };
@@ -70,6 +70,8 @@ void Astraeus_Server::runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>:
 		reinterpret_cast<uint8_t *>(pkt->getData()) + sizeof(Headers::Ethernet) +
 			sizeof(Headers::IPv4) + sizeof(Headers::Udp),
 		sendLen);
+
+	sodium_increment(nonce, sizeof(nonce));
 
 	pkt->setDataLen(
 		sendLen + sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Udp));
