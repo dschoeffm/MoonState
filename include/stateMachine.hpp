@@ -550,10 +550,10 @@ public:
 		  curTimeoutID(0), connPool(&connPoolStatic){};
 
 	~StateMachine() {
-		std::cout << "StateMachine stats:" << std::endl;
-		std::cout << "stateTable.size() = " << stateTable.size() << std::endl;
-		std::cout << "statesAdded  = " << stat_statesAdded << std::endl;
-		std::cout << "statesClosed = " << stat_statesClosed << std::endl;
+		DEBUG_ENABLED(std::cout << "StateMachine stats:" << std::endl;
+					  std::cout << "stateTable.size() = " << stateTable.size() << std::endl;
+					  std::cout << "statesAdded  = " << stat_statesAdded << std::endl;
+					  std::cout << "statesClosed = " << stat_statesClosed << std::endl;)
 	}
 
 	/*! Get the number of tracked connections
