@@ -2,6 +2,8 @@
 #include <iostream>
 #include <memory>
 
+#include "sodium.h"
+
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
 
@@ -44,7 +46,16 @@ public:
 	};
 
 	struct Hasher {
-		size_t operator()(const ConnectionID &id) const { return id.val; }
+		size_t operator()(const ConnectionID &id) const {
+			uint64_t res;
+			assert(crypto_shorthash_BYTES == 8);
+			uint8_t key[crypto_shorthash_KEYBYTES];
+			memset(key, 0, crypto_shorthash_KEYBYTES);
+			crypto_shorthash(reinterpret_cast<uint8_t *>(&res),
+				reinterpret_cast<const uint8_t *>(&id.val), sizeof(id.val), key);
+
+			return res;
+		}
 	};
 
 	static ConnectionID identify(SamplePacket *pkt) {
