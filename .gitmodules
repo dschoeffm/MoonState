@@ -4,13 +4,10 @@
 [submodule "deps/concurrentqueue"]
 	path = deps/concurrentqueue
 	url = https://github.com/cameron314/concurrentqueue.git
-[submodule "deps/openssl"]
-	path = deps/openssl
-	url = https://github.com/dschoeffm/openssl.git
-	branch = moonstate
 [submodule "deps/tbb"]
 	path = deps/tbb
 	url = https://github.com/dschoeffm/tbb.git
-[submodule "deps/AstraeusVPN"]
-	path = deps/AstraeusVPN
-	url = https://github.com/dschoeffm/AstraeusVPN.git
+[submodule "deps/libsodium"]
+	path = deps/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+	branch = stable
