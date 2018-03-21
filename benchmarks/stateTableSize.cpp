@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <memory>
 
 #include "sodium.h"
@@ -43,6 +44,15 @@ public:
 
 		ConnectionID(const ConnectionID &c) : val(c.val){};
 		ConnectionID() : val(0){};
+		ConnectionID(uint64_t val) : val(val){};
+	};
+
+	static struct ConnectionID getDelKey() {
+		return ConnectionID(std::numeric_limits<uint64_t>::max());
+	};
+
+	static struct ConnectionID getEmptyKey() {
+		return ConnectionID(std::numeric_limits<uint64_t>::max() - 1);
 	};
 
 	struct Hasher {
