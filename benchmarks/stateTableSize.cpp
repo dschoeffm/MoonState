@@ -83,6 +83,8 @@ SamplePacket *getPkt() {
 	return p;
 }
 
+uint64_t numMemAccess = 0;
+
 // This is the function for state 1
 void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 
@@ -90,6 +92,11 @@ void fun1(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 
 	// Sanity check -> this should never to true
 	DEBUG_ENABLED(if (state.state != 1) { cout << "fun1: state not 1" << endl; })
+
+	uint64_t *data = reinterpret_cast<uint64_t *>(state.stateData);
+	for (uint64_t i = 0; i < numMemAccess; i++) {
+		data[i]++;
+	}
 
 	// if pktIn == 2 -> transition to state 2 and fill packet with 12
 	if (*(reinterpret_cast<uint32_t *>(pktIn->getData())) == 2) {
@@ -132,25 +139,36 @@ void fun2(SM::State &state, SamplePacket *pktIn, SM::FunIface &fi) {
 }
 
 void usage(std::string progName) {
-	std::cout << "Usage: " << progName << " <Num States>" << std::endl;
+	std::cout << "Usage: " << progName << " <Num States> <Num Mem Accesses>" << std::endl;
 	std::exit(0);
 }
 
 int main(int argc, char **argv) {
 
-	if (argc < 2) {
+	if (argc < 3) {
 		usage(std::string(argv[0]));
 	}
 
 	unsigned int numStates = atoi(argv[1]);
+	numMemAccess = atoi(argv[2]);
 	uint64_t startTimer, stopTimer;
+
+	uint64_t *data =
+		reinterpret_cast<uint64_t *>(malloc(sizeof(uint64_t) * numStates * numMemAccess));
+	uint64_t dataCounter = 0;
 
 	try {
 
 		SM sm;
 
 		// All incoming connections start at state 1, and don't require preparation
-		sm.registerStartStateID(1, nullptr);
+		sm.registerStartStateID(
+			1, [&data, &dataCounter](Identifier::ConnectionID cID) -> void * {
+				(void)cID;
+				void *dataRet = reinterpret_cast<void *>(data + dataCounter);
+				dataCounter += numMemAccess;
+				return dataRet;
+			});
 
 		// Every connection is state 3 should be deleted
 		sm.registerEndStateID(3);
@@ -189,11 +207,13 @@ int main(int argc, char **argv) {
 		stopTimer = read_rdtsc();
 		std::cout << "Run: " << stopTimer - startTimer << std::endl;
 
+		free(data);
 	} catch (exception *e) {
 		// Just catch whatever fails there may be
 		cout << endl << "FATAL:" << endl;
 		cout << e->what() << endl;
 
+		free(data);
 		return 1;
 	}
 
