@@ -749,6 +749,9 @@ public:
 				std::move(timeoutDataIt->second);
 			auto stateIt = findState(timeoutData->id);
 			assert(stateIt != stateTable.end());
+
+			// XXX Check if timeoutID is invalid
+
 			FunIface funIface(this, std::numeric_limits<uint32_t>::max(), pktsIn,
 				timeoutData->id, stateIt->second);
 

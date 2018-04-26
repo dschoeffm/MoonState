@@ -186,14 +186,15 @@ struct IPv4 {
 
 /*! Representation of the TCP header. */
 struct Tcp {
-	uint16_t srcPort;	  //!< Source port
-	uint16_t dstPort;	  //!< Destination port
-	uint32_t seq;		   //!< Sequence number
-	uint32_t ack;		   //!< Acknowledgement number
-	uint16_t offset_flags; //!< Data offset and flags
-	uint16_t window;	   //!< Receive window
-	uint16_t checksum;	 //!< Checksum
-	uint16_t urgend_ptr;   //!< Urgent pointer
+	uint16_t srcPort;		 //!< Source port
+	uint16_t dstPort;		 //!< Destination port
+	uint32_t seq;			 //!< Sequence number
+	uint32_t ack;			 //!< Acknowledgement number
+	uint8_t offset_reserved; //!< Data offset and reserved
+	uint8_t flags;			 //!< Flags
+	uint16_t window;		 //!< Receive window
+	uint16_t checksum;		 //!< Checksum
+	uint16_t urgend_ptr;	 //!< Urgent pointer
 
 	/*! Get the SDU
 	 * \return Pointer to the payload
@@ -202,6 +203,44 @@ struct Tcp {
 		return reinterpret_cast<void *>(
 			reinterpret_cast<uint8_t *>(this) + sizeof(struct Tcp));
 	}
+
+	/*! Set the source port
+	 * \param p Source port in host byte order
+	 */
+	void setSrcPort(uint16_t p) { srcPort = htons(p); }
+
+	/*! Set the destination port
+	 * \param p Destination port in host byte order
+	 */
+	void setDstPort(uint16_t p) { dstPort = htons(p); }
+
+	/*! Get the source port
+	 * \return Source port in host byte order
+	 */
+	uint16_t getSrcPort() const { return ntohs(srcPort); }
+
+	/*! Get the destination port
+	 * \return Destination port in host byte order
+	 */
+	uint16_t getDstPort() const { return ntohs(dstPort); }
+
+	uint32_t getSeq() const { return ntohl(seq); }
+	uint32_t getAck() const { return ntohl(ack); }
+
+	void setSeq(uint32_t s) { seq = htonl(s); }
+	void setAck(uint32_t a) { ack = htonl(a); }
+
+	void clearFlags() { flags = 0; }
+
+	bool getFinFlag() const { return flags & 0x1; }
+	bool getSynFlag() const { return flags & 0x2; }
+	bool getRstFlag() const { return flags & 0x4; }
+	bool getAckFlag() const { return flags & 0x8; }
+
+	void setFinFlag() { flags |= 0x1; }
+	void setSynFlag() { flags |= 0x2; }
+	void setRstFlag() { flags |= 0x4; }
+	void setAckFlag() { flags |= 0x8; }
 
 } __attribute__((packed));
 
