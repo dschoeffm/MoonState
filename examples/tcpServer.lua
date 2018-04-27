@@ -79,8 +79,8 @@ function reflector(rxQ, txQ)
 		end
 
 		if sendBufsCount > 0 then
-			sendBufs:offloadIPChecksums(true, 14,20,1)
-			sendBufs:offloadUdpChecksums(true)
+			sendBufs:offloadIPChecksums(true)
+			sendBufs:offloadTcpChecksums(true)
 
 			txQ:sendN(sendBufs, sendBufsCount)
 		end

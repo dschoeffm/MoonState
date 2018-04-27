@@ -1,9 +1,3 @@
-#if 0
-
-/* This file is already in Astraeus
- * if this was commented out, there would be linker errors
- */
-
 #include <cassert>
 #include <iomanip>
 #include <iostream>
@@ -88,5 +82,3 @@ void hexdumpHexOnly(const void *data, int dataLen) {
 
 	cout << all.str();
 }
-
-#endif

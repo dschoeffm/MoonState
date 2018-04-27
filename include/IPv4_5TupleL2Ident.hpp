@@ -96,6 +96,8 @@ public:
 			crypto_shorthash(reinterpret_cast<uint8_t *>(&res),
 				reinterpret_cast<const uint8_t *>(&hashContent), sizeof(hashContent), key);
 
+			DEBUG_ENABLED(std::cout << "Hasher output: " << res << std::endl;)
+
 			return res;
 		}
 	};

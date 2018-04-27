@@ -235,13 +235,17 @@ struct Tcp {
 	bool getFinFlag() const { return flags & 0x1; }
 	bool getSynFlag() const { return flags & 0x2; }
 	bool getRstFlag() const { return flags & 0x4; }
-	bool getAckFlag() const { return flags & 0x8; }
+	bool getAckFlag() const { return flags & 0x10; }
 
 	void setFinFlag() { flags |= 0x1; }
 	void setSynFlag() { flags |= 0x2; }
 	void setRstFlag() { flags |= 0x4; }
-	void setAckFlag() { flags |= 0x8; }
+	void setAckFlag() { flags |= 0x10; }
 
+	void setOffset(uint8_t offset) {
+		offset = offset << 4;
+		offset_reserved = offset;
+	}
 } __attribute__((packed));
 
 /*! Representation of the UDP header. */

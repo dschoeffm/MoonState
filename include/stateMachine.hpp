@@ -416,6 +416,13 @@ private:
 	findStateLoop:
 		auto stateIt = stateTable.find(id);
 		if (stateIt == stateTable.end()) {
+			DEBUG_ENABLED(std::cout
+							  << "StateMachine::findState() Didn't find state in stateTable"
+							  << std::endl;)
+			DEBUG_ENABLED(
+				std::cout
+					<< "StateMachine::findState() (after not found) stateTable.size() = "
+					<< stateTable.size() << std::endl;)
 
 			// Try to find state in the connection pool
 			{
@@ -447,6 +454,10 @@ private:
 
 				State s(startStateID, stateData);
 				stateTable.insert({id, s});
+				DEBUG_ENABLED(
+					std::cout
+						<< "StateMachine::findState() (after insert) stateTable.size() = "
+						<< stateTable.size() << std::endl;)
 
 				stat_statesAdded++;
 
@@ -630,7 +641,11 @@ public:
 	 *
 	 * \param id The connection id of the connection to remove
 	 */
-	void removeState(ConnectionID id) { stateTable.erase(id); }
+	void removeState(ConnectionID id) {
+		DEBUG_ENABLED(std::cout << "stateTable::removeState() removing: "
+								<< static_cast<std::string>(id) << std::endl;)
+		stateTable.erase(id);
+	}
 
 	/*! Open an outgoing connection
 	 *
@@ -721,6 +736,9 @@ public:
 			std::cout << std::endl
 					  << "StateMachine::runPktBatch() running incoming batch now, #Pkts: "
 					  << inCount << std::endl;)
+		DEBUG_ENABLED(
+			std::cout << "StateMachine::runPktBatch() (beginning) stateTable.size() = "
+					  << stateTable.size() << std::endl;)
 
 		// This loop handles the timeouts
 		// It breaks, if there are no usable timeouts anymore
@@ -777,6 +795,9 @@ public:
 		for (uint32_t i = 0; i < inCount; i++) {
 			runPkt(pktsIn, i);
 		}
+
+		DEBUG_ENABLED(std::cout << "StateMachine::runPktBatch() (ending) stateTable.size() = "
+								<< stateTable.size() << std::endl;)
 	}
 };
 
