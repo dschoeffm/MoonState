@@ -3,6 +3,7 @@
 
 //#include <mutex>
 //#include <sstream>
+#include <vector>
 
 #include "IPv4_5TupleL2Ident.hpp"
 #include "common.hpp"
@@ -14,11 +15,6 @@
 namespace TCP {
 using Identifier = IPv4_5TupleL2Ident<mbuf>;
 
-struct connection {
-	uint32_t seqLocal;
-	uint32_t seqRemote;
-};
-
 /*
  * ===================================
  * Server
@@ -26,25 +22,69 @@ struct connection {
  *
  */
 
-namespace Server {
+template <class Proto, class ConCtl> class Server;
+
+/*
+class ProtoBase {
+public:
+	virtual void handlePacket(uint8_t *data, uint16_t dataLen, TcpIface &tcpIface) = 0;
+};
+
+class ConCtlBase {
+public:
+	virtual void initSeq(uint32_t seq, uint32_t ack) = 0;
+	virtual void handlePacket(uint32_t seq, uint32_t ack) = 0;
+	virtual bool reset(uint32_t &seq);
+	virtual unsigned int getConWindow() = 0;
+};
+*/
 
 struct States {
 	static constexpr StateID syn_ack = 0;
-	static constexpr StateID fin = 1;
-	static constexpr StateID ack_fin = 2;
-	static constexpr StateID END = 3;
+	static constexpr StateID est = 1;
+	static constexpr StateID fin = 2;
+	static constexpr StateID ack_fin = 3;
+	static constexpr StateID END = 4;
 };
 
-void *factory(Identifier::ConnectionID id);
+template <class Proto, class ConCtl> class Server {
+public:
+	struct connection {
+		uint32_t seqLocal = 0;
+		uint32_t seqRemote = 0;
+		uint32_t dataToSendSeq = 0;
+		uint32_t dataToSendOffset = 0;
+		std::vector<uint8_t> dataToSend;
+		uint16_t sendWindow = 0;
+		bool closeConnectionAfterSending = false;
+		ConCtl conCtl;
+		Proto proto;
+	};
 
-void runSynAck(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
-	StateMachine<Identifier, mbuf>::FunIface &funIface);
+	class TcpIface {
+	private:
+		friend class Server<Proto, ConCtl>;
 
-void runFin(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
-	StateMachine<Identifier, mbuf>::FunIface &funIface);
+		TcpIface(struct connection &conn);
 
-void runAckFin(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
-	StateMachine<Identifier, mbuf>::FunIface &funIface);
+	public:
+		void close();
+		void sendData(const uint8_t *data, uint32_t dataLen);
+	};
+
+	static struct connection *factory(Identifier::ConnectionID id);
+
+	static void runSynAck(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
+		StateMachine<Identifier, mbuf>::FunIface &funIface);
+
+	static void runEst(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
+		StateMachine<Identifier, mbuf>::FunIface &funIface);
+
+	static void runFin(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
+		StateMachine<Identifier, mbuf>::FunIface &funIface);
+
+	static void runAckFin(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
+		StateMachine<Identifier, mbuf>::FunIface &funIface);
 
 }; // namespace Server
 
@@ -83,6 +123,7 @@ void runFin(StateMachine<Identifier, mbuf>::State &state, mbuf *pkt,
 
 extern "C" {
 
+#if 0
 /*
  * XXX -------------------------------------------- XXX
  *       Server
@@ -119,6 +160,7 @@ void TCP_Server_getPkts(void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf *
  * \param obj object returned by TCPServer_init()
  */
 void TCP_Server_free(void *obj);
+#endif
 
 /*
  * XXX -------------------------------------------- XXX
@@ -182,10 +224,8 @@ void TCP_Client_free(void *obj);
  * When compiling, YCM should never be set.
  * Set YCM in a libclang based IDE in order to avoid errors
  */
-// Is this include really needed?
-// We are not defining a template here
-//#ifndef YCM
-//#include "../src/tcp.cpp"
-//#endif
+#ifndef YCM
+#include "../src/tcp.cpp"
+#endif
 
 #endif /* TCP_HPP */

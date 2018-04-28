@@ -246,6 +246,14 @@ struct Tcp {
 		offset = offset << 4;
 		offset_reserved = offset;
 	}
+
+	uint8_t getHeaderLen() {
+		uint8_t tmp = offset_reserved;
+		// This *should* get compiled into one shift (>>2)
+		tmp = tmp >> 4;
+		tmp = tmp * 4;
+		return tmp;
+	}
 } __attribute__((packed));
 
 /*! Representation of the UDP header. */
