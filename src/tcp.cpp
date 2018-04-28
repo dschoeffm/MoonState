@@ -197,7 +197,7 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	}
 
 	if (c->closeConnectionAfterSending && c->dataToSend.empty()) {
-		funIface.transition(States::fin);
+		funIface.transition(States::ack_fin);
 	}
 };
 

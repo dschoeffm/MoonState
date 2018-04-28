@@ -64,12 +64,17 @@ public:
 	class TcpIface {
 	private:
 		friend class Server<Proto, ConCtl>;
+		struct connection &conn;
 
-		TcpIface(struct connection &conn);
+		TcpIface(struct connection &conn) : conn(conn){};
 
 	public:
-		void close();
-		void sendData(const uint8_t *data, uint32_t dataLen);
+		void close() { conn.closeConnectionAfterSending = true; };
+		void sendData(const uint8_t *data, uint32_t dataLen) {
+			auto oldSize = conn.dataToSend.size();
+			conn.dataToSend.resize(oldSize + dataLen);
+			memcpy(conn.dataToSend.data() + oldSize, data, dataLen);
+		};
 	};
 
 	static struct connection *factory(Identifier::ConnectionID id);

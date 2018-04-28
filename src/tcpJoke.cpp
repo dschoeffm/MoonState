@@ -16,7 +16,7 @@ void *TCP_Server_Joke_init() {
 
 	obj->registerFunction(TCP::States::syn_ack, ServerJoke::runSynAck);
 	obj->registerFunction(TCP::States::est, ServerJoke::runEst);
-	obj->registerFunction(TCP::States::fin, ServerJoke::runFin);
+	//	obj->registerFunction(TCP::States::fin, ServerJoke::runFin);
 	obj->registerFunction(TCP::States::ack_fin, ServerJoke::runAckFin);
 
 	return obj;
