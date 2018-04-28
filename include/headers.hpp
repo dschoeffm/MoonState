@@ -95,7 +95,7 @@ struct IPv4 {
 	/*! Get the length of the L3-SDU
 	 * \return The length of the payload (host byte order)
 	 */
-	uint16_t getPayloadLength() const { return ntohl(total_length) - ihl() * 4; }
+	uint16_t getPayloadLength() const { return ntohs(total_length) - ihl() * 4; }
 
 	uint16_t id;				  //!< Identification
 	uint16_t flags_fragmentation; //!< flags and fragmentation offset
@@ -229,6 +229,8 @@ struct Tcp {
 
 	void setSeq(uint32_t s) { seq = htonl(s); }
 	void setAck(uint32_t a) { ack = htonl(a); }
+
+	uint16_t getWindow() { return ntohs(window); }
 
 	void clearFlags() { flags = 0; }
 

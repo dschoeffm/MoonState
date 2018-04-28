@@ -3,22 +3,22 @@ local memory = require "memory"
 local log = require "log"
 
 ffi.cdef[[
-void *TCP_Server_init();
+void *TCP_Server_Joke_init();
 
-void *TCP_Server_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
+void *TCP_Server_Joke_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount);
 
-void TCP_Server_getPkts(
+void TCP_Server_Joke_getPkts(
 	void *obj, struct rte_mbuf **sendPkts, struct rte_mbuf **freePkts);
 
-void TCP_Server_free(void *obj);
+void TCP_Server_Joke_free(void *obj);
 ]]
 
 local mod = {}
 
 function mod.init()
 	ret = {}
-	ret.obj = ffi.C.TCP_Server_init()
+	ret.obj = ffi.C.TCP_Server_Joke_init()
 	ret.sbc = ffi.new("unsigned int[1]")
 	ret.fbc = ffi.new("unsigned int[1]")
 	ret.fbufs = memory.bufArray(128)
@@ -34,7 +34,7 @@ function mod.process(obj, inPkts, inCount)
 	if 0 < inCount then
 --		log:info("helloBye.process() called (>0 packets)")
 
-		local ba = ffi.C.TCP_Server_process(obj.obj, inPkts, inCount, obj.sbc,
+		local ba = ffi.C.TCP_Server_Joke_process(obj.obj, inPkts, inCount, obj.sbc,
 		obj.fbc)
 
 		if obj.sbc[0] > obj.sbufsS then
@@ -47,7 +47,7 @@ function mod.process(obj, inPkts, inCount)
 			obj.fbufsS = obj.fbc[0]
 		end
 
-		ffi.C.TCP_Server_getPkts(ba, obj.sbufs.array, obj.fbufs.array)
+		ffi.C.TCP_Server_Joke_getPkts(ba, obj.sbufs.array, obj.fbufs.array)
 
 		obj.sbufs.size = obj.sbc[0]
 		ret.send = obj.sbufs
@@ -62,7 +62,7 @@ function mod.process(obj, inPkts, inCount)
 end
 
 function mod.free(obj)
-	ffi.C.TCP_Server_free(obj.obj)
+	ffi.C.TCP_Server_Joke_free(obj.obj)
 end
 
 return mod

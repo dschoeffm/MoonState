@@ -18,6 +18,8 @@ typename Server<Proto, ConCtl>::connection *Server<Proto, ConCtl>::factory(
 		"ConCtl has to be derived from ConCtlBase");
 		*/
 
+	DEBUG_ENABLED(std::cout << "creating new TCP connection" << std::endl;)
+
 	(void)id;
 	struct connection *conn = new connection();
 	return conn;
@@ -60,6 +62,9 @@ void Server<Proto, ConCtl>::runSynAck(StateMachine<Identifier, mbuf>::State &sta
 		return;
 	}
 
+	DEBUG_ENABLED(
+		std::cout << "TCP::Server::runSynAck() All received flags are correct" << std::endl;)
+
 	c->seqRemote = tcp->getSeq();
 	c->seqLocal = 0;
 
@@ -69,6 +74,15 @@ void Server<Proto, ConCtl>::runSynAck(StateMachine<Identifier, mbuf>::State &sta
 	//	std::cout << "Setting seq to: " << 0 << std::endl;
 	tcp->setAckFlag();
 	tcp->setOffset(5);
+
+	// Trick the dataToSend vecot
+	// SYN counts as one byte into the seq number
+	c->dataToSend.push_back(0);
+	c->dataToSendOffset = 1;
+
+	DEBUG_ENABLED(
+		std::cout << "TCP::Server::runSynAck() Sending ACK, transition into ESTABLISHED"
+				  << std::endl;)
 
 	funIface.transition(States::est);
 };
@@ -82,6 +96,8 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	Headers::Ethernet *ether = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ether->getPayload());
 	Headers::Tcp *tcp = reinterpret_cast<Headers::Tcp *>(ipv4->getPayload());
+
+	bool freePkt = true;
 
 	/*
 	assert(!tcp->getSynFlag());
@@ -107,14 +123,34 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	assert(tcp->getSeq() == (c->seqRemote + 1));
 	*/
 
-	if (tcp->getSynFlag() || (!tcp->getAckFlag()) || tcp->getFinFlag() || tcp->getRstFlag() ||
-		(tcp->getAck() != c->seqLocal) || (tcp->getSeq() != (c->seqRemote + 1))) {
+	if (tcp->getSynFlag() || (!tcp->getAckFlag()) || tcp->getRstFlag()) {
+
+		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() Some flag or number doesn't add up"
+								<< std::endl;)
+		DEBUG_ENABLED(std::cout << "Flags " << tcp->getSynFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "SYN = " << tcp->getSynFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "ACK = " << tcp->getAckFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "FIN = " << tcp->getFinFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "RST = " << tcp->getRstFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "Seq # = " << tcp->getSeq() << std::endl;)
+		DEBUG_ENABLED(std::cout << "Ack # = " << tcp->getAck() << std::endl;)
+		DEBUG_ENABLED(std::cout << "c->seqLocal = " << c->seqLocal << std::endl;)
+		DEBUG_ENABLED(std::cout << "c->seqRemote = " << c->seqRemote << std::endl;)
+
 		tcp->clearFlags();
 		tcp->setRstFlag();
+		tcp->setAck(0);
+		tcp->setSeq(c->seqLocal);
+		ipv4->setPayloadLength(sizeof(Headers::Tcp));
+		pkt->setDataLen(
+			sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Tcp));
 
 		funIface.transition(States::END);
 		return;
 	}
+
+	DEBUG_ENABLED(
+		std::cout << "TCP::Server::runEst() All received flags are correct" << std::endl;)
 
 	// Run whatever congestion control magic we have
 	c->conCtl.handlePacket(tcp->getSeq(), tcp->getAck());
@@ -122,11 +158,37 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	if (c->conCtl.reset(resetSeq)) {
 		c->dataToSendOffset = resetSeq - c->dataToSendSeq;
 	}
+	c->sendWindow = tcp->getWindow();
 
-	c->seqRemote = tcp->getSeq();
+	// See how long the TCP payload is and set the current remote seq number
+	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() old c->seqRemote = " << c->seqRemote
+							<< std::endl;)
+	uint16_t numBytesReceived = ipv4->getPayloadLength() - tcp->getHeaderLen();
+	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() ipv4->getPayloadLength() = "
+							<< ipv4->getPayloadLength() << std::endl;)
+	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() tcp->getHeaderLen() = "
+							<< static_cast<uint16_t>(tcp->getHeaderLen()) << std::endl;)
 
-	uint32_t ackBytes = tcp->getAck() - c->dataToSendSeq;
-	if (ackBytes > 0) {
+	c->seqRemote = tcp->getSeq() + numBytesReceived;
+	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() numBytesReceived = " << numBytesReceived
+							<< std::endl;)
+	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() new c->seqRemote = " << c->seqRemote
+							<< std::endl;)
+
+	if (tcp->getAck() > c->dataToSendSeq) {
+		uint32_t ackBytes = tcp->getAck() - c->dataToSendSeq;
+
+		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() " << ackBytes
+								<< " bytes are acknowledged" << std::endl;)
+
+		DEBUG_ENABLED(std::cout << "ackBytes = " << ackBytes << std::endl;)
+		DEBUG_ENABLED(
+			std::cout << "c->dataToSendOffset = " << c->dataToSendOffset << std::endl;)
+		DEBUG_ENABLED(
+			std::cout << "c->dataToSend.size() = " << c->dataToSend.size() << std::endl;)
+		DEBUG_ENABLED(std::cout << "tcp->getAck() = " << tcp->getAck() << std::endl;)
+		DEBUG_ENABLED(std::cout << "c->dataToSendSeq = " << c->dataToSendSeq << std::endl;)
+
 		assert(c->dataToSendOffset >= ackBytes);
 		assert(c->dataToSend.size() >= ackBytes);
 
@@ -134,21 +196,34 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 		c->dataToSendOffset -= ackBytes;
 		c->dataToSend.resize(c->dataToSend.size() - ackBytes);
 		c->dataToSendSeq += ackBytes;
+
+		DEBUG_ENABLED(std::cout << "(after shrinking) c->dataToSend.size() = "
+								<< c->dataToSend.size() << std::endl;)
 	}
+
+	if (tcp->getFinFlag()) {
+		DEBUG_ENABLED(std::cout << "TCP::Server:runEst() Peer sent FIN" << std::endl;)
+		c->closeConnectionAfterSending = true;
+		c->seqRemote++;
+	}
+
+	tcp->clearFlags();
+	tcp->setAckFlag();
 
 	tcp->setSeq(c->seqLocal);
 	// tcp->setFinFlag();
 	tcp->setAck(c->seqRemote);
 	tcp->setOffset(5);
 
-	if (tcp->getFinFlag()) {
-		c->closeConnectionAfterSending = true;
-	}
-
 	// funIface.transition(States::ack_fin);
 
 	uint16_t dataLen = ipv4->getPayloadLength() - tcp->getHeaderLen();
 	if (dataLen > 0) {
+		DEBUG_ENABLED(
+			std::cout << "TCP::Server:runEst() pumping data into the protocol implementation"
+					  << std::endl;)
+
+		freePkt = false;
 		TcpIface tcpIface(*c);
 		c->proto.handlePacket(
 			reinterpret_cast<uint8_t *>(tcp->getPayload()), dataLen, tcpIface);
@@ -160,44 +235,84 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 		maxSend = std::min(
 			maxSend, static_cast<uint32_t>(c->dataToSend.size() - c->dataToSendOffset));
 
-		uint32_t totalSend = 0;
+		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() c->sendWindow = " << c->sendWindow
+								<< " bytes" << std::endl;)
+		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() c->conCtl.getConWindow = "
+								<< c->conCtl.getConWindow() << " bytes" << std::endl;)
+		DEBUG_ENABLED(
+			std::cout << "TCP::Server::runEst() data available = "
+					  << static_cast<uint32_t>(c->dataToSend.size() - c->dataToSendOffset)
+					  << " bytes" << std::endl;)
 
-		uint32_t segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
-		memcpy(tcp->getPayload(), c->dataToSend.data() + c->dataToSendOffset, segmentSend);
-		ipv4->setPayloadLength(sizeof(Headers::Tcp) + segmentSend);
-		tcp->setSeq(c->seqLocal);
+		if (maxSend > 0) {
 
-		c->seqLocal += segmentSend;
-		totalSend += segmentSend;
+			freePkt = false;
 
-		uint16_t idAdd = 1;
+			uint32_t totalSend = 0;
 
-		while (totalSend < maxSend) {
-			mbuf *extraPkt = funIface.getPkt();
-			segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
-
-			Headers::Ethernet *etherX = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
-			Headers::IPv4 *ipv4X = reinterpret_cast<Headers::IPv4 *>(etherX->getPayload());
-			Headers::Tcp *tcpX = reinterpret_cast<Headers::Tcp *>(ipv4X->getPayload());
-
-			memcpy(extraPkt->getData(), pkt->getData(),
-				sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Tcp));
-
-			ipv4X->id = htons(ntohs(ipv4X->id) + idAdd);
-
-			tcpX->setSeq(c->seqLocal);
-
-			memcpy(tcpX->getPayload(), c->dataToSend.data() + c->dataToSendOffset + totalSend,
-				segmentSend);
+			uint32_t segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
+			memcpy(
+				tcp->getPayload(), c->dataToSend.data() + c->dataToSendOffset, segmentSend);
 			ipv4->setPayloadLength(sizeof(Headers::Tcp) + segmentSend);
+			tcp->setSeq(c->seqLocal);
+			pkt->setDataLen(sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) +
+							sizeof(Headers::Tcp) + segmentSend);
 
 			c->seqLocal += segmentSend;
+			c->dataToSendOffset += segmentSend;
 			totalSend += segmentSend;
+
+			DEBUG_ENABLED(std::cout << "TCP::Server::runEst() Sending segment with "
+									<< segmentSend << " bytes" << std::endl;)
+
+			uint16_t idAdd = 1;
+
+			while (totalSend < maxSend) {
+				mbuf *extraPkt = funIface.getPkt();
+				segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
+
+				Headers::Ethernet *etherX =
+					reinterpret_cast<Headers::Ethernet *>(pkt->getData());
+				Headers::IPv4 *ipv4X =
+					reinterpret_cast<Headers::IPv4 *>(etherX->getPayload());
+				Headers::Tcp *tcpX = reinterpret_cast<Headers::Tcp *>(ipv4X->getPayload());
+
+				memcpy(extraPkt->getData(), pkt->getData(),
+					sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Tcp));
+
+				ipv4X->id = htons(ntohs(ipv4X->id) + idAdd);
+
+				tcpX->setSeq(c->seqLocal);
+
+				memcpy(tcpX->getPayload(),
+					c->dataToSend.data() + c->dataToSendOffset + totalSend, segmentSend);
+				ipv4->setPayloadLength(sizeof(Headers::Tcp) + segmentSend);
+
+				c->seqLocal += segmentSend;
+				totalSend += segmentSend;
+				c->dataToSendOffset += segmentSend;
+
+				extraPkt->setDataLen(sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) +
+									 sizeof(Headers::Tcp) + segmentSend);
+
+				DEBUG_ENABLED(std::cout << "TCP::Server::runEst() Sending segment with "
+										<< segmentSend << " bytes" << std::endl;)
+			}
 		}
+	} else {
+		DEBUG_ENABLED(std::cout << "TCP::Server:runEst() no data to be sent" << std::endl;)
 	}
 
 	if (c->closeConnectionAfterSending && c->dataToSend.empty()) {
+		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() Setting FIN" << std::endl;)
+		freePkt = false;
+		tcp->setFinFlag();
+		c->seqLocal++;
 		funIface.transition(States::ack_fin);
+	}
+
+	if (freePkt) {
+		funIface.freePkt();
 	}
 };
 
@@ -236,8 +351,22 @@ void Server<Proto, ConCtl>::runAckFin(StateMachine<Identifier, mbuf>::State &sta
 	assert(tcp->getSeq() == c->seqRemote);
 	*/
 
-	if (tcp->getSynFlag() || (!tcp->getAckFlag()) || (!tcp->getFinFlag()) ||
-		tcp->getRstFlag() || (tcp->getAck() != 2) || (tcp->getSeq() != c->seqRemote)) {
+	if (tcp->getSynFlag() || (!tcp->getAckFlag()) || tcp->getRstFlag() ||
+		(tcp->getAck() != c->seqLocal) || (tcp->getSeq() != c->seqRemote)) {
+
+		DEBUG_ENABLED(
+			std::cout << "TCP::Server::runAckFin() Some flag or number doesn't add up"
+					  << std::endl;)
+		DEBUG_ENABLED(std::cout << "Flags " << tcp->getSynFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "SYN = " << tcp->getSynFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "ACK = " << tcp->getAckFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "FIN = " << tcp->getFinFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "RST = " << tcp->getRstFlag() << std::endl;)
+		DEBUG_ENABLED(std::cout << "Seq # = " << tcp->getSeq() << std::endl;)
+		DEBUG_ENABLED(std::cout << "Ack # = " << tcp->getAck() << std::endl;)
+		DEBUG_ENABLED(std::cout << "c->seqLocal = " << c->seqLocal << std::endl;)
+		DEBUG_ENABLED(std::cout << "c->seqRemote = " << c->seqRemote << std::endl;)
+
 		tcp->clearFlags();
 		tcp->setRstFlag();
 
@@ -247,16 +376,20 @@ void Server<Proto, ConCtl>::runAckFin(StateMachine<Identifier, mbuf>::State &sta
 
 	//	std::cout << "tcp->getSeq() = " << tcp->getSeq() << std::endl;
 	//	std::cout << "c->seqRemote = " << c->seqRemote << std::endl;
-	c->seqLocal++;
-	c->seqRemote = tcp->getSeq();
+	if (tcp->getFinFlag()) {
+		c->seqLocal++;
+		c->seqRemote = tcp->getSeq();
 
-	tcp->setSeq(c->seqLocal);
-	tcp->setAck(c->seqRemote + 1);
-	tcp->clearFlags();
-	tcp->setAckFlag();
-	tcp->setOffset(5);
+		tcp->setSeq(c->seqLocal);
+		tcp->setAck(c->seqRemote + 1);
+		tcp->clearFlags();
+		tcp->setAckFlag();
+		tcp->setOffset(5);
 
-	funIface.transition(States::END);
+		funIface.transition(States::END);
+	} else {
+		funIface.freePkt();
+	}
 };
 
 }; // namespace TCP
