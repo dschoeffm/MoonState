@@ -70,7 +70,7 @@ void Server<Proto, ConCtl>::runSynAck(StateMachine<Identifier, mbuf>::State &sta
 	tcp->setAckFlag();
 	tcp->setOffset(5);
 
-	funIface.transition(States::fin);
+	funIface.transition(States::est);
 };
 
 template <class Proto, class ConCtl>
