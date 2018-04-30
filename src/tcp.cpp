@@ -7,6 +7,8 @@
 
 namespace TCP {
 
+static constexpr unsigned int MSS = 1460;
+
 template <class Proto, class ConCtl>
 typename Server<Proto, ConCtl>::connection *Server<Proto, ConCtl>::factory(
 	Identifier::ConnectionID id) {
@@ -192,7 +194,8 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 		assert(c->dataToSendOffset >= ackBytes);
 		assert(c->dataToSend.size() >= ackBytes);
 
-		memmove(c->dataToSend.data(), c->dataToSend.data() + ackBytes, ackBytes);
+		memmove(c->dataToSend.data(), c->dataToSend.data() + ackBytes,
+			c->dataToSend.size() - ackBytes);
 		c->dataToSendOffset -= ackBytes;
 		c->dataToSend.resize(c->dataToSend.size() - ackBytes);
 		c->dataToSendSeq += ackBytes;
@@ -250,7 +253,7 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 
 			uint32_t totalSend = 0;
 
-			uint32_t segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
+			uint32_t segmentSend = std::min(maxSend, static_cast<uint32_t>(MSS));
 			memcpy(
 				tcp->getPayload(), c->dataToSend.data() + c->dataToSendOffset, segmentSend);
 			ipv4->setPayloadLength(sizeof(Headers::Tcp) + segmentSend);
@@ -269,7 +272,7 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 
 			while (totalSend < maxSend) {
 				mbuf *extraPkt = funIface.getPkt();
-				segmentSend = std::min(maxSend, static_cast<uint32_t>(1440));
+				segmentSend = std::min(maxSend, static_cast<uint32_t>(MSS));
 
 				Headers::Ethernet *etherX =
 					reinterpret_cast<Headers::Ethernet *>(pkt->getData());
