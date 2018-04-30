@@ -3,7 +3,7 @@ local memory = require "memory"
 local log = require "log"
 
 ffi.cdef[[
-void *TCP_Server_Joke_init(rte_mempool *mp);
+void *TCP_Server_Joke_init(struct rte_mempool *mp);
 
 void *TCP_Server_Joke_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount);
@@ -18,7 +18,7 @@ local mod = {}
 
 function mod.init()
 	ret = {}
-	ret.mempool = memory.getMemPool()
+	ret.mempool = memory.createMemPool()
 	ret.obj = ffi.C.TCP_Server_Joke_init(ret.mempool)
 	ret.sbc = ffi.new("unsigned int[1]")
 	ret.fbc = ffi.new("unsigned int[1]")
