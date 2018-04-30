@@ -1,3 +1,7 @@
+#include <functional>
+
+#include <rte_mempool.h>
+
 #include "tcp.cpp"
 #include "tcpConCtlSimple.hpp"
 #include "tcpProtoJoke.hpp"
@@ -8,8 +12,10 @@ using ServerJoke = TCP::Server<ProtoJoke, TcpConCtlSimple>;
 
 extern "C" {
 
-void *TCP_Server_Joke_init() {
+void *TCP_Server_Joke_init(rte_mempool *mp) {
 	auto *obj = new StateMachine<TCP::Identifier, mbuf>();
+
+	obj->registerGetPktCB([mp]() { return reinterpret_cast<mbuf *>(rte_pktmbuf_alloc(mp)); });
 
 	obj->registerEndStateID(TCP::States::END);
 	obj->registerStartStateID(TCP::States::syn_ack, ServerJoke::factory);
