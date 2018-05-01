@@ -3,7 +3,8 @@
 
 //#include <mutex>
 //#include <sstream>
-#include <vector>
+#include <list>
+#include <utility>
 
 #include "IPv4_5TupleL2Ident.hpp"
 #include "common.hpp"
@@ -14,6 +15,8 @@
 
 namespace TCP {
 using Identifier = IPv4_5TupleL2Ident<mbuf>;
+
+static constexpr unsigned int MSS = 1460;
 
 /*
  * ===================================
@@ -49,13 +52,19 @@ struct States {
 
 template <class Proto, class ConCtl> class Server {
 public:
+	struct segment {
+		uint8_t *dataPtr;
+		uint32_t seqNumber;
+		uint16_t dataLen;
+	};
+
 	struct connection {
 		uint32_t seqLocal = 0;
 		uint32_t seqRemote = 0;
-		uint32_t dataToSendSeq = 0;
-		uint32_t dataToSendOffset = 0;
-		std::vector<uint8_t> dataToSend;
+		std::list<struct segment> dataToSend;
+		std::list<struct segment> dataAlreadySent;
 		uint16_t sendWindow = 0;
+		uint16_t ipID = 0;
 		bool closeConnectionAfterSending = false;
 		ConCtl conCtl;
 		Proto proto;
@@ -70,10 +79,56 @@ public:
 
 	public:
 		void close() { conn.closeConnectionAfterSending = true; };
-		void sendData(const uint8_t *data, uint32_t dataLen) {
+		void sendData(uint8_t *data, uint32_t dataLen) {
+			/*
 			auto oldSize = conn.dataToSend.size();
 			conn.dataToSend.resize(oldSize + dataLen);
 			memcpy(conn.dataToSend.data() + oldSize, data, dataLen);
+			*/
+			if (dataLen <= MSS) {
+				struct segment seg;
+
+				seg.dataPtr = data;
+				seg.dataLen = dataLen;
+				seg.seqNumber = conn.seqLocal;
+				conn.seqLocal += dataLen;
+
+				conn.dataToSend.push_back(seg);
+			} else {
+				uint32_t totalLen = 0;
+
+				/*
+				 * First segment reuses the given buffer
+				 * This might mean to waste memory, but it saves malloc() and free()
+				 * calls
+				 *
+				 * It would also be possible to append to the last non-full segment
+				 */
+				struct segment segFirst;
+				segFirst.dataPtr = data;
+				segFirst.dataLen = MSS;
+				segFirst.seqNumber = conn.seqLocal;
+				conn.seqLocal += MSS;
+
+				conn.dataToSend.push_back(segFirst);
+
+				totalLen += MSS;
+
+				while (totalLen < dataLen) {
+					uint32_t curSize = std::min(dataLen - totalLen, MSS);
+
+					struct segment segCur;
+					segCur.dataPtr = reinterpret_cast<uint8_t *>(malloc(curSize));
+					memcpy(segCur.dataPtr, data + totalLen, curSize);
+					segCur.dataLen = curSize;
+					segCur.seqNumber = conn.seqLocal;
+					conn.seqLocal += curSize;
+
+					conn.dataToSend.push_back(segCur);
+
+					totalLen += curSize;
+				}
+			}
 		};
 	};
 
