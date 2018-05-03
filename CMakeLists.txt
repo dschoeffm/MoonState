@@ -27,9 +27,11 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/concurrentqueue
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/include
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/include
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/include
 )
 
 INCLUDE_DIRECTORIES(
@@ -37,6 +39,15 @@ INCLUDE_DIRECTORIES(
 )
 
 FILE(GLOB SOURCES src/*.cpp)
+
+SET(OPENSSL_LIBS
+	-Wl,--whole-archive
+	libssl.a
+	-Wl,--whole-archive
+	libcrypto.a
+	-Wl,--no-whole-archive
+	dl
+)
 
 if(NOT LIBMOON_BUILD_LIBRARY)
 SET(DPDK_LIBS
@@ -46,12 +57,12 @@ SET(DPDK_LIBS
 endif(NOT LIBMOON_BUILD_LIBRARY)
 
 SET(ALL_LIBS
-	dl
 	pthread
 	numa
+	${OPENSSL_LIBS}
 	${DPDK_LIBS}
 	libtbb.a
-	libsodium.a
+	Astraeus
 )
 
 if(WITH_PCAP)
@@ -62,25 +73,24 @@ if(WITH_PCAP)
 	ADD_DEFINITIONS(-DWITH_PCAP)
 endif(WITH_PCAP)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/libtbb.a
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a
+	PRE_LINK
+	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/config"
+	COMMAND $(MAKE) "build_libs"
+	COMMENT "Building OpenSSL - This may take a while"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
+)
+add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a
 	PRE_LINK
 	COMMAND $(MAKE) "extra_inc=big_iron.inc"
 	COMMENT "Building TBB"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/
 )
-add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/libtbb.a)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib/libsodium.a
-	PRE_LINK
-	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium/configure"
-	"--prefix=${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install" "--enable-opt"
-	"--libdir=${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib"
-	COMMAND $(MAKE)
-	COMMAND $(MAKE) "install"
-	COMMENT "Building libsodium"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium/
-)
-add_custom_target(libsodium DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib/libsodium.a)
+add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h
 	PRE_LINK
@@ -92,15 +102,18 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparse
 add_custom_target(sparsehash DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h)
 
 LINK_DIRECTORIES(
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/lib
 	${DPDK_LIB_DIR}
 )
+
+ADD_SUBDIRECTORY(deps/AstraeusVPN)
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} TBB libsodium sparsehash)
+add_dependencies(${PROJECT_NAME} TBB libsodium sparsehash opensslBuild)
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})

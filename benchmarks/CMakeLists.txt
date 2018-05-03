@@ -9,7 +9,7 @@ LIST(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../src/main.cpp")
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} libsodium TBB sparsehash)
+add_dependencies(${PROJECT_NAME} libsodium TBB sparsehash opensslBuild)
 
 FILE(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 foreach(TESTNAMECPP ${TESTS})
