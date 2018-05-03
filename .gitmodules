@@ -17,3 +17,7 @@
 	path = deps/openssl
 	url = https://github.com/dschoeffm/openssl.git
 	branch = moonstate
+[submodule "deps/libsodium"]
+	path = deps/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+	branch = stable

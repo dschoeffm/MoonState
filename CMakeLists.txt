@@ -73,33 +73,6 @@ if(WITH_PCAP)
 	ADD_DEFINITIONS(-DWITH_PCAP)
 endif(WITH_PCAP)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a
-	PRE_LINK
-	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/config"
-	COMMAND $(MAKE) "build_libs"
-	COMMENT "Building OpenSSL - This may take a while"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/
-)
-add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libssl.a
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/libcrypto.a)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a
-	PRE_LINK
-	COMMAND $(MAKE) "extra_inc=big_iron.inc"
-	COMMENT "Building TBB"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/
-)
-add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h
-	PRE_LINK
-	COMMAND "./configure"
-	COMMAND $(MAKE)
-	COMMENT "Building Google sparsehash"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash
-)
-add_custom_target(sparsehash DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/sparsehash/internal/sparseconfig.h)
 
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
@@ -108,7 +81,7 @@ LINK_DIRECTORIES(
 	${DPDK_LIB_DIR}
 )
 
-ADD_SUBDIRECTORY(deps/AstraeusVPN)
+ADD_SUBDIRECTORY(deps)
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
