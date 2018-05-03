@@ -30,7 +30,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/include/
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/sparsehash/src/
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/include
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/include
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/include
 )
 
@@ -63,6 +63,7 @@ SET(ALL_LIBS
 	${DPDK_LIBS}
 	libtbb.a
 	Astraeus
+	libsodium.a
 )
 
 if(WITH_PCAP)
@@ -77,7 +78,7 @@ endif(WITH_PCAP)
 LINK_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/openssl
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb
-	${CMAKE_CURRENT_SOURCE_DIR}/deps/AstraeusVPN/deps/libsodium_install/lib
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/libsodium_install/lib
 	${DPDK_LIB_DIR}
 )
 

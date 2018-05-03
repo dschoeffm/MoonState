@@ -22,7 +22,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a
 	PRE_LINK
 	COMMAND $(MAKE) "extra_inc=big_iron.inc"
 	COMMENT "Building TBB"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb/
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tbb/
 )
 add_custom_target(TBB DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tbb/libtbb.a)
 
@@ -63,5 +63,7 @@ add_custom_target(libsodium DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/libsodium_instal
 # These libs are already contained in MoonState
 SET(ASTRAEUSVPN_BUILD_TBB OFF CACHE BOOL "Build TBB in AstraeusVPN")
 SET(ASTRAEUSVPN_BUILD_LIBSODIUM OFF CACHE BOOL "Build libsodium in AstraeusVPN")
+SET(ASTRAEUSVPN_BUILD_HEXDUMP OFF CACHE BOOL "Build hexdump in AstraeusVPN")
+SET(ASTRAEUSVPN_BUILD_BINARIES OFF CACHE BOOL "Build binaries for AstraeusVPN")
 
 ADD_SUBDIRECTORY(AstraeusVPN)
