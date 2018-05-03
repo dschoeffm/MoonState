@@ -87,7 +87,7 @@ ADD_SUBDIRECTORY(deps)
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})
 
-add_dependencies(${PROJECT_NAME} TBB libsodium sparsehash opensslBuild)
+add_dependencies(${PROJECT_NAME} TBB libsodium sparsehash openssl)
 
 #ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ALL_LIBS})

@@ -11,7 +11,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/openssl/libssl.a
 	COMMENT "Building OpenSSL - This may take a while"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/openssl/
 )
-add_custom_target(opensslBuild DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/openssl/libssl.a
+add_custom_target(openssl DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/openssl/libssl.a
 	${CMAKE_CURRENT_SOURCE_DIR}/openssl/libcrypto.a)
 
 #
@@ -65,5 +65,6 @@ SET(ASTRAEUSVPN_BUILD_TBB OFF CACHE BOOL "Build TBB in AstraeusVPN")
 SET(ASTRAEUSVPN_BUILD_LIBSODIUM OFF CACHE BOOL "Build libsodium in AstraeusVPN")
 SET(ASTRAEUSVPN_BUILD_HEXDUMP OFF CACHE BOOL "Build hexdump in AstraeusVPN")
 SET(ASTRAEUSVPN_BUILD_BINARIES OFF CACHE BOOL "Build binaries for AstraeusVPN")
+SET(ASTRAEUSVPN_BUILD_OPENSSL OFF CACHE BOOL "Build OpenSSL in AstraeusVPN")
 
 ADD_SUBDIRECTORY(AstraeusVPN)
