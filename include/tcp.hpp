@@ -63,6 +63,8 @@ public:
 		uint32_t seqRemote = 0;
 		std::list<struct segment> dataToSend;
 		std::list<struct segment> dataAlreadySent;
+//		std::list<struct segment> recvBuffer;
+//		uint32_t recvBytes = 0;
 		uint16_t sendWindow = 0;
 		uint16_t ipID = 0;
 		bool closeConnectionAfterSending = false;

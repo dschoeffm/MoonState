@@ -53,6 +53,7 @@ void Server<Proto, ConCtl>::runSynAck(StateMachine<Identifier, mbuf>::State &sta
 
 	ipv4->ttl = 64;
 	ipv4->checksum = 0;
+	ipv4->setPayloadLength(sizeof(Headers::Tcp));
 
 	if ((!tcp->getSynFlag()) || tcp->getAckFlag() || tcp->getFinFlag() || tcp->getRstFlag()) {
 		tcp->clearFlags();
@@ -65,10 +66,10 @@ void Server<Proto, ConCtl>::runSynAck(StateMachine<Identifier, mbuf>::State &sta
 	DEBUG_ENABLED(
 		std::cout << "TCP::Server::runSynAck() All received flags are correct" << std::endl;)
 
-	c->seqRemote = tcp->getSeq();
+	c->seqRemote = tcp->getSeq()+1;
 	c->seqLocal = 0;
 
-	tcp->setAck(c->seqRemote + 1);
+	tcp->setAck(c->seqRemote);
 	//	std::cout << "Setting ack to: " << c->seqRemote +1 << std::endl;
 	uint32_t curSeqNo = c->seqLocal++;
 	tcp->setSeq(curSeqNo);
@@ -162,30 +163,47 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	for (auto i = c->dataAlreadySent.begin(); i != c->dataAlreadySent.end();) {
 		if (tcp->getAck() > (i->seqNumber + i->dataLen)) {
 			// In this case, the data is acknowledged
-			auto delSeg = i;
+			auto del = i;
 			i++;
-			free(delSeg->dataPtr);
-			c->dataAlreadySent.erase(i);
+
+			struct segment delSeg = *del;
+
+			//std::cout << "segment is acknowledged - deleting: " << std::hex << reinterpret_cast<uint64_t>(delSeg.dataPtr) << std::dec << std::endl;
+
+			free(delSeg.dataPtr);
+			c->dataAlreadySent.erase(del);
 		} else {
+			i++;
+		}	/* else {
 			break;
-		}
+		} */
 	}
 
 	// Run whatever congestion control magic we have
-	c->conCtl.handlePacket(tcp->getSeq(), tcp->getAck());
+	c->conCtl.handlePacket(c->seqLocal, tcp->getAck());
 	uint32_t resetSeq;
 	if (c->conCtl.reset(resetSeq)) {
 		// For not, ignore resetSeq.
 		// Just resend all previous segments
-		(void)resetSeq;
+		//(void)resetSeq;
+
+		//std::abort();
 
 		// Identify all the segments we have to resend
 		// XXX In the future: Check if we can aggregate frames
-		for (auto i : c->dataAlreadySent) {
+		for(auto i = c->dataAlreadySent.begin(); i != c->dataAlreadySent.end();){
+//		for (auto i : c->dataAlreadySent) {
 			// We have to resend the data
-			c->dataToSend.push_front(i);
+			if(i->seqNumber > resetSeq){
+				c->dataToSend.push_front(*i);
+				//std::cout << "Enqueue old packet: seq:" << i->seqNumber << std::endl;
+				auto old = i++;
+				c->dataAlreadySent.erase(old);
+			} else {
+				i++;
+			}
 		}
-		c->dataAlreadySent.clear();
+		//c->dataAlreadySent.clear();
 	}
 
 	c->sendWindow = tcp->getWindow();
@@ -198,6 +216,33 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 							<< ipv4->getPayloadLength() << std::endl;)
 	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() tcp->getHeaderLen() = "
 							<< static_cast<uint16_t>(tcp->getHeaderLen()) << std::endl;)
+
+	if(tcp->getSeq() != c->seqRemote){
+		// This packet was not expected - Let's be dump and play Go-Back-N
+
+		//std::cout << "packet not expected" << std::endl;
+
+		//std::abort();
+
+		tcp->clearFlags();
+		tcp->setAckFlag();
+
+		tcp->setSeq(c->seqLocal);
+		tcp->setAck(c->seqRemote);
+		tcp->setOffset(5);
+
+		ipv4->setPayloadLength(sizeof(Headers::Tcp));
+		if(c->dataToSend.empty()){
+			tcp->setSeq(c->seqLocal);
+		} else {
+			tcp->setSeq(c->dataToSend.front().seqNumber);
+		}
+		tcp->setWindow(4*MSS);
+		pkt->setDataLen(sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) + sizeof(Headers::Tcp));
+
+		// Do not try to send some data, even if we could do so
+		return;
+	}
 
 	c->seqRemote = tcp->getSeq() + numBytesReceived;
 	DEBUG_ENABLED(std::cout << "TCP::Server::runEst() numBytesReceived = " << numBytesReceived
@@ -241,16 +286,16 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 								<< " bytes" << std::endl;)
 		DEBUG_ENABLED(std::cout << "TCP::Server::runEst() c->conCtl.getConWindow = "
 								<< c->conCtl.getConWindow() << " bytes" << std::endl;)
-		DEBUG_ENABLED(
-			std::cout << "TCP::Server::runEst() data available = "
-					  << static_cast<uint32_t>(c->dataToSend.size() - c->dataToSendOffset)
-					  << " bytes" << std::endl;)
+//		DEBUG_ENABLED(
+//			std::cout << "TCP::Server::runEst() data available = "
+//					  << static_cast<uint32_t>(c->dataToSend.size() - c->dataToSendOffset)
+//					  << " bytes" << std::endl;)
 
 		mbuf *curSendMbuf = pkt;
 		uint32_t alreadySent = 0;
 		bool firstPacket = true;
 
-		while (maxSend > alreadySent) {
+		while ((maxSend > alreadySent) && (!c->dataToSend.empty())) {
 
 			freePkt = false;
 
@@ -267,6 +312,7 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 
 			uint16_t curSend =
 				std::min(segmentToSend.dataLen, static_cast<uint16_t>(maxSend - alreadySent));
+			alreadySent += curSend;
 
 			if (curSend == segmentToSend.dataLen) {
 				// We can send the whole enqueued segment
@@ -287,8 +333,8 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 				oldModSeg.dataPtr = reinterpret_cast<uint8_t *>(malloc(oldModSeg.dataLen));
 				memcpy(oldModSeg.dataPtr, segmentToSend.dataPtr + curSend,
 					segmentToSend.dataLen - curSend);
-				c->dataToSend.push_front(oldModSeg);
 				c->dataToSend.pop_front();
+				c->dataToSend.push_front(oldModSeg);
 
 				memmove(segmentToSend.dataPtr, segmentToSend.dataPtr + curSend,
 					segmentToSend.dataLen - curSend);
@@ -296,12 +342,16 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 				c->dataAlreadySent.push_back(segmentToSend);
 
 				memcpy(tcp->getPayload(), segmentToSend.dataPtr, segmentToSend.dataLen);
+
+				//std::cout << "Splitting segment. send: " << std::hex << reinterpret_cast<uint64_t>(segmentToSend.dataPtr)
+				//	<< " remain: " << reinterpret_cast<uint64_t>(oldModSeg.dataPtr) << std::dec << std::endl;
 			}
 
 			ipv4->id = htons(c->ipID++);
+			tcp->setWindow(4*MSS);
 
 			ipv4->setPayloadLength(sizeof(Headers::Tcp) + segmentToSend.dataLen);
-			tcp->setSeq(c->seqLocal);
+			tcp->setSeq(segmentToSend.seqNumber);
 			pkt->setDataLen(sizeof(Headers::Ethernet) + sizeof(Headers::IPv4) +
 							sizeof(Headers::Tcp) + segmentToSend.dataLen);
 
@@ -321,7 +371,10 @@ void Server<Proto, ConCtl>::runEst(StateMachine<Identifier, mbuf>::State &state,
 	}
 
 	if (freePkt) {
+		//std::cout << "freeing packet" << std::endl;
 		funIface.freePkt();
+	} else {
+		//std::cout << "sending packet" << std::endl;
 	}
 };
 

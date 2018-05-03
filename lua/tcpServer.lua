@@ -3,7 +3,7 @@ local memory = require "memory"
 local log = require "log"
 
 ffi.cdef[[
-void *TCP_Server_Joke_init(struct rte_mempool *mp);
+void *TCP_Server_Joke_init(struct mempool *mp);
 
 void *TCP_Server_Joke_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCount,
 	unsigned int *sendCount, unsigned int *freeCount);

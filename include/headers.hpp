@@ -231,6 +231,8 @@ struct Tcp {
 	void setAck(uint32_t a) { ack = htonl(a); }
 
 	uint16_t getWindow() { return ntohs(window); }
+	void setWindow(uint16_t w) { window = htons(w); }
+
 
 	void clearFlags() { flags = 0; }
 

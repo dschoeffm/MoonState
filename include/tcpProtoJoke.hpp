@@ -12,6 +12,8 @@ public:
 		std::string str("The good thing about TCP jokes is, that you always get them.");
 		tcpIface.sendData(reinterpret_cast<const uint8_t *>(str.c_str()), str.length());
 		*/
-		tcpIface.sendData(data, dataLen);
+		uint8_t* dataCpy = reinterpret_cast<uint8_t*>(malloc(dataLen));
+		memcpy(dataCpy, data, dataLen);
+		tcpIface.sendData(dataCpy, dataLen);
 	};
 };
