@@ -252,4 +252,176 @@ public:
 	iterator end() { return iterator(this, numBufs); }
 };
 
+/*
+ * The following is a simpler implementation.
+ * It tracks two different array, instead of one large array.
+ * Furthermore it is is restricted in the number of buffers.
+ * It may offer advantages -> research needed
+ */
+#if 0
+/*! Wrapper around MoonGen bufarrays
+ *
+ * BufArrays bundle an array of pointers to packets together with their count.
+ * It also tracks, which buffers should be send out or freed.
+ * This array grows if needed.
+ */
+template <typename Packet> class BufArray {
+private:
+	Packet *pktsOrig[512];
+	Packet *pktsSend[512];
+	Packet *pktsFree[512];
+
+	uint32_t numBufsOrig;
+	uint32_t numXtraBufs;
+	uint32_t numBufsSend;
+	uint32_t numBufsFree;
+
+public:
+	/*! Constructor
+	 *
+	 * \param pkts Pointer to pointers to buffers
+	 * \param numPkts Number of buffers in pkts
+	 * \param fromLua Set to true, if pkts is garbage-collected
+	 */
+	BufArray(Packet **pkts, uint32_t numPkts, bool fromLua = false) {
+		std::cout << "BufArray Constructor called" << std::endl;
+		for(uint32_t i=0; i<numPkts; i++){
+			std::cout << "buf[" << i << "] = 0x" << std::hex << reinterpret_cast<uint64_t>(pkts[i]) << std::endl;
+			std::cout << "buf[" << i << "].data = 0x" << std::hex << reinterpret_cast<uint64_t>(pkts[i]->getData()) << std::endl;
+
+			pktsOrig[i] = pkts[i];
+		}
+
+		numBufsSend = 0;
+		numBufsFree = 0;
+		numBufsOrig = numPkts;
+		numXtraBufs = 0;
+	};
+
+	/*! Mark one packet as drop
+	 *
+	 * \param pktIdx Index of the packet to drop
+	 */
+	void markDropPkt(uint32_t pktIdx) {
+		DEBUG_ENABLED(std::cout << "BufArray::markDropPkt() called" << std::endl;)
+
+		pktsFree[numBufsFree++] = pktsOrig[pktIdx];
+	};
+
+	/*! Mark one packet as drop
+	 *
+	 * \param pkt Pointer to the packet to drop
+	 */
+	void markDropPkt(Packet *pkt) {
+		DEBUG_ENABLED(std::cout << "BufArray::markDropPkt() called" << std::endl;)
+
+		assert(pkt != nullptr);
+		for (uint32_t pktIdx = 0; pktIdx < numBufsOrig; pktIdx++) {
+			if (pkt == pktsOrig[pktIdx]) {
+				pktsFree[numBufsFree++] = pktsOrig[pktIdx];
+			}
+		}
+	};
+
+	/*! Mark one packet as send
+	 *
+	 * \param pktIdx Index of the packet to send
+	 */
+	void markSendPkt(uint32_t pktIdx) {
+		DEBUG_ENABLED(std::cout << "BufArray::markSendPkt() called" << std::endl;)
+
+		pktsSend[numBufsSend++] = pktsOrig[pktIdx];
+	};
+
+	/*! Add one packet to the BufArray
+	 *
+	 * This function may allocate new memory, to fit all packets into one array
+	 *
+	 * \param pkt Packe to add
+	 */
+	void addPkt(Packet *pkt) {
+		DEBUG_ENABLED(std::cout << "BufArray::addPkt() Adding packet to array" << std::endl;)
+		pktsSend[numBufsSend++] = pkt;
+		numXtraBufs++;
+	};
+
+	/*! Get the number of packets currently marked as send
+	 *
+	 * \return Number of packets to be sent
+	 */
+	uint32_t getSendCount() const {
+		DEBUG_ENABLED(std::cout << "BufArray::getSendCount() return: " << numBufsSend << std::endl;)
+		return numBufsSend;
+	};
+
+	/*! Get the number of packets currently marked as free
+	 *
+	 * \return Number of packets to be freed
+	 */
+	uint32_t getFreeCount() const {
+		DEBUG_ENABLED(std::cout << "BufArray::getSendCount() return: " << numBufsSend << std::endl;)
+		return numBufsFree;
+	}
+
+	/*! Get all the packets which are to be sent
+	 *
+	 * \param sendBufs Array at least the size returned by getSendCount()
+	 */
+	void getSendBufs(Packet **sendBufs) const {
+		for(uint32_t i=0; i<numBufsSend; i++){
+			sendBufs[i] = pktsSend[i];
+			std::cout << "buf[" << i << "] = 0x" << std::hex << reinterpret_cast<uint64_t>(sendBufs[i]) << std::endl;
+			std::cout << "buf[" << i << "].data = 0x" << std::hex << reinterpret_cast<uint64_t>(sendBufs[i]->getData()) << std::endl;
+		}
+	}
+
+	/*! Get all the packets which are to be freed
+	 *
+	 * \param freeBufs Array at least the size returned by getFreeCount()
+	 */
+	void getFreeBufs(Packet **freeBufs) const {
+		for(uint32_t i=0; i<numBufsFree; i++){
+			freeBufs[i] = pktsFree[i];
+		}
+	}
+
+	/*! Get the number of all packets in the BufArray
+	 *
+	 * \return Number of all packets
+	 */
+	uint32_t getTotalCount() const { return numBufsOrig + numXtraBufs; }
+
+	Packet *operator[](unsigned int idx) const { return pktsOrig[idx]; }
+
+	class iterator {
+	private:
+		friend BufArray;
+		BufArray<Packet> *ba;
+		uint32_t idx;
+		iterator(BufArray<Packet> *ba, uint32_t idx) : ba(ba), idx(idx) {}
+
+	public:
+		iterator(const iterator &it) : ba(it.ba), idx(it.idx){};
+
+		iterator operator++() { idx++; };
+
+		bool operator==(const iterator &it) const {
+			if (this->idx == it.idx) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		bool operator!=(const iterator &it) const { return !((*this) == it); }
+
+		Packet *operator->() { return ba->pkts[idx]; }
+		Packet *operator*() { return ba->pkts[idx]; }
+	};
+
+	iterator begin() { return iterator(this, 0); }
+	iterator end() { return iterator(this, numBufsOrig); }
+};
+#endif
+
 #endif /* BUFARRAY_HPP */
