@@ -2,6 +2,7 @@
 #define HEADERS_HPP
 
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <sstream>
@@ -65,7 +66,11 @@ struct Ethernet {
 struct IPv4 {
 	uint8_t version_ihl; //!< Version and IHL
 
-	uint8_t version() const { return (version_ihl & 0xf0) >> 4; }
+	uint8_t version() const {
+		uint8_t ret = (version_ihl & 0xf0) >> 4;
+		assert(ret >= 4);
+		return ret;
+	}
 	uint8_t ihl() const { return version_ihl & 0x0f; }
 
 	/*! Set the version field to 4
@@ -232,7 +237,6 @@ struct Tcp {
 
 	uint16_t getWindow() { return ntohs(window); }
 	void setWindow(uint16_t w) { window = htons(w); }
-
 
 	void clearFlags() { flags = 0; }
 
