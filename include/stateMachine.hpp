@@ -145,6 +145,8 @@ public:
 		~FunIface() {
 			if (!sendPkt) {
 				pktsBA.markDropPkt(pktIdx);
+			} else {
+				pktsBA.markSendPkt(pktIdx);
 			}
 
 			// We are not in the endstate - checked by runPkt

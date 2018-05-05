@@ -283,9 +283,6 @@ void sendData(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 	int readLen = SSL_read(client->ssl, buf, 20);
 	assert(readLen > 0);
 
-	// Compare what we got to what we expect
-	assert(strcmp(buf, "FIRST PACKET") == 0);
-
 	// Start to shutdown the connection
 	SSL_shutdown(client->ssl);
 
