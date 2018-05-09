@@ -20,6 +20,7 @@
 #include "bufArray.hpp"
 #include "common.hpp"
 #include "exceptions.hpp"
+#include "measure.hpp"
 #include "spinlock.hpp"
 
 /*! State machine framework
@@ -275,7 +276,12 @@ public:
 		 * \param cID ID of the connection
 		 * \param st State for the connection
 		 */
-		void add(ConnectionID &cID, State &st) { newStates.insert({cID, st}); };
+		void add(ConnectionID &cID, State &st) {
+			uint64_t start = read_rdtsc();
+			newStates.insert({cID, st});
+			uint64_t stop = read_rdtsc();
+			measureData.tbb += stop - start;
+		};
 
 		/*! Try to find a state for a given connection ID
 		 *
@@ -288,14 +294,23 @@ public:
 		 * \return Found or not found
 		 */
 		bool findAndErase(ConnectionID &cID, State *st) {
+			uint64_t start = read_rdtsc();
 			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
 			if (newStates.find(it, cID)) {
 				st->set(it->second);
 				newStates.erase(it);
+				uint64_t stop = read_rdtsc();
+				measureData.tbb += stop - start;
 				return true;
 			} else {
+				uint64_t stop = read_rdtsc();
+				measureData.tbb += stop - start;
+
 				return false;
 			}
+			uint64_t stop = read_rdtsc();
+			measureData.tbb += stop - start;
+
 			return false;
 		};
 	};
@@ -416,7 +431,11 @@ private:
 		DEBUG_ENABLED(std::cout << "StateMachine::findState() Searching for ConnectionID: "
 								<< static_cast<std::string>(id) << std::endl;)
 	findStateLoop:
+		uint64_t start = read_rdtsc();
 		auto stateIt = stateTable.find(id);
+		uint64_t stop = read_rdtsc();
+		measureData.denseMap += stop - start;
+
 		if (stateIt == stateTable.end()) {
 			DEBUG_ENABLED(std::cout
 							  << "StateMachine::findState() Didn't find state in stateTable"
@@ -455,7 +474,14 @@ private:
 				}
 
 				State s(startStateID, stateData);
+
+				uint64_t start = read_rdtsc();
+
 				stateTable.insert({id, s});
+
+				uint64_t stop = read_rdtsc();
+				measureData.denseMap += stop - start;
+
 				DEBUG_ENABLED(
 					std::cout
 						<< "StateMachine::findState() (after insert) stateTable.size() = "
@@ -646,7 +672,10 @@ public:
 	void removeState(ConnectionID id) {
 		DEBUG_ENABLED(std::cout << "stateTable::removeState() removing: "
 								<< static_cast<std::string>(id) << std::endl;)
+		uint64_t start = read_rdtsc();
 		stateTable.erase(id);
+		uint64_t stop = read_rdtsc();
+		measureData.denseMap += stop - start;
 	}
 
 	/*! Open an outgoing connection

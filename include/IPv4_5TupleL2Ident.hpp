@@ -16,6 +16,8 @@
 
 #include "exceptions.hpp"
 
+#include "measure.hpp"
+
 template <class Packet> class IPv4_5TupleL2Ident {
 public:
 	struct Hasher;
@@ -72,6 +74,8 @@ public:
 			res += c.proto;
 			*/
 
+			uint64_t start = read_rdtsc();
+
 			struct __attribute__((packed)) {
 				uint32_t srcIP;
 				uint32_t dstIP;
@@ -97,6 +101,9 @@ public:
 				reinterpret_cast<const uint8_t *>(&hashContent), sizeof(hashContent), key);
 
 			DEBUG_ENABLED(std::cout << "Hasher output: " << res << std::endl;)
+
+			uint64_t stop = read_rdtsc();
+			measureData.siphash += stop - start;
 
 			return res;
 		}

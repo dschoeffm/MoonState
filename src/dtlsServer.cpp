@@ -5,15 +5,61 @@
 
 #include <rte_errno.h>
 
+#include <openssl/dh.h>
+
 #include "dtlsServer.hpp"
 #include "headers.hpp"
 #include "spinlock.hpp"
+
+#include "measure.hpp"
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using SM = StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>;
 
 namespace DTLS_Server {
 
+static DH *get_dh2048() {
+	static unsigned char dhp_2048[] = {0x88, 0xD8, 0xA0, 0x31, 0x4B, 0x45, 0x4A, 0xA3, 0x0D,
+		0x07, 0xD3, 0x6E, 0x68, 0xDA, 0x74, 0xE7, 0xEF, 0x69, 0x2B, 0x9C, 0x61, 0xC1, 0xDE,
+		0x36, 0x58, 0x68, 0x85, 0x80, 0x04, 0x2A, 0xD1, 0x93, 0x52, 0xEA, 0xB6, 0x21, 0x9B,
+		0x03, 0x59, 0x8E, 0x3A, 0x72, 0x41, 0x5B, 0x85, 0xDC, 0x46, 0xE6, 0x32, 0x2E, 0xF9,
+		0x50, 0x20, 0xE3, 0x63, 0xFB, 0x0B, 0x14, 0xE9, 0x72, 0x8E, 0x6D, 0xBD, 0x69, 0xF5,
+		0x65, 0x9F, 0x22, 0x65, 0x65, 0x16, 0x12, 0x13, 0x74, 0x46, 0x99, 0x37, 0x5E, 0x3B,
+		0x68, 0x20, 0x8C, 0x61, 0x1B, 0xCE, 0xEB, 0xCD, 0xFA, 0x61, 0xEE, 0x7D, 0x52, 0x00,
+		0x5F, 0x1C, 0xDC, 0xCE, 0x74, 0xBB, 0x09, 0x2A, 0xA9, 0xEC, 0xD2, 0x0C, 0xE9, 0x7A,
+		0x15, 0x31, 0x1E, 0xD6, 0x37, 0x28, 0x11, 0x93, 0x82, 0x64, 0xD0, 0xF2, 0xF9, 0x93,
+		0x51, 0xD9, 0xB5, 0x92, 0xEF, 0xB8, 0xAC, 0x01, 0xB7, 0x80, 0xE6, 0xCB, 0xB6, 0x23,
+		0x92, 0xAF, 0x58, 0x79, 0xF9, 0xBB, 0x42, 0x7F, 0x42, 0x93, 0xF9, 0x04, 0x9A, 0xC1,
+		0x24, 0x7B, 0x6B, 0xF4, 0x4C, 0xE5, 0x19, 0xEF, 0x64, 0x36, 0x0D, 0xCE, 0x6F, 0x77,
+		0xF8, 0x65, 0x32, 0xB6, 0x2D, 0xB7, 0xA2, 0xD0, 0x93, 0x07, 0xEC, 0xFB, 0x62, 0xF3,
+		0x01, 0xEB, 0x4F, 0x4E, 0x2B, 0x6A, 0x30, 0xF5, 0x09, 0x17, 0x3A, 0x92, 0x1B, 0x0B,
+		0xA9, 0x13, 0x6E, 0x76, 0xDB, 0x39, 0x4D, 0x2F, 0x1A, 0x15, 0x27, 0x7A, 0xE8, 0xEE,
+		0x6C, 0xFA, 0x91, 0xC6, 0xF0, 0x51, 0x25, 0xA6, 0x5B, 0x77, 0xC9, 0x14, 0xF1, 0x04,
+		0xF0, 0x99, 0x30, 0x13, 0x60, 0xAA, 0x4A, 0x73, 0xF2, 0x7B, 0x2D, 0xAA, 0x7F, 0x02,
+		0xB5, 0xD4, 0x86, 0xF0, 0x25, 0x7D, 0x80, 0x9E, 0xAF, 0x3A, 0x90, 0x93, 0x03, 0xDC,
+		0xA1, 0xB9, 0x76, 0xB3, 0x6B, 0x8C, 0xDC, 0x83, 0xE3};
+	static unsigned char dhg_2048[] = {0x02};
+	DH *dh = DH_new();
+	BIGNUM *dhp_bn, *dhg_bn;
+
+	if (dh == NULL)
+		return NULL;
+	dhp_bn = BN_bin2bn(dhp_2048, sizeof(dhp_2048), NULL);
+	dhg_bn = BN_bin2bn(dhg_2048, sizeof(dhg_2048), NULL);
+	if (dhp_bn == NULL || dhg_bn == NULL || !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) {
+		DH_free(dh);
+		BN_free(dhp_bn);
+		BN_free(dhg_bn);
+		return NULL;
+	}
+	return dh;
+}
+
 SSL_CTX *createCTX() {
+	uint64_t start = read_rdtsc();
 
 	int result = 0;
 
@@ -26,8 +72,16 @@ SSL_CTX *createCTX() {
 		return nullptr;
 	}
 
+	DH *dh = get_dh2048();
+	if (1 != SSL_CTX_set_tmp_dh(ctx, dh)) {
+		std::cout << "DTLS_Server::createCTX() SSL_CTX_set_tmp_dh failed" << std::endl;
+		return nullptr;
+	}
+	DH_free(dh);
+
 	// Set our supported ciphers
-	result = SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+	// result = SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+	result = SSL_CTX_set_cipher_list(ctx, "ALL");
 	if (result != 1) {
 		std::cout << "DTLS_Server::createCTX() SSL_CTX_set_cipher_list() failed" << std::endl;
 		return nullptr;
@@ -71,6 +125,9 @@ SSL_CTX *createCTX() {
 	// Do not query the BIO for an MTU
 	SSL_CTX_set_options(ctx, SSL_OP_NO_QUERY_MTU);
 
+	uint64_t stop = read_rdtsc();
+	measureData.openssl += stop - start;
+
 	return ctx;
 };
 
@@ -101,9 +158,16 @@ void *factory(IPv4_5TupleL2Ident<mbuf>::ConnectionID id) {
 	(void)id;
 
 	// Create necessary structures
+	uint64_t startMem = read_rdtsc();
+
 	dtlsServer *server = new dtlsServer();
 	memset(server, 0, sizeof(dtlsServer));
 	SM::State state(DTLS_Server::States::HANDSHAKE, reinterpret_cast<void *>(server));
+
+	uint64_t stopMem = read_rdtsc();
+	measureData.memory += stopMem - startMem;
+
+	uint64_t start = read_rdtsc();
 
 	// Create SSL and memQ BIOs
 	server->ssl = SSL_new(ctx);
@@ -121,6 +185,9 @@ void *factory(IPv4_5TupleL2Ident<mbuf>::ConnectionID id) {
 
 	// Set the MTU manually, 1280 is too short, but it should always work
 	SSL_set_mtu(server->ssl, 1280);
+
+	uint64_t stop = read_rdtsc();
+	measureData.openssl += stop - start;
 
 	return server;
 };
@@ -149,7 +216,13 @@ static int writeAllDataAvailable(dtlsServer *server, mbuf *pkt, SM::FunIface &fu
 			std::min(pkt->getBufLen(), static_cast<uint16_t>(1500)) - allHeaderLength;
 
 		// Try to read bytes openssl wants to write
+		uint64_t start = read_rdtsc();
+
 		int dataLen = BIO_read(server->wbio, udp->getPayload(), udpMaxLen);
+
+		uint64_t stop = read_rdtsc();
+		measureData.openssl += stop - start;
+
 		assert(dataLen > 0);
 		pkt->setDataLen(dataLen + allHeaderLength);
 
@@ -204,7 +277,13 @@ static int writeAllDataAvailable(dtlsServer *server, mbuf *pkt, SM::FunIface &fu
 		int udpMaxLen =
 			std::min(pkt->getBufLen(), static_cast<uint16_t>(1500)) - allHeaderLength;
 
+		uint64_t start = read_rdtsc();
+
 		int dataLen = BIO_read(server->wbio, udp->getPayload(), udpMaxLen);
+
+		uint64_t stop = read_rdtsc();
+		measureData.openssl += stop - start;
+
 		assert(dataLen > 0);
 		xtraPkt->setDataLen(dataLen + allHeaderLength);
 
@@ -257,6 +336,8 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 	int writeBytes = BIO_write(server->rbio, udp->getPayload(), udp->getPayloadLength());
 	assert(writeBytes > 0);
 
+	uint64_t start = read_rdtsc();
+
 	SSL_accept(server->ssl);
 
 	// Check if the handshake is finished
@@ -274,6 +355,8 @@ void runHandshake(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 			}
 		}
 	}
+	uint64_t stop = read_rdtsc();
+	measureData.openssl += stop - start;
 
 	writeAllDataAvailable(server, pkt, funIface);
 };
@@ -284,6 +367,8 @@ void sendData(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 	Headers::Ethernet *ethernet = reinterpret_cast<Headers::Ethernet *>(pkt->getData());
 	Headers::IPv4 *ipv4 = reinterpret_cast<Headers::IPv4 *>(ethernet->getPayload());
 	Headers::Udp *udp = reinterpret_cast<Headers::Udp *>(ipv4->getPayload());
+
+	uint64_t start = read_rdtsc();
 
 	// Write the incoming packet to the BIO
 	int writeBytes = BIO_write(server->rbio, udp->getPayload(), udp->getPayloadLength());
@@ -311,6 +396,9 @@ void sendData(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 		// funIface.transition(States::RUN_TEARDOWN);
 		funIface.transition(States::DELETED);
 	}
+
+	uint64_t stop = read_rdtsc();
+	measureData.openssl += stop - start;
 
 	// Same procedure as everytime
 	writeAllDataAvailable(server, pkt, funIface);
@@ -424,6 +512,24 @@ void *DtlsServer_process(void *obj, struct rte_mbuf **inPkts, unsigned int inCou
 
 void DtlsServer_free(void *obj) {
 	try {
+
+		std::cout << "measure: openssl: " << measureData.openssl << std::endl;
+		std::cout << "measure: denseMap: " << measureData.denseMap << std::endl;
+		std::cout << "measure: tbb: " << measureData.tbb << std::endl;
+		std::cout << "measure: siphash: " << measureData.siphash << std::endl;
+		std::cout << "measure: memory: " << measureData.memory << std::endl;
+
+		std::cout << "CSV:";
+		std::stringstream sstream;
+		sstream << measureData.openssl << "," << measureData.denseMap << ","
+				<< measureData.tbb << "," << measureData.siphash << "," << measureData.memory
+				<< std::endl;
+		std::cout << sstream.str() << std::endl;
+
+		int fd = open("/root/output.csv", O_CREAT | O_RDWR);
+		write(fd, sstream.str().c_str(), sstream.str().length());
+		close(fd);
+
 		auto config = reinterpret_cast<Dtls_C_config *>(obj);
 
 		delete (config->sm);

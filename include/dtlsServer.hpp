@@ -15,6 +15,8 @@
 #include "mbuf.hpp"
 #include "stateMachine.hpp"
 
+#include "measure.hpp"
+
 namespace DTLS_Server {
 
 struct dtlsServer {
@@ -28,7 +30,7 @@ struct dtlsServer {
 	uint16_t remotePort;
 	uint16_t localPort;
 
-	//uint16_t counter;
+	// uint16_t counter;
 };
 
 /*! The state of the DTLS server
@@ -36,7 +38,7 @@ struct dtlsServer {
  * These descibe the state IDs for the DTLS server.
  */
 struct States {
-//	static constexpr StateID DOWN = 0;
+	//	static constexpr StateID DOWN = 0;
 	static constexpr StateID HANDSHAKE = 1;
 	static constexpr StateID ESTABLISHED = 2;
 	static constexpr StateID RUN_TEARDOWN = 3;
@@ -81,7 +83,7 @@ StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State createStateData(SSL_CTX *ctx
  * in the StateMachine<>
  */
 
-//void initHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
+// void initHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
 //	StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::FunIface &funIface);
 
 void runHandshake(StateMachine<IPv4_5TupleL2Ident<mbuf>, mbuf>::State &state, mbuf *,
@@ -100,7 +102,7 @@ extern "C" {
  *
  * \return void* to the object (opaque)
  */
-void *DtlsServer_init(struct rte_mempool* mp);
+void *DtlsServer_init(struct rte_mempool *mp);
 
 /*! Get the packets from an opaque structure
  *
