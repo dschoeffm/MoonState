@@ -26,6 +26,8 @@ struct measureData {
 	uint64_t tbb;
 	uint64_t siphash;
 	uint64_t memory;
+	uint64_t numPkts;
+	uint64_t numBytes;
 };
 
 extern struct measureData measureData;

@@ -378,6 +378,7 @@ void sendData(SM::State &state, mbuf *pkt, SM::FunIface &funIface) {
 
 	// Try to read from the DTLS connection
 	int readLen = SSL_read(server->ssl, buf, 2048);
+	measureData.numBytes += readLen;
 	if (readLen > 0) {
 
 		// Reflect the data
@@ -518,15 +519,19 @@ void DtlsServer_free(void *obj) {
 		std::cout << "measure: tbb: " << measureData.tbb << std::endl;
 		std::cout << "measure: siphash: " << measureData.siphash << std::endl;
 		std::cout << "measure: memory: " << measureData.memory << std::endl;
+		std::cout << "measure: numPkts: " << measureData.numPkts << std::endl;
+		std::cout << "measure: numBytes: " << measureData.numBytes << std::endl;
 
 		std::cout << "CSV:";
 		std::stringstream sstream;
 		sstream << measureData.openssl << "," << measureData.denseMap << ","
-				<< measureData.tbb << "," << measureData.siphash << "," << measureData.memory
+				<< measureData.tbb << "," << measureData.siphash << ","
+				<< measureData.memory << "," << measureData.numPkts << ","
+				<< measureData.numBytes
 				<< std::endl;
 		std::cout << sstream.str() << std::endl;
 
-		int fd = open("/root/output.csv", O_CREAT | O_RDWR);
+		int fd = open("/root/output.csv", O_CREAT | O_RDWR | O_TRUNC);
 		write(fd, sstream.str().c_str(), sstream.str().length());
 		close(fd);
 

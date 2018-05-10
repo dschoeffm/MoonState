@@ -501,6 +501,8 @@ private:
 	void runPkt(BufArray<Packet> &pktsIn, unsigned int cur) {
 		DEBUG_ENABLED(std::cout << std::endl << "StateMachine::runPkt() called" << std::endl;)
 
+		measureData.numPkts++;
+
 		try {
 			// Retrieve the current packet
 			Packet *pktIn = pktsIn[cur];
