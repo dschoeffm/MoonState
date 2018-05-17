@@ -8,6 +8,8 @@
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
 
+/*
+
 union tsc_t {
 	uint64_t tsc_64;
 	struct {
@@ -24,6 +26,8 @@ inline static uint64_t read_rdtsc() {
 				 : "=r"(tsc.hi_32), "=r"(tsc.lo_32)::"%rax", "%rbx", "%rcx", "%rdx");
 	return tsc.tsc_64;
 }
+
+*/
 
 using namespace std;
 
