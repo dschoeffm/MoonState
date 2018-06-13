@@ -5,6 +5,7 @@
 
 #include "sodium.h"
 
+#include "measure.hpp"
 #include "samplePacket.hpp"
 #include "stateMachine.hpp"
 
@@ -200,16 +201,17 @@ int main(int argc, char **argv) {
 		}
 
 		// Run the packet through the state machine
-		startTimer = read_rdtsc();
+		//		startTimer = read_rdtsc();
 		sm.runPktBatch(pktsIn);
-		stopTimer = read_rdtsc();
-		std::cout << "Insertion: " << stopTimer - startTimer << std::endl;
+		//		stopTimer = read_rdtsc();
+		std::cout << "Insertion: " << measureData.denseMap << std::endl;
+		uint64_t setupCost = measureData.denseMap;
 
 		// Run packets through SM
 		startTimer = read_rdtsc();
 		sm.runPktBatch(pktsIn);
 		stopTimer = read_rdtsc();
-		std::cout << "Run: " << stopTimer - startTimer << std::endl;
+		std::cout << "Run: " << measureData.denseMap - setupCost << std::endl;
 
 		free(data);
 	} catch (exception *e) {
