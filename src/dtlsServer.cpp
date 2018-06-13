@@ -525,13 +525,11 @@ void DtlsServer_free(void *obj) {
 		std::cout << "CSV:";
 		std::stringstream sstream;
 		sstream << measureData.openssl << "," << measureData.denseMap << ","
-				<< measureData.tbb << "," << measureData.siphash << ","
-				<< measureData.memory << "," << measureData.numPkts << ","
-				<< measureData.numBytes
-				<< std::endl;
+				<< measureData.tbb << "," << measureData.siphash << "," << measureData.memory
+				<< "," << measureData.numPkts << "," << measureData.numBytes << std::endl;
 		std::cout << sstream.str() << std::endl;
 
-		int fd = open("/root/output.csv", O_CREAT | O_RDWR | O_TRUNC);
+		int fd = open("/root/output.csv", O_CREAT | O_RDWR | O_TRUNC, 600);
 		write(fd, sstream.str().c_str(), sstream.str().length());
 		close(fd);
 
