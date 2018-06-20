@@ -74,7 +74,7 @@ public:
 			res += c.proto;
 			*/
 
-			uint64_t start = read_rdtsc();
+			uint64_t start = start_measurement();
 
 			struct __attribute__((packed)) {
 				uint32_t srcIP;
@@ -102,7 +102,7 @@ public:
 
 			DEBUG_ENABLED(std::cout << "Hasher output: " << res << std::endl;)
 
-			uint64_t stop = read_rdtsc();
+			uint64_t stop = stop_measurement();
 			measureData.siphash += stop - start;
 
 			return res;

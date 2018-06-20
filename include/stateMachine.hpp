@@ -277,9 +277,9 @@ public:
 		 * \param st State for the connection
 		 */
 		void add(ConnectionID &cID, State &st) {
-			uint64_t start = read_rdtsc();
+			uint64_t start = start_measurement();
 			newStates.insert({cID, st});
-			uint64_t stop = read_rdtsc();
+			uint64_t stop = stop_measurement();
 			measureData.tbb += stop - start;
 		};
 
@@ -294,21 +294,21 @@ public:
 		 * \return Found or not found
 		 */
 		bool findAndErase(ConnectionID &cID, State *st) {
-			uint64_t start = read_rdtsc();
+			uint64_t start = start_measurement();
 			typename tbb::concurrent_hash_map<ConnectionID, State, TBBHasher>::accessor it;
 			if (newStates.find(it, cID)) {
 				st->set(it->second);
 				newStates.erase(it);
-				uint64_t stop = read_rdtsc();
+				uint64_t stop = stop_measurement();
 				measureData.tbb += stop - start;
 				return true;
 			} else {
-				uint64_t stop = read_rdtsc();
+				uint64_t stop = stop_measurement();
 				measureData.tbb += stop - start;
 
 				return false;
 			}
-			uint64_t stop = read_rdtsc();
+			uint64_t stop = stop_measurement();
 			measureData.tbb += stop - start;
 
 			return false;
@@ -431,9 +431,9 @@ private:
 		DEBUG_ENABLED(std::cout << "StateMachine::findState() Searching for ConnectionID: "
 								<< static_cast<std::string>(id) << std::endl;)
 	findStateLoop:
-		uint64_t start = read_rdtsc();
+		uint64_t start = start_measurement();
 		auto stateIt = stateTable.find(id);
-		uint64_t stop = read_rdtsc();
+		uint64_t stop = stop_measurement();
 		measureData.denseMap += stop - start;
 
 		if (stateIt == stateTable.end()) {
@@ -475,11 +475,11 @@ private:
 
 				State s(startStateID, stateData);
 
-				uint64_t start = read_rdtsc();
+				uint64_t start = start_measurement();
 
 				stateTable.insert({id, s});
 
-				uint64_t stop = read_rdtsc();
+				uint64_t stop = stop_measurement();
 				measureData.denseMap += stop - start;
 
 				DEBUG_ENABLED(
@@ -674,9 +674,9 @@ public:
 	void removeState(ConnectionID id) {
 		DEBUG_ENABLED(std::cout << "stateTable::removeState() removing: "
 								<< static_cast<std::string>(id) << std::endl;)
-		uint64_t start = read_rdtsc();
+		uint64_t start = start_measurement();
 		stateTable.erase(id);
-		uint64_t stop = read_rdtsc();
+		uint64_t stop = stop_measurement();
 		measureData.denseMap += stop - start;
 	}
 
